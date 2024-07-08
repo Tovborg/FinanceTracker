@@ -1,0 +1,17 @@
+{
+  "name": "finance_tracker",
+  "version": "1.0.0",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+  "dev": "npx tailwindcss -i ./static/src/input.css -o ./static/src/styles.css --watch"},
+ "devDependencies": {
+  "tailwindcss": "^3.3.2"
+ }
+}
