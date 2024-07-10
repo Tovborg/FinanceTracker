@@ -7,6 +7,8 @@ module.exports = {
     extend: {
       colors: {
         'primary': '#003f63',
+        'form_outline': '#7E92B2',
+        'form_input': '#B1BBD3',
         'account-cards': '#002337',
         'secondary': '#3498DB',
         'accent': '#27AE60',

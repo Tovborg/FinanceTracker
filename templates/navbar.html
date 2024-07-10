@@ -3,8 +3,8 @@
         <div class="min-w-[50px] text-3xl text-sidebar text-white font-bold" style="font-family: 'Danske Text v2 Regular'"><a href="{% url 'index' %}">TjFinance</a></div>
         <div id="menu" class="duration-100 grow flex justify-end gap-4 md:gap-8 absolute md:relative flex-col md:flex-row top-[-100%] md:top-[inherit] bg-navigation_mobile md:bg-transparent w-[100%] left-0 right-0 m-auto md:w-auto md:left-auto md:right-auto px-10 py-10 md:p-0">
             {% if user.is_authenticated %}
-            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Dashboard</a>
-            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Accounts</a>
+            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'index' %}">Dashboard</a>
+            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account' %}">Accounts</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Transactions</a>
                 <form method="post" action="{% url 'logout' %}" class="hover:text-gray-400">
                     {% csrf_token %}

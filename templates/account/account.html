@@ -1,0 +1,17 @@
+<!-- templates/account/accounts.html -->
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Your regular content for accounts page -->
+    <!-- Other account-related content -->
+
+    <!-- Example condition to show no accounts error -->
+    {% if accounts %}
+        <!-- Iterate through accounts and display them -->
+        <h1>This user has added an account</h1>
+    {% else %}
+        <!-- Render no accounts error -->
+        {% include "account/no_accounts_error.html" %}
+    {% endif %}
+{% endblock content %}
