@@ -22,7 +22,7 @@
                             {% else %}
                             <ion-icon id="star_{{ account.name }}" class="mr-2" name="star-outline"></ion-icon>
                             {% endif %}
-                            {{ account.name }}<ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon></h2>
+                            {{ account.name }}<a href="{% url 'account_details' account.name %}"><ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon></a></h2>
 
                         <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
                     </div>

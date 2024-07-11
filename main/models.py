@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+import datetime
 # Create your models here.
 class Account(models.Model):
     ACCOUNT_TYPES = (
@@ -22,15 +22,18 @@ class Account(models.Model):
     def get_transaction(self):
         return self.transaction_set.all()
 
+
 class Transaction(models.Model):
     TRANSACTION_TYPES = (
-        ('indbetaling', 'Indbetaling'),
-        ('udgift', 'Udgift'),
+        ('deposit', 'Deposit'),
+        ('withdrawal', 'Withdrawal'),
+        ('payment', 'Payment'),
+        ('transfer', 'Transfer')
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=11, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
+    date = models.DateField(default=datetime.date.today)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):

@@ -31,10 +31,27 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script>
-        document.querySelector('#menuToggle').addEventListener('click', ()=>{
+        document.querySelector('#menuToggle').addEventListener('click', () => {
             let menu = document.getElementById('menu');
+            let icons = document.querySelectorAll('ion-icon');
+
             menu.classList.toggle('top-[50px]');
+
+            // Toggle visibility of icons based on menu state
+            icons.forEach(icon => {
+                if (menu.classList.contains('top-[50px]')) {
+                    if (icon.id === 'menuToggle') {
+                        return;
+                    } else {
+                        icon.style.display = 'none';
+                    }
+                     // Hide icon
+                } else {
+                    icon.style.display = 'inline-block'; // Show icon
+                }
+            });
         });
+
     </script>
 </body>
 </html>

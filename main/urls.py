@@ -10,4 +10,6 @@ urlpatterns = [
     path('account/', account_view, name='account'),
     path('account/add_account/', add_account, name='add_account'),
     path('account/update_favorite/', csrf_exempt(updateFavorite), name='update_favorite'),
+    path('account/<str:account_name>/', account_details, name='account_details'),
+    path('new_transaction/<str:account_name>/', new_transaction, name='new_transaction'),
 ]

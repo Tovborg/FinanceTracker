@@ -936,6 +936,22 @@ select {
   margin-right: 0.5rem;
 }
 
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mb-0 {
+  margin-bottom: 0px;
+}
+
+.mt-0 {
+  margin-top: 0px;
+}
+
 .block {
   display: block;
 }
@@ -980,6 +996,18 @@ select {
   height: 1px;
 }
 
+.h-\[300px\] {
+  height: 300px;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.h-20 {
+  height: 5rem;
+}
+
 .max-h-\[200px\] {
   max-height: 200px;
 }
@@ -1014,6 +1042,10 @@ select {
 
 .w-\[40\%\] {
   width: 40%;
+}
+
+.w-\[70\%\] {
+  width: 70%;
 }
 
 .min-w-\[50px\] {
@@ -1180,6 +1212,10 @@ select {
   border-radius: 0.375rem;
 }
 
+.rounded {
+  border-radius: 0.25rem;
+}
+
 .border {
   border-width: 1px;
 }
@@ -1209,6 +1245,17 @@ select {
 .border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+.border-gray-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
+}
+
+.border-y-green-600 {
+  --tw-border-opacity: 1;
+  border-top-color: rgb(22 163 74 / var(--tw-border-opacity));
+  border-bottom-color: rgb(22 163 74 / var(--tw-border-opacity));
 }
 
 .bg-account-cards {
@@ -1253,6 +1300,11 @@ select {
 
 .bg-transparent {
   background-color: transparent;
+}
+
+.bg-blue-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(96 165 250 / var(--tw-bg-opacity));
 }
 
 .bg-gradient-to-b {
@@ -1320,6 +1372,10 @@ select {
 
 .p-6 {
   padding: 1.5rem;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .px-10 {
@@ -1413,8 +1469,20 @@ select {
   text-align: right;
 }
 
+.text-start {
+  text-align: start;
+}
+
+.align-top {
+  vertical-align: top;
+}
+
 .align-middle {
   vertical-align: middle;
+}
+
+.align-bottom {
+  vertical-align: bottom;
 }
 
 .font-dansketext {
@@ -1476,6 +1544,15 @@ select {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-\[10px\] {
+  font-size: 10px;
+}
+
+.\!text-3xl {
+  font-size: 1.875rem !important;
+  line-height: 2.25rem !important;
 }
 
 .font-bold {
@@ -1807,8 +1884,48 @@ select {
     margin-bottom: 1rem;
   }
 
+  .mobile-only\:mt-0 {
+    margin-top: 0px;
+  }
+
+  .mobile-only\:mt-5 {
+    margin-top: 1.25rem;
+  }
+
+  .mobile-only\:mt-10 {
+    margin-top: 2.5rem;
+  }
+
+  .mobile-only\:mt-8 {
+    margin-top: 2rem;
+  }
+
+  .mobile-only\:mt-7 {
+    margin-top: 1.75rem;
+  }
+
   .mobile-only\:\!hidden {
     display: none !important;
+  }
+
+  .mobile-only\:hidden {
+    display: none;
+  }
+
+  .mobile-only\:h-full {
+    height: 100%;
+  }
+
+  .mobile-only\:w-\[100\%\] {
+    width: 100%;
+  }
+
+  .mobile-only\:w-\[50\%\] {
+    width: 50%;
+  }
+
+  .mobile-only\:items-center {
+    align-items: center;
   }
 
   .mobile-only\:rounded {
@@ -1818,9 +1935,18 @@ select {
   .mobile-only\:\!rounded {
     border-radius: 0.25rem !important;
   }
+
+  .mobile-only\:bg-cards {
+    --tw-bg-opacity: 1;
+    background-color: rgb(195 224 235 / var(--tw-bg-opacity));
+  }
 }
 
 @media (min-width: 640px) {
+  .sm\:visible {
+    visibility: visible;
+  }
+
   .sm\:col-span-4 {
     grid-column: span 4 / span 4;
   }
@@ -1836,6 +1962,14 @@ select {
 
   .sm\:flex {
     display: flex;
+  }
+
+  .sm\:\!hidden {
+    display: none !important;
+  }
+
+  .sm\:hidden {
+    display: none;
   }
 
   .sm\:w-full {
@@ -1891,6 +2025,10 @@ select {
 }
 
 @media (min-width: 768px) {
+  .md\:visible {
+    visibility: visible;
+  }
+
   .md\:relative {
     position: relative;
   }
@@ -1924,6 +2062,14 @@ select {
     margin-inline-end: 1.5rem;
   }
 
+  .md\:ml-auto {
+    margin-left: auto;
+  }
+
+  .md\:mt-0 {
+    margin-top: 0px;
+  }
+
   .md\:hidden {
     display: none;
   }
@@ -1954,6 +2100,14 @@ select {
 
   .md\:flex-row {
     flex-direction: row;
+  }
+
+  .md\:items-center {
+    align-items: center;
+  }
+
+  .md\:justify-end {
+    justify-content: flex-end;
   }
 
   .md\:gap-8 {
@@ -1994,6 +2148,10 @@ select {
 }
 
 @media (min-width: 1024px) {
+  .lg\:visible {
+    visibility: visible;
+  }
+
   .lg\:mx-0 {
     margin-left: 0px;
     margin-right: 0px;
@@ -2049,6 +2207,10 @@ select {
 }
 
 @media (min-width: 1280px) {
+  .xl\:visible {
+    visibility: visible;
+  }
+
   .xl\:mx-0 {
     margin-left: 0px;
     margin-right: 0px;
