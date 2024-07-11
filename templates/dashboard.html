@@ -10,25 +10,25 @@
                    <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Welcome, {{ user.username }}!</h1>
                </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 lg:mb-15 md:mb-20">
+            <div class="grid grid-cols-1 mx-3 md:mx-0 lg:mx-0 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 lg:mb-15 md:mb-20">
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl font-dansketext">Total Balance</h2>
-                    <p class="text-2xl">$10000</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Balance</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">$10000</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl font-dansketext">Number of Accounts</h2>
-                    <p class="text-2xl">4</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Number of Accounts</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">4</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl font-dansketext">Total Income</h2>
-                    <p class="text-2xl">$5000</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">$5000</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl font-dansketext">Total Expenses</h2>
-                    <p class="text-2xl">$1000</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Expenses</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">$1000</p>
                 </div>
             </div>
-            <div id="accounts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:grow mb-6">
+            <div id="accounts" class="grid mb-3 mx-3 md:mx-0 lg:mx-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:grow mb-6">
                 <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
                     <div class="flex flex-col md:flex-row justify-between items-center">
                         <h2 class="text-2xl text-white font-dansketext p-3">Opsparing</h2>
@@ -36,15 +36,7 @@
                     </div>
 
                     <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-
-                </div>
-                <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px]">
-                    <div class="flex flex-col md:flex-row justify-between items-center">
-                        <h2 class="text-2xl text-white font-dansketext p-3">Feriekonto</h2>
-                        <span class="text-2xl text-white font-dansketext p-3">DKK 6123</span>
-                    </div>
-                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-                    <div class="overflow-y-auto max-h-[200px]">
+                    <div class="overflow-y-auto mobile-only:!hidden max-h-[200px]">
                         <ul class="text-white">
                             <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                 <div>
@@ -81,11 +73,85 @@
                 </div>
                 <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px]">
                     <div class="flex flex-col md:flex-row justify-between items-center">
+                        <h2 class="text-2xl text-white font-dansketext p-3">Feriekonto</h2>
+                        <span class="text-2xl text-white font-dansketext p-3">DKK 6123</span>
+                    </div>
+                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+                    <div class="overflow-y-auto mobile-only:!hidden max-h-[200px]">
+                        <ul class="text-white">
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-accent">DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-account-cards mobile-only:mb-3 p-4 shadow md:min-h-[300px] lg:min-h-[400px]">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
                         <h2 class="text-2xl text-white font-dansketext p-3">Fritvalgskonto</h2>
                         <span class="text-2xl text-white font-dansketext p-3">DKK 632</span>
                     </div>
                     <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-
+                    <div class="overflow-y-auto mobile-only:!hidden max-h-[200px]">
+                        <ul class="text-white">
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-accent">DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

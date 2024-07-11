@@ -8,8 +8,102 @@
 
     <!-- Example condition to show no accounts error -->
     {% if accounts %}
-        <!-- Iterate through accounts and display them -->
-        <h1>This user has added an account</h1>
+        <!-- templates/account/accounts.html -->
+    <div class="container mx-auto mt-10">
+        <h1 class="text-5xl text-black font-dansketext text-center mb-7">Your Accounts</h1>
+        <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+        <div id="accounts" class="grid grid-cols-1 mx-3 lg:mx-0 md:mx-0 xl:mx-0 2xl:mx-0  md:grid-cols-2 lg:grid-cols-3 gap-4 lg:grow mb-6">
+            {% for account in accounts %}
+                <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
+                            {% if account.isFavorite %}
+                            <ion-icon id="star_{{ account.name }}" class="mr-2" name="star"></ion-icon>
+                            {% else %}
+                            <ion-icon id="star_{{ account.name }}" class="mr-2" name="star-outline"></ion-icon>
+                            {% endif %}
+                            {{ account.name }}<ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon></h2>
+
+                        <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
+                    </div>
+
+                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+                    <div class="overflow-y-auto max-h-[200px]">
+                        <ul class="text-white">
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-accent">DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                <div>
+                                    <span class="block">Grocery Store</span>
+                                    <span class="block text-sm">8. Jul 2024</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block font-bold text-warning">- DKK 200</span>
+                                    <span class="text-gray-400">128.800</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            <script>
+    function toggleFavorite(accountName) {
+        const formData = new FormData();
+        formData.append('account_name', accountName);
+
+        fetch('{% url "update_favorite" %}', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                console.log('Favorite status updated successfully.');
+                // Update the UI as needed, e.g., change the star icon
+            } else {
+                console.error('Failed to update favorite status.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    document.getElementById('star_{{ account.name }}').addEventListener('click', function() {
+        toggleFavorite('{{ account.name }}');
+        const starIcon = document.getElementById('star_{{ account.name }}');
+        if (starIcon.name === 'star-outline') {
+            starIcon.name = 'star';
+        } else {
+            starIcon.name = 'star-outline';
+        }
+    });
+</script>
+
+            {% endfor %}
+            </div>
+
+    </div>
+    <div class="flex flex-col justify-between items-center">
+    <form action="{% url 'add_account' %}">
+            <button class="align-middle mb-4 select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full" type="submit">Add new account</button>
+    </form>
+    </div>
     {% else %}
         <!-- Render no accounts error -->
         {% include "account/no_accounts_error.html" %}

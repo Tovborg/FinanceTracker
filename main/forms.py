@@ -15,7 +15,7 @@ class CreateAccountForm(forms.Form):
         ('checking', 'Checking'),
         ('Vacation', 'Vacation'),
         ('Retirement', 'Retirement'),
-        ('Other', 'Other')
+        ('other', 'Other')
     )
     account_name = forms.CharField(max_length=50)
     account_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=True)

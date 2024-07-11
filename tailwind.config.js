@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   content: [
       './templates/**/*.html' //new
@@ -7,6 +9,7 @@ module.exports = {
     extend: {
       colors: {
         'primary': '#003f63',
+        'account_background': '#F3F5F4',
         'form_outline': '#7E92B2',
         'form_input': '#B1BBD3',
         'account-cards': '#002337',
@@ -34,5 +37,8 @@ module.exports = {
   },
   plugins: [
       require('@tailwindcss/forms'),
+      plugin(function ({ addVariant }) {
+        addVariant('mobile-only', "@media screen and (max-width: theme('screens.sm'))"); // instead of hard-coded 640px use sm breakpoint value from config. Or anything
+      })
   ],
 }

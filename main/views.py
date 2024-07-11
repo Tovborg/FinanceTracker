@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from main.forms import RegistrationForm, CreateAccountForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from main.models import Account
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 # Use @login_required decorator to ensure only authenticated users can access the view
 
 
@@ -22,14 +24,16 @@ def sign_up(request):
     return render(request, "registration/signup.html", {"form": form})
 
 
-# Views to display and handler accounts
+# Views to display and handle accounts
 @login_required
 def account_view(request):
     user_accounts = Account.objects.filter(user=request.user)
-    print(user_accounts)
-    print(len(user_accounts))
     return render(request, "account/account.html", context={"accounts": user_accounts})
 
+@login_required
+def account_details(request, account_name):
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    pass
 
 @login_required
 def add_account(request):
@@ -56,3 +60,14 @@ def add_account(request):
     else:
         form = CreateAccountForm()
     return render(request, "account/add_account.html", {"form": form})
+
+
+@require_POST
+@login_required
+def updateFavorite(request):
+    account_name = request.POST.get('account_name')
+    print(request)
+    account = Account.objects.get(name=account_name)
+    account.isFavorite = not account.isFavorite
+    account.save()
+    return JsonResponse({'status': 'ok'})
