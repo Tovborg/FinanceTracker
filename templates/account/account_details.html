@@ -1,54 +1,68 @@
 {% extends '../base.html' %}
 {% load static %}
 {% block content %}
+
 <div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-10 mobile-only:mt-0">
     <div class="bg-cards mobile-only:h-full rounded-lg h-[600px] w-[70%] mobile-only:w-[100%] shadow-lg p-6">
-        <div class="flex flex-col md:flex-row mt-3 mobile-only:mt-7 justify-between items-center md:items-center">
-            <h1 class="text-4xl font-dansketext flex items-center mb-0">
+        <a href="{% url 'account' %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
+        <div class="flex flex-col md:flex-row mt-3 mobile-only:mt-2 justify-between items-center md:items-center">
+            <h1 class="text-4xl font-dansketext flex items-center mb-0 mobile-only:!mb-3">
             {{ account.name }}
-            <ion-icon class="ml-2 !text-3xl text-gray-500" name="information-circle-outline"></ion-icon>
+            <a href="{% url 'account_info' account.name %}"><ion-icon class="ml-2 !text-3xl text-gray-500" name="information-circle-outline"></ion-icon></a>
             </h1>
-            <div class="text-3xl font-dansketext mb-2 md:ml-auto">DKK {{ account.balance }}</div>
+            <div class="text-3xl font-medium mb-2 md:ml-auto">DKK {{ account.balance }}</div>
         </div>
         <div class="flex flex-col md:flex-row justify-between md:items-center items-center">
             <div class="text-gray-500 mobile-only:!hidden align-top">3667 3667701465</div>
-            <button class="select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full" type="submit">New Transaction</button>
+            <form action="{% url 'new_transaction' account.name %}">
+                <button class="select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full" type="submit">New Transaction</button>
+            </form>
         </div>
         <hr class="mt-6 border-gray-500">
-        <div class="overflow-y-auto max-h-[200px]">
+        <div class="overflow-y-auto max-h-[600px]">
                         <ul class="text-white">
+                            {% for transaction in transactions %}
                             <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                 <div>
-                                    <span class="block font-semibold text-gray-900">Indbetaling</span>
-                                    <span class="block text-sm text-gray-500">8. Jul 2024</span>
+                                    <span class="block font-semibold text-gray-900">{{ transaction.transaction_type|capfirst }}</span>
+                                    <span class="block text-sm text-gray-500">{{ transaction.date }}</span>
                                 </div>
+                                {% if transaction.transaction_type == 'deposit' %}
                                 <div class="text-right">
-                                    <span class="block font-bold text-accent">DKK 200</span>
-                                    <span class="text-gray-400">128.800</span>
+                                    <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
                                 </div>
-                            </li>
-                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
-                                <div>
-                                    <span class="block font-semibold text-gray-900">Grocery Store</span>
-                                    <span class="block text-sm text-gray-500">8. Jul 2024</span>
-                                </div>
+                                {% else %}
                                 <div class="text-right">
-                                    <span class="block font-bold text-warning">- DKK 200</span>
-                                    <span class="text-gray-400">128.800</span>
+                                    <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
+                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
                                 </div>
+                                {% endif %}
                             </li>
-                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
-                                <div>
-                                    <span class="block font-semibold text-gray-900">Grocery Store</span>
-                                    <span class="block text-sm text-gray-500">8. Jul 2024</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="block font-bold text-warning">- DKK 200</span>
-                                    <span class="text-gray-400">128.800</span>
-                                </div>
-                            </li>
+                            {% endfor %}
+
                         </ul>
                     </div>
+                    <div class="flex mt-4">
+                        {% if transactions.has_previous %}
+                        <a href="?page={{ transactions.previous_page_number }}" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                            Previous
+                            <svg class="w-3.5 ml-1 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+
+                        {% if transactions.has_next %}
+                        <a href="?page={{ transactions.next_page_number }}" class="flex items-center justify-center px-3 h-8 ms-auto text-sm font-medium text-white bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                            Next
+                            <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+
     </div>
 </div>
 

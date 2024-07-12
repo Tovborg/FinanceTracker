@@ -19,8 +19,11 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.name} ({self.account_type})"
 
-    def get_transaction(self):
-        return self.transaction_set.all()
+    def get_transactions(self):
+        return self.transaction_set.all().order_by('-date')
+
+    def get_three_recent_transactions(self):
+        return self.transaction_set.all().order_by('-date')[:3]
 
 
 class Transaction(models.Model):
@@ -28,22 +31,15 @@ class Transaction(models.Model):
         ('deposit', 'Deposit'),
         ('withdrawal', 'Withdrawal'),
         ('payment', 'Payment'),
-        ('transfer', 'Transfer')
+        ('transfer', 'Transfer'),
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=11, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=datetime.date.today)
     description = models.TextField(blank=True, null=True)
-
+    balance_after = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0) # Balance after transaction
+    transfer_to = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transfer_to', null=True, blank=True)
     def __str__(self):
         return f"{self.get_transaction_type_display()} - {self.amount} kr. on {self.date}"
 
-    def save(self, *args, **kwargs):
-        if self.pk is None:  # Only adjust balance for new transactions
-            if self.transaction_type == 'indbetaling':
-                self.account.balance += self.amount
-            elif self.transaction_type == 'udgift':
-                self.account.balance -= self.amount
-            self.account.save()
-        super().save(*args, **kwargs)

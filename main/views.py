@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from main.models import Account, Transaction
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 # Use @login_required decorator to ensure only authenticated users can access the view
 
 
@@ -12,6 +13,7 @@ from django.http import JsonResponse
 def index(request):
     accounts = Account.objects.filter(user=request.user)
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
+    three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
 
     if len(accounts) > 3:
         accounts = accounts[:3]
@@ -28,10 +30,10 @@ def index(request):
         additional_accounts = Account.objects.filter(user=request.user, isFavorite=False)[:3 - favorites_count]
         combined_accounts = list(favorites) + list(additional_accounts)
         return render(request, "dashboard.html", context={"accounts": combined_accounts})
+
     else:
         print(favorites)
         return render(request, "dashboard.html", context={"accounts": favorites})
-
 
 
 def sign_up(request):
@@ -53,9 +55,25 @@ def account_view(request):
     return render(request, "account/account.html", context={"accounts": user_accounts})
 
 @login_required
+def account_info(request, account_name):
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    return render(request, "account/account_info.html", context={"account": account})
+
+@login_required
 def account_details(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, "account/account_details.html", context={"account": account})
+    transactions_list = account.transaction_set.all().order_by('-date')
+
+    paginator = Paginator(transactions_list, 5)
+    page_number = request.GET.get('page')
+    try:
+        transactions = paginator.page(page_number)
+    except PageNotAnInteger:
+        transactions = paginator.page(1)
+    except EmptyPage:
+        transactions = paginator.page(paginator.num_pages)
+
+    return render(request, "account/account_details.html", context={"account": account, "transactions": transactions})
 
 
 @login_required
@@ -99,22 +117,65 @@ def updateFavorite(request):
 @login_required
 def new_transaction(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
+    accounts = Account.objects.filter(user=request.user).exclude(name=account_name)
     if request.method == "POST":
-        form = NewTransactionForm(request.POST)
+        form = NewTransactionForm(request.POST, user=request.user)
         if form.is_valid():
+            print('form is valid')
             transaction_type = form.cleaned_data['transaction_type']
             amount = form.cleaned_data['amount']
             date = form.cleaned_data['date']
             description = form.cleaned_data['description']
+            transfer_to = form.cleaned_data['transfer_to']
+
+            # Calculate balance after transaction
+            if transaction_type == 'deposit':
+                balance_after = account.balance + amount
+            elif transaction_type == 'withdrawal':
+                balance_after = account.balance - amount
+            elif transaction_type == 'transfer' and transfer_to:
+                balance_after = account.balance - amount
+            else:
+                balance_after = account.balance
 
             transaction = Transaction(
                 account=account,
                 transaction_type=transaction_type,
                 amount=amount,
                 date=date,
-                description=description
+                description=description,
+                transfer_to=transfer_to,
+                balance_after=balance_after
             )
             transaction.save()
+
+            handleTransaction(transaction_type, amount, account, transfer_to, transaction)
             return redirect('account_details', account_name=account_name)
-    form = NewTransactionForm()
-    return render(request, "new_transaction.html", context={"account": account, "form": form})
+        else:
+            print(form.errors)
+    else:
+        form = NewTransactionForm(user=request.user)
+    return render(request, "new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
+
+# Needs new logic to handle insufficient funds
+def handleTransaction(transaction_type, amount, account, transfer_to, transaction):
+    if transaction_type == 'deposit':
+        account.balance += amount
+    elif transaction_type == 'withdrawal':
+        account.balance -= amount
+    elif transaction_type == 'transfer' and transfer_to:
+        account.balance -= amount
+        transfer_to.balance += amount
+        transfer_to.save()
+        receiver_transaction = Transaction(
+            account=transfer_to,
+            transaction_type='deposit',
+            amount=amount,
+            date=transaction.date,
+            description=f"Transfer from {account.name}",
+            balance_after=transfer_to.balance
+        )
+        receiver_transaction.save()
+    account.save()
+    transaction.balance_after = account.balance
+    transaction.save()
