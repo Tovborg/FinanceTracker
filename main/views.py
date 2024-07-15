@@ -6,15 +6,26 @@ from main.models import Account, Transaction
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-# Use @login_required decorator to ensure only authenticated users can access the view
+import datetime
 
+
+# Use @login_required decorator to ensure only authenticated users can access the view
 
 @login_required
 def index(request):
     accounts = Account.objects.filter(user=request.user)
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
-
+    current_date = datetime.date.today()
+    total_expenses = 0
+    total_income = 0
+    for account in accounts:
+        total_expenses += account.get_monthly_expenses()
+    # Dashboard info
+    for account in accounts:
+        total_income += account.get_monthly_income()
+    total_balance = sum([account.balance for account in accounts])
+    no_accounts = len(accounts)
     if len(accounts) > 3:
         accounts = accounts[:3]
 
@@ -22,18 +33,25 @@ def index(request):
         favorites = favorites[:3]
     favorites_count = len(favorites)
 
+    context = {"accounts": accounts,
+               "total_balance": total_balance,
+               "no_accounts": no_accounts,
+               'total_expenses': total_expenses,
+               'total_income': total_income,
+               'current_date': current_date}
+
     if favorites_count == 0:
         print('No favorites')
-        return render(request, "dashboard.html", context={"accounts": accounts})
+        return render(request, "dashboard.html", context=context)
     elif favorites_count < 3:
         # Fetch additional non-favorite accounts to make up the count to 3
         additional_accounts = Account.objects.filter(user=request.user, isFavorite=False)[:3 - favorites_count]
         combined_accounts = list(favorites) + list(additional_accounts)
-        return render(request, "dashboard.html", context={"accounts": combined_accounts})
+        return render(request, "dashboard.html", context=context)
 
     else:
         print(favorites)
-        return render(request, "dashboard.html", context={"accounts": favorites})
+        return render(request, "dashboard.html", context=context)
 
 
 def sign_up(request):
@@ -54,10 +72,22 @@ def account_view(request):
     user_accounts = Account.objects.filter(user=request.user)
     return render(request, "account/account.html", context={"accounts": user_accounts})
 
+
 @login_required
 def account_info(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
     return render(request, "account/account_info.html", context={"account": account})
+
+
+@require_POST
+@login_required
+def delete_account(request, account_name):
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    # Delete transactions associated with the account
+    account.transaction_set.all().delete()
+    account.delete()
+    return redirect('account')
+
 
 @login_required
 def account_details(request, account_name):
@@ -157,6 +187,7 @@ def new_transaction(request, account_name):
         form = NewTransactionForm(user=request.user)
     return render(request, "new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
 
+
 # Needs new logic to handle insufficient funds
 def handleTransaction(transaction_type, amount, account, transfer_to, transaction):
     if transaction_type == 'deposit':
@@ -179,3 +210,6 @@ def handleTransaction(transaction_type, amount, account, transfer_to, transactio
     account.save()
     transaction.balance_after = account.balance
     transaction.save()
+
+def account_modal_test(request):
+    return render(request, "account/account_modal.html")

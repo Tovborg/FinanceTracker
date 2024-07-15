@@ -1,7 +1,92 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <h1>
-    Welcome to account info page for {{ account.name }}
-    </h1>
+
+    <div class="flex justify-center mt-10 mobile-only:h-full mobile-only:mt-0">
+        <div class="bg-cards rounded-lg h-[600px] sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
+            <div id="action_icons_info" class="flex flex-row justify-between">
+                <div class="flex justify-start">
+                    <a href="{% url 'account' %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
+                </div>
+                <div class="flex justify-end">
+                    <button id="delete_acc_btn"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></button>
+{#                    <form method="post" action="{% url 'delete_account' account.name %}" id="delete_account_form">#}
+{#                        {% csrf_token %}#}
+{#                        <a id="delete_account_btn" class="cursor-pointer" onclick="document.getElementById('delete_account_form').submit()"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></a>#}
+{#                    </form>#}
+
+                </div>
+            </div>
+            <hr class="mt-6 border-gray-500" />
+            <div id="account_info" class="mt-6 space-y-6">
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Account Name</span>
+                    <span class="font-dansketext">{{ account.name }}</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Account Owner</span>
+                    <span class="font-dansketext">{{ account.user }}</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Account Balance</span>
+                    <span>DKK {{ account.balance }}</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Account Number</span>
+                    <span class="font-dansketext">3667 3667701465</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Account Type</span>
+                    <span class="font-dansketext">{{ account.account_type|upper }}</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Currency</span>
+                    <span class="font-dansketext">DANSKE KRONER</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-gray-800 p-4 rounded shadow-lg mobile-only:w-[95%] sm:w-[75%] md:w-[60%] lg:w-[50%] xl:w-[35%]">
+            <div class="flex justify-end">
+                <ion-icon name="close-outline" class="text-3xl text-gray-300"></ion-icon>
+            </div>
+            <div class="flex justify-center">
+                <ion-icon name="alert-circle-outline" class="text-5xl text-gray-200"></ion-icon>
+            </div>
+            <div class="flex justify-center mt-4 font-dansketext text-2xl text-center text-gray-400">Are you sure you want to delete this account?</div>
+            <div class="flex flex-row justify-center mt-7">
+                <form action="{% url 'delete_account' account.name %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                        Yes, I'm sure
+                    </button>
+                </form>
+                <button data-modal-hide="popup-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">No, cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const delete_acc_btn = document.getElementById('delete_acc_btn');
+        const modal = document.querySelector('.hidden');
+        const close_modal = document.querySelector('.bg-gray-800');
+        const yes_btn = document.querySelector('.bg-red-600');
+        const no_btn = document.querySelector('.bg-white');
+
+        delete_acc_btn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+
+        close_modal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        yes_btn.addEventListener('click', () => {
+            window.location.href = "{% url 'delete_account' account.name %}";
+        });
+
+        no_btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    </script>
 {% endblock %}

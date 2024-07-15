@@ -25,6 +25,40 @@ class Account(models.Model):
     def get_three_recent_transactions(self):
         return self.transaction_set.all().order_by('-date')[:3]
 
+    def get_monthly_expenses(self):
+        today = datetime.date.today()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = (today.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(
+            days=1)
+
+        transactions = self.transaction_set.filter(
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month,
+            transaction_type__in=['withdrawal', 'payment']
+        )
+
+        total_expenses = sum(transaction.amount for transaction in transactions)
+        return total_expenses
+
+    def get_monthly_income(self):
+        # Get the current date
+        today = datetime.date.today()
+        # Get the first and last day of the current month
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = (today.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(
+            days=1)
+
+        # Filter transactions for the current month
+        transactions = self.transaction_set.filter(
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month,
+            transaction_type='deposit'
+        ).exclude(description__startswith='Transfer from')
+
+        # Calculate the total income for the month
+        total_income = sum(transaction.amount for transaction in transactions)
+
+        return total_income
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = (

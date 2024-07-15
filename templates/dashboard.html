@@ -13,19 +13,19 @@
             <div class="grid grid-cols-1 mx-3 md:mx-0 lg:mx-0 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 lg:mb-15 md:mb-20">
                 <div class="bg-cards p-4 shadow">
                     <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Balance</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">$10000</p>
+                    <p class="text-2xl text-center md:text-start lg:text-start">DKK {{ total_balance }}</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
                     <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Number of Accounts</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">4</p>
+                    <p class="text-2xl text-center md:text-start lg:text-start">{{ no_accounts }}</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">$5000</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income ({{ current_date|date:"F" }})</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">{{ total_income }}</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Expenses</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">$1000</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Expenses ({{ current_date|date:"F" }})</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">DKK {{ total_expenses }}</p>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                             <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                 <div>
                                     <span class="block">{{ transaction.transaction_type|capfirst }}</span>
-                                    <span class="block text-sm">{{ transaction.date }}4</span>
+                                    <span class="block text-sm">{{ transaction.date }}</span>
                                 </div>
                                 {% if transaction.transaction_type == 'deposit' %}
                                 <div class="text-right">

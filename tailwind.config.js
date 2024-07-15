@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       colors: {
         'primary': '#003f63',
+        'account_info': '#F7FAFC',
         'account_background': '#F3F5F4',
         'form_outline': '#7E92B2',
         'form_input': '#B1BBD3',
