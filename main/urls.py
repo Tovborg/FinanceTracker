@@ -14,5 +14,5 @@ urlpatterns = [
     path('new_transaction/<str:account_name>/', new_transaction, name='new_transaction'),
     path('account/info/<str:account_name>/', account_info, name='account_info'),
     path('account/delete/<str:account_name>/', delete_account, name='delete_account'),
-    path('account_modal', account_modal_test, name='account_modal'),
+    path('account/edit/<str:account_name>/<str:field>/', edit_account, name='edit_account'),
 ]

@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
+from django.contrib import messages
 
 
 # Use @login_required decorator to ensure only authenticated users can access the view
@@ -117,6 +118,7 @@ def add_account(request):
             account_name = form.cleaned_data['account_name']
             account_balance = form.cleaned_data['account_balance']
             account_type = form.cleaned_data['account_type']
+            account_number = form.cleaned_data['account_number']
             description = form.cleaned_data['description']
 
             new_account = Account(
@@ -124,13 +126,42 @@ def add_account(request):
                 name=account_name,
                 balance=account_balance,
                 account_type=account_type,
-                description=description
+                description=description,
+                account_number=account_number
             )
             new_account.save()
             return redirect('account')
     else:
         form = CreateAccountForm()
     return render(request, "account/add_account.html", {"form": form})
+
+@login_required
+@require_POST
+def edit_account(request, account_name, field):
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    new_value = request.POST.get('new_value')
+    print(new_value)
+    if new_value is None:
+        messages.error(request, 'New value cannot be empty')
+        return redirect('account_info', account_name=account_name)
+    if new_value is '':
+        messages.error(request, 'New value cannot be empty')
+        return redirect('account_info', account_name=account_name)
+
+    valid_fields = ['name', 'account_number', 'account_type']
+    if field in valid_fields:
+        print('Valid field')
+        setattr(account, field, new_value)
+        account.save()
+        messages.success(request, f'{field.replace("_", " ").capitalize()} updated successfully.')
+    else:
+        messages.error(request, 'Invalid field.')
+    if field == 'name':
+        if new_value:
+            account_name = new_value
+        else:
+            account_name = account.name
+    return redirect('account_info', account_name=account_name)
 
 
 @require_POST
@@ -211,5 +242,4 @@ def handleTransaction(transaction_type, amount, account, transfer_to, transactio
     transaction.balance_after = account.balance
     transaction.save()
 
-def account_modal_test(request):
-    return render(request, "account/account_modal.html")
+

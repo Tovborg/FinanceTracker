@@ -20,6 +20,7 @@ class CreateAccountForm(forms.Form):
     account_name = forms.CharField(max_length=50)
     account_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
     account_type = forms.ChoiceField(choices=ACCOUNT_TYPES)
+    account_number = forms.CharField(max_length=50, required=False)
     # field for uploading a file
     description = forms.CharField(widget=forms.Textarea, required=False)
 

@@ -10,18 +10,20 @@
                 </div>
                 <div class="flex justify-end">
                     <button id="delete_acc_btn"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></button>
-{#                    <form method="post" action="{% url 'delete_account' account.name %}" id="delete_account_form">#}
-{#                        {% csrf_token %}#}
-{#                        <a id="delete_account_btn" class="cursor-pointer" onclick="document.getElementById('delete_account_form').submit()"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></a>#}
-{#                    </form>#}
-
                 </div>
             </div>
             <hr class="mt-6 border-gray-500" />
             <div id="account_info" class="mt-6 space-y-6">
                 <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Account Name</span>
-                    <span class="font-dansketext">{{ account.name }}</span>
+                    <span class="font-semibold">Account Name<a onclick="toggleEditForm('account_name')" class="cursor-pointer"><ion-icon id="account_name_pencil" class="ml-2 font-bold" name="pencil-outline"></ion-icon></a></span>
+                    <form method="post" action="{% url 'edit_account' account.name 'name' %}" id="account_name_edit" class="hidden">
+                        {% csrf_token %}
+                        <span class="font-dansketext flex items-center">
+                            <input name="new_value" type="text" placeholder="{{ account.name }}" class="border rounded px-2 py-1 bg-transparent">
+                            <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer" name="checkmark-outline"></ion-icon></button>
+                        </span>
+                    </form>
+                    <span class="font-dansketext" id="account_name">{{ account.name }}</span>
                 </div>
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Account Owner</span>
@@ -31,13 +33,38 @@
                     <span class="font-semibold">Account Balance</span>
                     <span>DKK {{ account.balance }}</span>
                 </div>
+                {% if account.account_type == 'savings' or account.account_type == 'checking' %}
                 <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Account Number</span>
-                    <span class="font-dansketext">3667 3667701465</span>
+                    <span class="font-semibold">Account Number<a onclick="toggleEditForm('account_number')" class="cursor-pointer"><ion-icon id="account_number_pencil" class="ml-2 font-bold" name="pencil-outline"></ion-icon></a></span>
+                    <form method="post" action="{% url 'edit_account' account.name 'account_number' %}" id="account_number_edit" class="hidden">
+                        {% csrf_token %}
+                        <span class="font-dansketext flex items-center">
+                            <input name="new_value" type="text" placeholder="{{ account.account_number }}" class="border rounded px-2 py-1 bg-transparent">
+                            <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer" name="checkmark-outline"></ion-icon></button>
+                        </span>
+                    </form>
+                    {% if account.account_number %}
+                    <span class="font-dansketext" id="account_number">{{ account.account_number }}</span>
+                    {% else %}
+                    <span class="font-dansketext" id="account_number">Not Available</span>
+                    {% endif %}
                 </div>
+                {% endif %}
                 <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Account Type</span>
-                    <span class="font-dansketext">{{ account.account_type|upper }}</span>
+                    <span class="font-semibold">Account Type<a onclick="toggleEditForm('account_type')" class="cursor-pointer"><ion-icon id="account_type_pencil" class="ml-2 font-bold" name="pencil-outline"></ion-icon></a></span>
+                    <span id="account_type" class="font-dansketext">{{ account.account_type|upper }}</span>
+                    <form method="post" action="{% url 'edit_account' account.name 'account_type' %}" id="account_type_edit" class="hidden">
+                        {% csrf_token %}
+                        <span class="font-dansketext flex items-center">
+                            <select name="new_value" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out bg-transparent">
+                                <option value="savings">Savings</option>
+                                <option value="checking">Checking</option>
+                                <option value="Vacation">Vacation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer" name="checkmark-outline"></ion-icon></button>
+                    </span>
+                    </form>
                 </div>
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Currency</span>
@@ -46,7 +73,7 @@
             </div>
         </div>
     </div>
-    <div class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div id="modal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-gray-800 p-4 rounded shadow-lg mobile-only:w-[95%] sm:w-[75%] md:w-[60%] lg:w-[50%] xl:w-[35%]">
             <div class="flex justify-end">
                 <ion-icon name="close-outline" class="text-3xl text-gray-300"></ion-icon>
@@ -68,7 +95,7 @@
     </div>
     <script>
         const delete_acc_btn = document.getElementById('delete_acc_btn');
-        const modal = document.querySelector('.hidden');
+        const modal = document.getElementById('modal');
         const close_modal = document.querySelector('.bg-gray-800');
         const yes_btn = document.querySelector('.bg-red-600');
         const no_btn = document.querySelector('.bg-white');
@@ -88,5 +115,14 @@
         no_btn.addEventListener('click', () => {
             modal.classList.add('hidden');
         });
+
+        function toggleEditForm(field) {
+            const form = document.getElementById(`${field}_edit`);
+            const info = document.getElementById(`${field}`);
+            const pencil = document.getElementById(`${field}_pencil`);
+            pencil.classList.toggle('hidden');
+            form.classList.toggle('hidden');
+            info.classList.toggle('hidden');
+        }
     </script>
 {% endblock %}
