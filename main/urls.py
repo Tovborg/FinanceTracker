@@ -15,4 +15,7 @@ urlpatterns = [
     path('account/info/<str:account_name>/', account_info, name='account_info'),
     path('account/delete/<str:account_name>/', delete_account, name='delete_account'),
     path('account/edit/<str:account_name>/<str:field>/', edit_account, name='edit_account'),
+    path('transaction/<int:pk>/', transaction_detail, name='transaction_detail'),
+    path('transaction/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
+    path('user_info/', user_info, name='user_info'),
 ]

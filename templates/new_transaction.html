@@ -208,4 +208,23 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+        // Get the current date
+            const today = new Date();
+            const currentMonth = today.getMonth() + 1; // Months are 0-based in JavaScript
+            const currentDay = today.getDate();
+            const currentYear = today.getFullYear();
+
+            // Select the month, day, and year select elements
+            const monthSelect = document.getElementById('id_date_month');
+            const daySelect = document.getElementById('id_date_day');
+            const yearSelect = document.getElementById('id_date_year');
+
+            // Set the default selected value to the current month, day, and year
+            monthSelect.value = currentMonth;
+            daySelect.value = currentDay;
+            yearSelect.value = currentYear;
+        });
+    </script>
 {% endblock %}

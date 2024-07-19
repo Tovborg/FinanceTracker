@@ -6,7 +6,7 @@
         <div class="bg-cards rounded-lg h-[600px] sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
             <div id="action_icons_info" class="flex flex-row justify-between">
                 <div class="flex justify-start">
-                    <a href="{% url 'account' %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
+                    <a href="{% url 'account_details' account.name %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
                 </div>
                 <div class="flex justify-end">
                     <button id="delete_acc_btn"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></button>
@@ -32,6 +32,17 @@
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Account Balance</span>
                     <span>DKK {{ account.balance }}</span>
+                </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Accumulated Interest<a onclick="toggleEditForm('accumulated_interest')" class="cursor-pointer"><ion-icon id="accumulated_interest_pencil" class="ml-2 font-bold" name="pencil-outline"></ion-icon></a></span>
+                    <form method="post" action="{% url 'edit_account' account.name 'accumulated_interest' %}" id="accumulated_interest_edit" class="hidden">
+                        {% csrf_token %}
+                        <span class="font-dansketext flex items-center">
+                            <input name="new_value" type="text" placeholder="{{ account.accumulated_interest }}" class="border rounded px-2 py-1 bg-transparent">
+                            <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer" name="checkmark-outline"></ion-icon></button>
+                        </span>
+                    </form>
+                    <span id="accumulated_interest">DKK {{ account.accumulated_interest }}</span>
                 </div>
                 {% if account.account_type == 'savings' or account.account_type == 'checking' %}
                 <div class="flex flex-row justify-between">

@@ -1,21 +1,26 @@
 <header class="bg-primary flex justify-center">
     <div class="w-[80%] h-[50px] flex items-center text-gray-700">
-        <div class="min-w-[50px] text-3xl text-sidebar text-white font-bold" style="font-family: 'Danske Text v2 Regular'"><a href="{% url 'index' %}">TjFinance</a></div>
+        <div class="min-w-[50px] text-3xl text-sidebar text-white font-bold" style="font-family: 'Danske Text v2 Regular'"><a href="{% url 'index' %}">Tovborg</a></div>
         <div id="menu" class="duration-100 grow flex justify-end gap-4 md:gap-8 absolute md:relative flex-col md:flex-row top-[-100%] md:top-[inherit] bg-navigation_mobile md:bg-transparent w-[100%] left-0 right-0 m-auto md:w-auto md:left-auto md:right-auto px-10 py-10 md:p-0">
             {% if user.is_authenticated %}
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'index' %}">Dashboard</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account' %}">Accounts</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Transactions</a>
-                <form method="post" action="{% url 'logout' %}" class="hover:text-gray-400">
-                    {% csrf_token %}
-                    <button type="submit" class="text-primary md:text-white hover:text-gray-400 font-bold" style="font-family: 'Danske Text v2 Regular'">Log out</button>
-                </form>
+            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'user_info' %}">Settings</a>
+            <form method="post" action="{% url 'logout' %}" class="hover:text-gray-400">
+                {% csrf_token %}
+                <button type="submit" class="text-primary md:text-white hover:text-gray-400 font-bold" style="font-family: 'Danske Text v2 Regular'">Log out</button>
+            </form>
+
             {% else %}
             <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'login' %}">Login</a>
             <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'sign_up' %}">Register</a>
             {% endif %}
             <!-- Must add another tab for user authentication (login etc.) -->
         </div>
+        {% if user.is_authenticated %}
+        {% endif %}
+
         <div class="text-3xl md:hidden flex justify-end grow text-white">
             <ion-icon id="menuToggle" class="cursor-pointer" name="menu-outline"></ion-icon>
         </div>

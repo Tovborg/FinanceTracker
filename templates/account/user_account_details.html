@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mx-auto p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <div>
+            <h2 class="text-2xl font-semibold">Personal Information</h2>
+            <p class="text-gray-600">Use a permanent address where you can receive mail.</p>
+        </div>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            <div class="col-span-2">
+                <label for="first-name" class="block text-sm font-medium text-gray-700">First Name</label>
+                <div class="mt-2">
+                    <input id="first-name" name="first-name" type="text" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label for="last-name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <div class="mt-2">
+                    <input id="last-name" name="last-name" type="text" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <div class="mt-2">
+                    <input id="email" name="email" type="email" autocomplete="email" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <div class="mt-2">
+                    <input id="username" name="username" type="text" autocomplete="username" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="flex justify-start col-span-2">
+                <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
+            </div>
+        </form>
+    </div>
+    <hr class="mt-10 border-black">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <div>
+            <h2 class="text-2xl font-semibold">Change Password</h2>
+            <p class="text-gray-600">Update your password associated with your account.</p>
+        </div>
+        <form method="post" action="{% url 'user_info' %}" class="space-y-6">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="text-warning">
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li class="text-warning">{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li class="text-warning">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="text-accent rounded-md">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="col-span-2">
+                <label for="id_old_password" class="block text-sm font-medium text-gray-700">Current Password</label>
+                <div class="mt-2">
+                    <input id="id_old_password" required name="old_password" type="password" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label for="id_new_password1" class="block text-sm font-medium text-gray-700">New Password</label>
+                <div class="mt-2">
+                    <input id="id_new_password1" required name="new_password1" type="password" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="col-span-2">
+                <label for="id_new_password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <div class="mt-2">
+                    <input id="id_new_password2" required name="new_password2" type="password" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+            </div>
+            <div class="flex justify-start col-span-2">
+                <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
+            </div>
+        </form>
+    </div>
+    <hr class="mt-10 border-black">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <div class="md:col-span-1">
+            <h2 class="text-2xl font-semibold">Delete Account</h2>
+            <p class="text-gray-600">No longer want to use this service? You can delete your account here. This action is irreversible. All information related to your account will be deleted permanently!</p>
+        </div>
+        <div class="flex items-center md:justify-end md:col-span-1">
+            <button type="submit" class="flex justify-center text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

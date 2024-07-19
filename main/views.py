@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from main.forms import RegistrationForm, CreateAccountForm, NewTransactionForm
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from main.models import Account, Transaction
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
 from django.contrib import messages
@@ -144,11 +146,11 @@ def edit_account(request, account_name, field):
     if new_value is None:
         messages.error(request, 'New value cannot be empty')
         return redirect('account_info', account_name=account_name)
-    if new_value is '':
+    if new_value == '':
         messages.error(request, 'New value cannot be empty')
         return redirect('account_info', account_name=account_name)
 
-    valid_fields = ['name', 'account_number', 'account_type']
+    valid_fields = ['name', 'account_number', 'account_type', 'accumulated_interest']
     if field in valid_fields:
         print('Valid field')
         setattr(account, field, new_value)
@@ -241,5 +243,60 @@ def handleTransaction(transaction_type, amount, account, transfer_to, transactio
     account.save()
     transaction.balance_after = account.balance
     transaction.save()
+
+
+def transaction_detail(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    return render(request, "transaction_detail.html", context={"transaction": transaction})
+
+
+@login_required
+@require_POST
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk, account__user=request.user)
+    # Revert back transaction
+    account = transaction.account
+    if transaction.transaction_type == 'deposit':
+        account.balance -= transaction.amount
+    elif transaction.transaction_type == 'payment':
+        account.balance += transaction.amount
+    elif transaction.transaction_type == 'transfer':
+        account.balance += transaction.amount
+
+        corresponding_transaction = Transaction.objects.filter(
+            account=transaction.transfer_to,
+            transaction_type='deposit',
+            amount=transaction.amount,
+            description=f"Transfer from {account.name}",
+            date=transaction.date
+        ).first()
+
+        if corresponding_transaction:
+            transaction.transfer_to.balance -= corresponding_transaction.amount
+            transaction.transfer_to.save()
+            corresponding_transaction.delete()
+
+    account.save()
+    transaction.delete()
+    messages.success(request, 'Transaction deleted and balance reverted.')
+    return redirect('account_details', account_name=account.name)
+
+
+@login_required
+def user_info(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('user_info')  # Or any other page you want to redirect to after success
+        else:
+            messages.error(request, 'Please correct the error below.')
+            print(form.errors)  # For debugging purposes
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, "account/user_account_details.html", context={"form": form})
 
 

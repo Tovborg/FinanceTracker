@@ -1024,6 +1024,14 @@ select {
   margin-left: 0.75rem;
 }
 
+.me-3 {
+  margin-inline-end: 0.75rem;
+}
+
+.ms-5 {
+  margin-inline-start: 1.25rem;
+}
+
 .block {
   display: block;
 }
@@ -1148,6 +1156,10 @@ select {
   height: 700px !important;
 }
 
+.h-4 {
+  height: 1rem;
+}
+
 .max-h-\[200px\] {
   max-height: 200px;
 }
@@ -1234,6 +1246,10 @@ select {
 
 .\!w-\[30\%\] {
   width: 30% !important;
+}
+
+.w-4 {
+  width: 1rem;
 }
 
 .min-w-\[50px\] {
@@ -1324,6 +1340,10 @@ select {
 
 .gap-6 {
   gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
 }
 
 .gap-x-3 {
@@ -1540,6 +1560,11 @@ select {
   background-color: rgb(231 76 60 / var(--tw-bg-opacity));
 }
 
+.bg-gray-900 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -1694,6 +1719,11 @@ select {
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .pb-12 {
@@ -2296,6 +2326,10 @@ select {
     margin-bottom: 0px;
   }
 
+  .sm\:mt-0 {
+    margin-top: 0px;
+  }
+
   .sm\:flex {
     display: flex;
   }
@@ -2352,12 +2386,24 @@ select {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .sm\:items-center {
     align-items: center;
   }
 
+  .sm\:justify-center {
+    justify-content: center;
+  }
+
   .sm\:justify-between {
     justify-content: space-between;
+  }
+
+  .sm\:gap-6 {
+    gap: 1.5rem;
   }
 
   .sm\:py-32 {
@@ -2432,6 +2478,14 @@ select {
     margin-left: auto;
   }
 
+  .md\:mb-0 {
+    margin-bottom: 0px;
+  }
+
+  .md\:flex {
+    display: flex;
+  }
+
   .md\:hidden {
     display: none;
   }
@@ -2490,6 +2544,10 @@ select {
 
   .md\:items-center {
     align-items: center;
+  }
+
+  .md\:justify-between {
+    justify-content: space-between;
   }
 
   .md\:gap-8 {
@@ -2603,6 +2661,11 @@ select {
     padding-right: 2rem;
   }
 
+  .lg\:py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
   .lg\:text-start {
     text-align: start;
   }
@@ -2663,6 +2726,11 @@ select {
   .dark\:bg-blue-600 {
     --tw-bg-opacity: 1;
     background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+  }
+
+  .dark\:bg-gray-900 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(17 24 39 / var(--tw-bg-opacity));
   }
 
   .dark\:via-neutral-400 {
