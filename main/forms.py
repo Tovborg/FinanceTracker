@@ -2,12 +2,15 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from main.models import Account
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 class RegistrationForm(UserCreationForm):
-    Email = forms.EmailField(required=True)
-
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(max_length=50, required=True)
+    last_name = forms.CharField(max_length=50, required=True)
     class Meta:
         model = User
-        fields = ['username', 'Email', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
 
 class CreateAccountForm(forms.Form):
     ACCOUNT_TYPES = (
@@ -49,4 +52,44 @@ class NewTransactionForm(forms.Form):
         transfer_to = cleaned_data.get('transfer_to')
         if transaction_type == 'transfer' and not transfer_to:
             self.add_error('transfer_to', 'This field is required when transaction type is Transfer')
+        return cleaned_data
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'username']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].required = False
+        self.fields['email'].required = False
+        self.fields['first_name'].required = False
+        self.fields['last_name'].required = False
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                raise ValidationError("Enter a valid email address.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username and User.objects.filter(username=username).exists():
+            raise ValidationError("This username is already taken.")
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('first_name'):
+            cleaned_data['first_name'] = self.instance.first_name
+        if not cleaned_data.get('last_name'):
+            cleaned_data['last_name'] = self.instance.last_name
+        if not cleaned_data.get('email'):
+            cleaned_data['email'] = self.instance.email
+        if not cleaned_data.get('username'):
+            cleaned_data['username'] = self.instance.username
         return cleaned_data

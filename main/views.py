@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from main.forms import RegistrationForm, CreateAccountForm, NewTransactionForm
+from main.forms import RegistrationForm, CreateAccountForm, NewTransactionForm, UserUpdateForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
@@ -284,19 +284,47 @@ def delete_transaction(request, pk):
 
 @login_required
 def user_info(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)
-            messages.success(request, 'Your password was successfully updated!')
-            return redirect('user_info')  # Or any other page you want to redirect to after success
-        else:
-            messages.error(request, 'Please correct the error below.')
-            print(form.errors)  # For debugging purposes
-    else:
-        form = PasswordChangeForm(request.user)
+    user_form = None
+    password_form = None
 
-    return render(request, "account/user_account_details.html", context={"form": form})
+
+
+    if request.method == 'POST':
+        if 'update_user_info' in request.POST:
+            user_form = UserUpdateForm(request.POST, instance=request.user)
+            if user_form.is_valid():
+                print('User form is valid')
+                user_form.save(commit=False)
+                if not user_form.cleaned_data['email']:
+                    user_form.cleaned_data['email'] = request.user.email
+                if not user_form.cleaned_data['username']:
+                    user_form.cleaned_data['username'] = request.user.username
+                if not user_form.cleaned_data['first_name']:
+                    user_form.cleaned_data['first_name'] = request.user.first_name
+                if not user_form.cleaned_data['last_name']:
+                    user_form.cleaned_data['last_name'] = request.user.last_name
+                user_form.save()
+                messages.success(request, 'User profile updated successfully.', extra_tags='user_profile')
+                return redirect('user_info')
+            else:
+                print(user_form.errors)
+        elif 'change_password' in request.POST:
+            print('Changing password')
+            password_form = PasswordChangeForm(request.user, request.POST)
+            user_form = UserUpdateForm(instance=request.user)  # Initialize the user form in case of errors
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Your Password was successfully updated!', extra_tags='password')
+                return redirect('user_info')
+            else:
+                print(password_form.errors)
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+
+    return render(request, "account/user_account_details.html", context={"user_form": user_form, "password_form": password_form})
+
+
 
 

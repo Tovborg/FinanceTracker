@@ -7,34 +7,55 @@
             <h2 class="text-2xl font-semibold">Personal Information</h2>
             <p class="text-gray-600">Use a permanent address where you can receive mail.</p>
         </div>
-        <form method="post" class="space-y-6">
+        <form method="post" action="{% url 'user_info' %}" class="space-y-6">
             {% csrf_token %}
+            {% if user_form.errors %}
+            <div class="text-warning">
+                <ul>
+                    {% for field in user_form %}
+                        {% for error in field.errors %}
+                            <li class="text-warning">{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in user_form.non_field_errors %}
+                        <li class="text-warning">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% for message in messages %}
+                {% if 'user_profile' in message.tags %}
+                    <div class="mb-4">
+                        <div class="text-accent {{ message.tags }}">{{ message }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
             <div class="col-span-2">
-                <label for="first-name" class="block text-sm font-medium text-gray-700">First Name</label>
+                <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
                 <div class="mt-2">
-                    <input id="first-name" name="first-name" type="text" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input id="first_name" name="first_name" type="text" placeholder="{{ user.first_name }}" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="col-span-2">
-                <label for="last-name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
                 <div class="mt-2">
-                    <input id="last-name" name="last-name" type="text" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input id="last_name" placeholder="{{ user.last_name }}" name="last_name" type="text" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="col-span-2">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                 <div class="mt-2">
-                    <input id="email" name="email" type="email" autocomplete="email" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input id="email" name="email" type="email" placeholder="{{ user.email }}" autocomplete="email" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="col-span-2">
                 <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
                 <div class="mt-2">
-                    <input id="username" name="username" type="text" autocomplete="username" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <input id="username" placeholder="{{ user.username }}" name="username" type="text" autocomplete="username" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="flex justify-start col-span-2">
-                <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
+                <button type="submit" name="update_user_info" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
             </div>
         </form>
     </div>
@@ -46,29 +67,27 @@
         </div>
         <form method="post" action="{% url 'user_info' %}" class="space-y-6">
             {% csrf_token %}
-            {% if form.errors %}
+            {% if password_form.errors %}
             <div class="text-warning">
                 <ul>
-                    {% for field in form %}
+                    {% for field in password_form %}
                         {% for error in field.errors %}
                             <li class="text-warning">{{ error }}</li>
                         {% endfor %}
                     {% endfor %}
-                    {% for error in form.non_field_errors %}
+                    {% for error in password_form.non_field_errors %}
                         <li class="text-warning">{{ error }}</li>
                     {% endfor %}
                 </ul>
             </div>
             {% endif %}
-            {% if messages %}
-                <div class="mb-4">
-                    {% for message in messages %}
-                        <div class="text-accent rounded-md">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            {% for message in messages %}
+                {% if 'password' in message.tags %}
+                    <div class="mb-4">
+                        <div class="text-accent {{ message.tags }}">{{ message }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
             <div class="col-span-2">
                 <label for="id_old_password" class="block text-sm font-medium text-gray-700">Current Password</label>
                 <div class="mt-2">
@@ -88,7 +107,7 @@
                 </div>
             </div>
             <div class="flex justify-start col-span-2">
-                <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
+                <button type="submit" name="change_password" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Save Changes</button>
             </div>
         </form>
     </div>
