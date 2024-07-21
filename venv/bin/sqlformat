@@ -1,4 +1,4 @@
-#!/Users/emiltovborg-jensen/Desktop/Finance_tracker/venv/bin/python
+#!/home/django/FinanceTracker/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
