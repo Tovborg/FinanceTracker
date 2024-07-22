@@ -1,5 +1,4 @@
-<!-- ====== Error 404 Section Start -->
-<section class="relative z-10 h-full bg-primary py-[120px]">
+<section id="no_accounts_section" class="relative z-10 h-full bg-primary py-[120px]">
    <div class="container mx-auto">
       <div class="-mx-4 flex">
          <div class="w-full px-4">
@@ -46,4 +45,9 @@
          ></div>
    </div>
 </section>
-<!-- ====== Error 404 Section End -->
+<script>
+    document.querySelector('#menuToggle').addEventListener('click', () => {
+        let no_accounts_section = document.getElementById('no_accounts_section');
+        no_accounts_section.classList.toggle('relative')
+    })
+</script>

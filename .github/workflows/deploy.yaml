@@ -28,13 +28,13 @@ jobs:
           REPO_URL: ${{ secrets.REPO_URL }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'EOF'
-            cd $APP_PATH
+            cd /home/django
             rm -rf FinanceTracker
             git clone https://github.com/Tovborg/FinanceTracker.git
-            cd FinanceTracker
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install -r requirements.txt
+            cd /home/django/FinanceTracker
+            python3 -m venv /home/django/FinanceTracker/venv
+            source /home/django/FinanceTracker/venv/bin/activate
+            pip install -r /home/django/FinanceTracker/requirements.txt
             sudo systemctl restart gunicorn
             sudo systemctl restart nginx
           EOF
