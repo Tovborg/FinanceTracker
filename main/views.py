@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from main.forms import RegistrationForm, CreateAccountForm, NewTransactionForm, UserUpdateForm
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from main.models import Account, Transaction
@@ -10,9 +11,20 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
 from django.contrib import messages
+from django.core.mail import send_mail
 
 
 # Use @login_required decorator to ensure only authenticated users can access the view
+# def test_mail(request):
+#     if request.method == 'POST':
+#         send_mail(
+#             'Subject here',
+#             'Here is the message.',
+#             'emiltovborg11@gmail.com',
+#             ['emil@tovborg-jensen.dk'],
+#             fail_silently=False,
+#         )
+#     return render(request, 'test_mail.html')
 
 @login_required
 def index(request):

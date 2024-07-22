@@ -21,9 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-env = environ.Env()
 
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# SECURITY WARNING: Always change this to False in production
+developing_locally = False
+
+env = environ.Env()
+if developing_locally:
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+else:
+    environ.Env.read_env('/root/.digitalocean_passwords')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DJANGO_DEBUG', default=True)
@@ -64,6 +70,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 if DEBUG:
     MIDDLEWARE.append('django_browser_reload.middleware.BrowserReloadMiddleware')
