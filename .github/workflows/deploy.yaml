@@ -29,10 +29,9 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'EOF'
             cd $APP_PATH
-            cd ..
-            rm -rf /home/django/FinanceTracker
-            git clone $REPO_URL
-            cd /home/django/FinanceTracker
+            rm -rf FinanceTracker
+            git clone https://github.com/Tovborg/FinanceTracker.git
+            cd FinanceTracker
             python3 -m venv venv
             source venv/bin/activate
             pip install -r requirements.txt
