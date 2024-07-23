@@ -12,19 +12,22 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
 from django.contrib import messages
 from django.core.mail import send_mail
+import requests
+from bs4 import BeautifulSoup
 
+def get_payday_info():
+    url = "https://xn--lnningsdag-0cb.dk/"
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an error for bad status codes
 
-# Use @login_required decorator to ensure only authenticated users can access the view
-# def test_mail(request):
-#     if request.method == 'POST':
-#         send_mail(
-#             'Subject here',
-#             'Here is the message.',
-#             'emiltovborg11@gmail.com',
-#             ['emil@tovborg-jensen.dk'],
-#             fail_silently=False,
-#         )
-#     return render(request, 'test_mail.html')
+    soup = BeautifulSoup(response.content, 'html.parser')
+    payday_span = soup.find('span', id='when')
+
+    if payday_span:
+        # only extract the number
+        return payday_span.text.split()[1]
+    else:
+        return "Not available"
 
 @login_required
 def index(request):
@@ -32,6 +35,7 @@ def index(request):
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
     current_date = datetime.date.today()
+    payday = get_payday_info()
     total_expenses = 0
     total_income = 0
     for account in accounts:
@@ -53,7 +57,8 @@ def index(request):
                "no_accounts": no_accounts,
                'total_expenses': total_expenses,
                'total_income': total_income,
-               'current_date': current_date}
+               'current_date': current_date,
+               'payday': payday}
 
     if favorites_count == 0:
         print('No favorites')
