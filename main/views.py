@@ -342,6 +342,11 @@ def user_info(request):
 
     return render(request, "account/user_account_details.html", context={"user_form": user_form, "password_form": password_form})
 
-
+@require_POST
+@login_required
+def delete_user(request):
+    user = request.user
+    user.delete()
+    return redirect('login')
 
 
