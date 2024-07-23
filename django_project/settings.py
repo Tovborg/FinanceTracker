@@ -23,13 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: Always change this to False in production
-developing_locally = False
-
 env = environ.Env()
-if developing_locally:
-    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-else:
-    environ.Env.read_env('/root/.digitalocean_passwords')
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DJANGO_DEBUG', default=True)

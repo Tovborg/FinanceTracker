@@ -24,17 +24,32 @@ jobs:
         env:
           USER: ${{ secrets.USER }}
           HOST: ${{ secrets.HOST }}
-          APP_PATH: ${{ secrets.APP_PATH }}
-          REPO_URL: ${{ secrets.REPO_URL }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'EOF'
             cd /home/django
             rm -rf FinanceTracker
             git clone https://github.com/Tovborg/FinanceTracker.git
             cd /home/django/FinanceTracker
-            python3 -m venv /home/django/FinanceTracker/venv
-            source /home/django/FinanceTracker/venv/bin/activate
-            pip install -r /home/django/FinanceTracker/requirements.txt
+            
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install -r requirements.txt
+          
+            cat <<EOT > .env
+            DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
+            DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+            EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+            EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+            EOT
+          
+            source venv/bin/activate
+            python manage.py migrate
+            python manage.py collectstatic --noinput
+          
             sudo systemctl restart gunicorn
-            sudo systemctl restart nginx
+            sudo nginx -t && sudo systemctl restart nginx
           EOF
