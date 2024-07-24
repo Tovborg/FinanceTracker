@@ -90,20 +90,29 @@
             {% endfor %}
             <div class="col-span-2">
                 <label for="id_old_password" class="block text-sm font-medium text-gray-700">Current Password</label>
-                <div class="mt-2">
-                    <input id="id_old_password" required name="old_password" type="password" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <div class="relative w-full mt-2">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                          <ion-icon id="visibility-toggle1" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+                        </div>
+                        <input id="id_old_password" required name="old_password" type="password" autocomplete="given-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="col-span-2">
                 <label for="id_new_password1" class="block text-sm font-medium text-gray-700">New Password</label>
-                <div class="mt-2">
+                <div class="relative w-full mt-2">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                          <ion-icon id="visibility-toggle2" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+                        </div>
                     <input id="id_new_password1" required name="new_password1" type="password" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="col-span-2">
                 <label for="id_new_password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                <div class="mt-2">
-                    <input id="id_new_password2" required name="new_password2" type="password" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <div class="relative w-full mt-2">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                          <ion-icon id="visibility-toggle3" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+                        </div>
+                        <input id="id_new_password2" required name="new_password2" type="password" autocomplete="family-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
             </div>
             <div class="flex justify-start col-span-2">
@@ -165,5 +174,39 @@
             modal.classList.add('hidden');
         });
 
+        passwordToggle1 = document.getElementById('visibility-toggle1');
+        passwordToggle2 = document.getElementById('visibility-toggle2');
+        passwordToggle3 = document.getElementById('visibility-toggle3');
+        passwordInput1 = document.getElementById('id_old_password');
+        passwordInput2 = document.getElementById('id_new_password1');
+        passwordInput3 = document.getElementById('id_new_password2');
+
+        passwordToggle1.addEventListener('click', () => {
+            if (passwordInput1.type === 'password') {
+                passwordInput1.type = 'text';
+                passwordToggle1.name = 'eye-outline';
+            } else {
+                passwordInput1.type = 'password';
+                passwordToggle1.name = 'eye-off-outline';
+            }
+        });
+        passwordToggle2.addEventListener('click', () => {
+            if (passwordInput2.type === 'password') {
+                passwordInput2.type = 'text';
+                passwordToggle2.name = 'eye-outline';
+            } else {
+                passwordInput2.type = 'password';
+                passwordToggle2.name = 'eye-off-outline';
+            }
+        });
+        passwordToggle3.addEventListener('click', () => {
+            if (passwordInput3.type === 'password') {
+                passwordInput3.type = 'text';
+                passwordToggle3.name = 'eye-outline';
+            } else {
+                passwordInput3.type = 'password';
+                passwordToggle3.name = 'eye-off-outline';
+            }
+        });
     </script>
 {% endblock %}

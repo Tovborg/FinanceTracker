@@ -52,14 +52,20 @@
                 </div>
                 <div class="mt-3">
                     <label for="id_password1" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-                    <div class="mt-2">
-                        <input type="password" name="password1" autocomplete="new-password" required="" aria-describedby="id_password1_helptext" id="id_password1" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                          <ion-icon id="visibility-toggle1" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+                        </div>
+                        <input id="id_password1" name="password1" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
                     </div>
                 </div>
                 <div class="mt-3">
                     <label for="id_password2" class="block text-sm font-medium leading-6 text-gray-900">Confirm Password</label>
-                    <div class="mt-2">
-                        <input type="password" name="password2" autocomplete="new-password" required="" aria-describedby="id_password2_helptext" id="id_password2" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                          <ion-icon id="visibility-toggle2" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+                        </div>
+                        <input id="id_password2" name="password2" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
                     </div>
                 </div>
                 <div class="mt-3">
@@ -72,4 +78,30 @@
     </p>
         </div>
     </div>
+    <script>
+        const visibilityToggle1 = document.getElementById('visibility-toggle1');
+        const passwordInput1 = document.getElementById('id_password1');
+        visibilityToggle1.addEventListener('click', () => {
+            if (passwordInput1.type === 'password') {
+                passwordInput1.type = 'text';
+                visibilityToggle1.name = 'eye-outline';
+            } else {
+                passwordInput1.type = 'password';
+                visibilityToggle1.name = 'eye-off-outline';
+            }
+        });
+
+        const visibilityToggle2 = document.getElementById('visibility-toggle2');
+        const passwordInput2 = document.getElementById('id_password2');
+        visibilityToggle2.addEventListener('click', () => {
+            if (passwordInput2.type === 'password') {
+                passwordInput2.type = 'text';
+                visibilityToggle2.name = 'eye-outline';
+            } else {
+                passwordInput2.type = 'password';
+                visibilityToggle2.name = 'eye-off-outline';
+            }
+        });
+
+    </script>
 {% endblock %}

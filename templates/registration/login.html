@@ -34,9 +34,13 @@
             <a href="{% url 'password_reset' %}" class="font-light text-registration_text hover:text-button_hover">Forgot password?</a>
           </div>
         </div>
-        <div class="mt-2">
-          <input id="id_password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+        <div class="relative w-full mt-2">
+            <div class="absolute inset-y-0 right-0 flex items-center px-2">
+              <ion-icon id="visibility-toggle" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+            </div>
+            <input id="id_password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
         </div>
+
       </div>
     <div class="mt-3">
                     <button type="submit" class="flex w-full justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Sign in</button>
@@ -50,4 +54,17 @@
     </p>
   </div>
 </div>
+    <script>
+        const visibilityToggle = document.getElementById('visibility-toggle');
+        const passwordInput = document.getElementById('id_password');
+        visibilityToggle.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                visibilityToggle.name = 'eye-outline';
+            } else {
+                passwordInput.type = 'password';
+                visibilityToggle.name = 'eye-off-outline';
+            }
+        });
+    </script>
 {% endblock %}
