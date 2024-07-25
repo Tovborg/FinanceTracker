@@ -364,4 +364,8 @@ def delete_user(request):
     user.delete()
     return redirect('login')
 
+@login_required
+def paychecks(request):
+    return render(request, "paychecks.html")
+
 

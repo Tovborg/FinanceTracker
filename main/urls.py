@@ -24,4 +24,5 @@ urlpatterns = [
     path('transaction/<int:pk>/', transaction_detail, name='transaction_detail'),
     path('transaction/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
     path('user_info/', user_info, name='user_info'),
+    path('paychecks/', paychecks, name='paychecks'),
 ]
