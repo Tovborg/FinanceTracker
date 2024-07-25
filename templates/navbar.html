@@ -5,7 +5,7 @@
             {% if user.is_authenticated %}
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'index' %}">Dashboard</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account' %}">Accounts</a>
-            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Transactions</a>
+            <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="#">Paychecks</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'user_info' %}">Settings</a>
             <form method="post" action="{% url 'logout' %}" class="hover:text-gray-400">
                 {% csrf_token %}

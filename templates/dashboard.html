@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container mx-auto mt-4">
@@ -16,8 +17,13 @@
                     <p class="text-2xl text-center md:text-start lg:text-start">DKK {{ total_balance }}</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
+                    {% if payday|is_number %}
                     <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday in</h2>
                     <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }} days</p>
+                    {% else %}
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday on</h2>
+                    <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }}</p>
+                    {% endif %}
                 </div>
                 <div class="bg-cards p-4 shadow">
                     <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income ({{ current_date|date:"F" }})</h2>

@@ -29,6 +29,19 @@ def get_payday_info():
     else:
         return "Not available"
 
+def translate_payday_info(weekday):
+    weekdays = {
+        'mandag': 'Monday',
+        'tirsdag': 'Tuesday',
+        'onsdag': 'Wednesday',
+        'torsdag': 'Thursday',
+        'fredag': 'Friday',
+        'lørdag': 'Saturday',
+        'søndag': 'Sunday'
+    }
+    return weekdays[weekday]
+
+
 @login_required
 def index(request):
     accounts = Account.objects.filter(user=request.user)
@@ -36,6 +49,8 @@ def index(request):
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
     current_date = datetime.date.today()
     payday = get_payday_info()
+    if type(payday) is str:
+        payday = translate_payday_info(str(payday))
     total_expenses = 0
     total_income = 0
     for account in accounts:
