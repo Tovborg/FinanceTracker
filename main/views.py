@@ -1,5 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from main.forms import RegistrationForm, CreateAccountForm, NewTransactionForm, UserUpdateForm
+from main.forms import (RegistrationForm,
+                        CreateAccountForm,
+                        NewTransactionForm,
+                        UserUpdateForm,
+                        AddPaycheckForm)
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
@@ -49,6 +53,10 @@ def index(request):
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
     current_date = datetime.date.today()
     payday = get_payday_info()
+    try:
+        payday = int(payday)
+    except ValueError:
+        pass
     if type(payday) is str:
         payday = translate_payday_info(str(payday))
     total_expenses = 0
@@ -366,6 +374,10 @@ def delete_user(request):
 
 @login_required
 def paychecks(request):
-    return render(request, "paychecks.html")
+    return render(request, "paychecks/paychecks.html")
+
+@login_required
+def add_new_paycheck(request):
+    return render(request, "paychecks/add_paycheck.html", context={"form": AddPaycheckForm()})
 
 

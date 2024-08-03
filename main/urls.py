@@ -25,4 +25,5 @@ urlpatterns = [
     path('transaction/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
     path('user_info/', user_info, name='user_info'),
     path('paychecks/', paychecks, name='paychecks'),
+    path('add_paycheck/', add_new_paycheck, name='add_paycheck'),
 ]

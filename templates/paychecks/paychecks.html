@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container mx-auto mt-10">
+        <h1 class="text-5xl text-black font-dansketext text-center mb-7">Your Paychecks</h1>
+        <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+        <div class="flex justify-center items-center">
+            <a href="{% url 'add_paycheck' %}"><button class="select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full" type="submit">Add Paycheck</button></a>
+        </div>
+        <div class="flex mobile-only:h-full items-center justify-center mt-10 mobile-only:mt-0">
+            <div class="bg-account_info mobile-only:h-full rounded-lg w-[70%] mobile-only:w-[100%] shadow-lg p-6">
+                <div class="overflow-y-auto">
+                    <ul class="text-white">
+                        <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Paycheck for January</span></a>
+                                <span class="block text-sm text-gray-500">Employer: Salling Group A/S</span>
+                                <span class="text-sm text-gray-500 mobile-only:!hidden">Pay Period: 2024-06-01 to 2024-05-31</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="block text-sm text-gray-500">DKK 5000</span>
+                                <span class="text-sm text-gray-500 mobile-only:!hidden">Status: Paid</span>
+                            </div>
+                        </li>
+                        <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                                                <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                                                <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                        <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                        <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                                                <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                                                <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="#"><span class="block font-semibold text-gray-900">Deposit</span></a>
+                                <span class="block text-sm text-gray-500">2024-07-27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-accent">DKK 1000</span>
+                                <span class="text-gray-400">DKK 5000</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from main.models import Account
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+
+
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=50, required=True)
@@ -11,6 +13,7 @@ class RegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
+
 
 class CreateAccountForm(forms.Form):
     ACCOUNT_TYPES = (
@@ -26,6 +29,7 @@ class CreateAccountForm(forms.Form):
     account_number = forms.CharField(max_length=50, required=False)
     # field for uploading a file
     description = forms.CharField(widget=forms.Textarea, required=False)
+
 
 class NewTransactionForm(forms.Form):
     TRANSACTION_TYPES = (
@@ -93,3 +97,23 @@ class UserUpdateForm(forms.ModelForm):
         if not cleaned_data.get('username'):
             cleaned_data['username'] = self.instance.username
         return cleaned_data
+
+
+class AddPaycheckForm(forms.Form):
+    amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+    pay_date = forms.DateField(widget=forms.SelectDateWidget, required=True)
+    start_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
+    end_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
+    employer = forms.CharField(max_length=50, required=True)
+    description = forms.CharField(widget=forms.Textarea, required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_pay_period = cleaned_data.get('start_pay_period')
+        end_pay_period = cleaned_data.get('end_pay_period')
+
+        if start_pay_period and end_pay_period and start_pay_period > end_pay_period:
+            raise ValidationError("End of pay period must be after start of pay period.")
+
+        return cleaned_data
+
