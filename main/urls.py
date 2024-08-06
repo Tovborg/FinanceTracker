@@ -26,4 +26,6 @@ urlpatterns = [
     path('user_info/', user_info, name='user_info'),
     path('paychecks/', paychecks, name='paychecks'),
     path('add_paycheck/', add_new_paycheck, name='add_paycheck'),
+    path('paycheck/<int:pk>/', paycheck_info, name='paycheck_info'),
+    path('paycheck/delete/<int:pk>/', delete_paycheck, name='delete_paycheck'),
 ]

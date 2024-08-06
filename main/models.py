@@ -90,6 +90,7 @@ class Paychecks(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payout_account = models.ForeignKey(Account, on_delete=models.CASCADE, default=1)
     pay_date = models.DateField(default=datetime.date.today)
     pay_period_start = models.DateField(default=datetime.date.today)
     pay_period_end = models.DateField(default=datetime.date.today)

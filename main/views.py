@@ -376,7 +376,7 @@ def delete_user(request):
 
 @login_required
 def paychecks(request):
-    user_paychecks = Paychecks.objects.filter(user=request.user).order_by('pay_date')
+    user_paychecks = Paychecks.objects.filter(user=request.user).order_by('-pay_date')
     paginator = Paginator(user_paychecks, 5)  # Show 10 paychecks per page
 
     page_number = request.GET.get('page')
@@ -388,7 +388,7 @@ def paychecks(request):
 @login_required
 def add_new_paycheck(request):
     if request.method == "POST":
-        form = AddPaycheckForm(request.POST)
+        form = AddPaycheckForm(request.POST, user=request.user)
         if form.is_valid():
             print(form.errors)
             print(form.cleaned_data)
@@ -396,6 +396,7 @@ def add_new_paycheck(request):
             amount = form.cleaned_data['amount']
             pay_date = form.cleaned_data['pay_date']
             start_pay_period = form.cleaned_data['start_pay_period']
+            payout_account = form.cleaned_data['payout_account']
             end_pay_period = form.cleaned_data['end_pay_period']
             employer = form.cleaned_data['employer']
             description = form.cleaned_data['description']
@@ -409,6 +410,7 @@ def add_new_paycheck(request):
                 pay_period_end=end_pay_period,
                 employer=employer,
                 description=description,
+                payout_account=payout_account,
                 status=status
             )
             new_paycheck.save()
@@ -416,6 +418,19 @@ def add_new_paycheck(request):
         else:
             print(form.errors)
     else:
-        form = AddPaycheckForm()
-    return render(request, "paychecks/add_paycheck.html", {"form": form})
+        form = AddPaycheckForm(user=request.user)
+    return render(request, "paychecks/add_paycheck.html", {"form": form, "accounts": Account.objects.filter(user=request.user)})
 
+
+@login_required()
+def paycheck_info(request, pk):
+    paycheck = get_object_or_404(Paychecks, pk=pk)
+    return render(request, "paychecks/paycheck_info.html", context={"paycheck": paycheck})
+
+
+@login_required
+@require_POST
+def delete_paycheck(request, pk):
+    paycheck = get_object_or_404(Paychecks, pk=pk)
+    paycheck.delete()
+    return redirect('paychecks')

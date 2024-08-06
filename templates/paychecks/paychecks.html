@@ -15,7 +15,7 @@
                         {% for paycheck in page_obj %}
                         <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                             <div>
-                                <a href="#"><span class="block font-semibold text-gray-900">Paycheck for {{ paycheck.pay_date|date:"F" }}</span></a>
+                                <a href="{% url 'paycheck_info' paycheck.pk %}"><span class="block font-semibold text-gray-900">Paycheck for {{ paycheck.pay_date|date:"F" }}</span></a>
                                 <span class="block text-sm text-gray-500">Employer: {{ paycheck.employer }}</span>
                                 <span class="text-sm text-gray-500 mobile-only:!hidden">Pay Period: {{ paycheck.pay_period_start }} to {{ paycheck.pay_period_end }}</span>
                             </div>

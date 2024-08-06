@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from main.models import Account
+from main.models import Account, Paychecks
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
@@ -105,12 +105,23 @@ class AddPaycheckForm(forms.Form):
         ('paid', 'Paid'),
     )
     amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+    payout_account = forms.ModelChoiceField(queryset=Account.objects.none(), required=True)
     pay_date = forms.DateField(widget=forms.SelectDateWidget, required=True)
     start_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
     end_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
     employer = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea, required=False)
     status = forms.ChoiceField(choices=PAYCHECK_STATUS, required=True)
+
+    class Meta:
+        model = Paychecks
+        fields = ['amount', 'payout_account', 'pay_date', 'start_pay_period', 'end_pay_period', 'employer', 'description', 'status']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['payout_account'].queryset = Account.objects.filter(user=user)
 
     def clean(self):
         cleaned_data = super().clean()
