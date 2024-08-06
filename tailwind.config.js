@@ -40,6 +40,15 @@ module.exports = {
       require('@tailwindcss/forms'),
       plugin(function ({ addVariant }) {
         addVariant('mobile-only', "@media screen and (max-width: theme('screens.sm'))"); // instead of hard-coded 640px use sm breakpoint value from config. Or anything
-      })
+      }),
+      // Add md breakpoint
+      plugin(function ({ addVariant }) {
+          addVariant('md', "@media screen and (min-width: theme('screens.md'))");
+      }),
+        // Add lg breakpoint
+      plugin(function ({ addVariant }) {
+          addVariant('lg', "@media screen and (min-width: theme('screens.lg'))");
+      }),
+
   ],
 }

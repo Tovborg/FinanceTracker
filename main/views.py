@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from main.models import Account, Transaction
+from main.models import Account, Transaction, Paychecks
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
@@ -365,6 +365,7 @@ def user_info(request):
 
     return render(request, "account/user_account_details.html", context={"user_form": user_form, "password_form": password_form})
 
+
 @require_POST
 @login_required
 def delete_user(request):
@@ -372,12 +373,49 @@ def delete_user(request):
     user.delete()
     return redirect('login')
 
+
 @login_required
 def paychecks(request):
-    return render(request, "paychecks/paychecks.html")
+    user_paychecks = Paychecks.objects.filter(user=request.user).order_by('pay_date')
+    paginator = Paginator(user_paychecks, 5)  # Show 10 paychecks per page
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'page_obj': page_obj}
+    return render(request, 'paychecks/paychecks.html', context)
+
 
 @login_required
 def add_new_paycheck(request):
-    return render(request, "paychecks/add_paycheck.html", context={"form": AddPaycheckForm()})
+    if request.method == "POST":
+        form = AddPaycheckForm(request.POST)
+        if form.is_valid():
+            print(form.errors)
+            print(form.cleaned_data)
+            # Create a new paycheck
+            amount = form.cleaned_data['amount']
+            pay_date = form.cleaned_data['pay_date']
+            start_pay_period = form.cleaned_data['start_pay_period']
+            end_pay_period = form.cleaned_data['end_pay_period']
+            employer = form.cleaned_data['employer']
+            description = form.cleaned_data['description']
+            status = form.cleaned_data['status']
 
+            new_paycheck = Paychecks(
+                user=request.user,
+                amount=amount,
+                pay_date=pay_date,
+                pay_period_start=start_pay_period,
+                pay_period_end=end_pay_period,
+                employer=employer,
+                description=description,
+                status=status
+            )
+            new_paycheck.save()
+            return redirect('paychecks')
+        else:
+            print(form.errors)
+    else:
+        form = AddPaycheckForm()
+    return render(request, "paychecks/add_paycheck.html", {"form": form})
 

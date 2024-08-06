@@ -100,12 +100,17 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class AddPaycheckForm(forms.Form):
+    PAYCHECK_STATUS = (
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+    )
     amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
     pay_date = forms.DateField(widget=forms.SelectDateWidget, required=True)
     start_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
     end_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
     employer = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea, required=False)
+    status = forms.ChoiceField(choices=PAYCHECK_STATUS, required=True)
 
     def clean(self):
         cleaned_data = super().clean()

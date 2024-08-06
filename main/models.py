@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 import datetime
 # Create your models here.
+
 class Account(models.Model):
     ACCOUNT_TYPES = (
         ('savings', 'Savings'),
@@ -18,6 +19,7 @@ class Account(models.Model):
     description = models.TextField(blank=True, null=True, max_length=255)
     isFavorite = models.BooleanField(default=False)
     accumulated_interest = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     def __str__(self):
         return f"{self.name} ({self.account_type})"
 
@@ -62,6 +64,7 @@ class Account(models.Model):
 
         return total_income
 
+
 class Transaction(models.Model):
     TRANSACTION_TYPES = (
         ('deposit', 'Deposit'),
@@ -79,3 +82,20 @@ class Transaction(models.Model):
     def __str__(self):
         return f"{self.get_transaction_type_display()} - {self.amount} kr. on {self.date}"
 
+
+class Paychecks(models.Model):
+    PAYCHECK_STATUS = (
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    pay_date = models.DateField(default=datetime.date.today)
+    pay_period_start = models.DateField(default=datetime.date.today)
+    pay_period_end = models.DateField(default=datetime.date.today)
+    employer = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, choices=PAYCHECK_STATUS, default='pending')
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.employer} - {self.amount} kr. on {self.pay_date}"
