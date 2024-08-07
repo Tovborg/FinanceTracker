@@ -44,6 +44,8 @@ jobs:
             echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
             echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
             echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+            echo "AZURE_KEY=${{ secret.AZURE_KEY }}" >> .env
+            echo "AZURE_ENDPOINT=${{ secret.AZURE_ENDPOINT }}" >> .env
                
             source venv/bin/activate
             python manage.py migrate

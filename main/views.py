@@ -3,7 +3,8 @@ from main.forms import (RegistrationForm,
                         CreateAccountForm,
                         NewTransactionForm,
                         UserUpdateForm,
-                        AddPaycheckForm)
+                        AddPaycheckForm,
+                        ReceiptUploadForm)
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
@@ -18,6 +19,13 @@ from django.contrib import messages
 from django.core.mail import send_mail
 import requests
 from bs4 import BeautifulSoup
+from .services.azure_service import AzureDocumentIntelligenceService
+from .utils.utils import compress_image
+from io import BytesIO
+import tempfile
+import os
+
+
 
 def get_payday_info():
     url = "https://xn--lnningsdag-0cb.dk/"
@@ -432,3 +440,40 @@ def delete_paycheck(request, pk):
     paycheck = get_object_or_404(Paychecks, pk=pk)
     paycheck.delete()
     return redirect('paychecks')
+
+
+@login_required
+def analyze_receipt_view(request):
+    if request.method == "POST" and 'receipt_image' in request.FILES:
+        form = ReceiptUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            receipt_image = form.cleaned_data['receipt_image']
+            try:
+                image_bytes = BytesIO()
+                for chunk in receipt_image.chunks():
+                    image_bytes.write(chunk)
+                image_bytes.seek(0)
+
+                # Compress the image if needed
+                compressed_image = compress_image(image_bytes)
+
+                # Save the compressed image to a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+                    temp_file.write(compressed_image.getvalue())
+                    temp_file_path = temp_file.name
+
+                service = AzureDocumentIntelligenceService()
+                analysis_results = service.analyze_receipts(temp_file_path)
+                print(analysis_results)
+
+                # Delete the temporary file
+                os.remove(temp_file_path)
+
+                return redirect('analyze_receipt')
+
+            except ValueError as e:
+                form.add_error('receipt_image', str(e))
+    else:
+        form = ReceiptUploadForm()
+
+    return render(request, 'upload_receipt.html', {'form': form})

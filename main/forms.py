@@ -148,3 +148,6 @@ class AddPaycheckForm(forms.Form):
 
         return cleaned_data
 
+
+class ReceiptUploadForm(forms.Form):
+    receipt_image = forms.ImageField()
