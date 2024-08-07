@@ -12,7 +12,7 @@ class Account(models.Model):
         ('Other', 'Other')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=20)
     account_type = models.CharField(max_length=50, choices=ACCOUNT_TYPES)
     account_number = models.CharField(max_length=50, blank=True, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=0)

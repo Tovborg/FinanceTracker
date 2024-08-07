@@ -2,15 +2,34 @@
 {% load static %}
 {% block content %}
 <div class="flex items-center justify-center mt-10">
-    <div class="bg-cards rounded-lg h-full w-[80%] md:w-[70%] lg:w-[50%] shadow-lg p-6">
-        <h1 class="text-3xl font-dansketext mb-4 text-center">Add New Paycheck</h1>
+    <div class="bg-cards rounded-lg h-full mb-8 w-[80%] md:w-[70%] lg:w-[50%] shadow-lg p-6">
+        <div class="flex items-center justify-center mb-4 relative">
+            <a href="{% url 'paychecks' %}" class="absolute mobile-only:!hidden left-0">
+                <ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon>
+            </a>
+            <h1 class="text-3xl font-dansketext text-center">Add New Paycheck</h1>
+        </div>
         <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
         <form method="post" action="#">
             {% csrf_token %}
+            {% if form.errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Oops!</strong>
+                    <span class="block sm:inline">Something went wrong. Please look over these errors.</span>
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <li class="font-dansketext text-warning">{{ error }}</li>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endif %}
             <div class="space-y-12">
                 <div class="pb-12">
                     <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.amount }}</span>
+                            {% endif %}
                             <label for="{{ form.amount.id_for_label }}" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Paycheck Amount
                             </label>
@@ -21,6 +40,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.payout_account }}</span>
+                            {% endif %}
                             <label for="{{ form.payout_account.id_for_label }}" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Payout Account
                             </label>
@@ -37,6 +59,9 @@
 
                         <!-- Pay Date Section -->
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.pay_date }}</span>
+                            {% endif %}
                             <label for="{{ form.pay_date.id_for_label }}" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Pay Date
                             </label>
@@ -114,6 +139,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.start_pay_period }}</span>
+                            {% endif %}
                             <label for="id_start_pay_period_month" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Pay Period Start
                             </label>
@@ -191,6 +219,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.end_pay_period }}</span>
+                            {% endif %}
                             <label for="id_end_pay_period_month" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Pay Period End
                             </label>
@@ -268,6 +299,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.employer }}</span>
+                            {% endif %}
                             <label for="id_employer" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Employer
                             </label>
@@ -278,6 +312,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.description }}</span>
+                            {% endif %}
                             <label for="id_description" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Remarks
                             </label>
@@ -288,6 +325,9 @@
                             </div>
                         </div>
                         <div class="sm:col-span-4">
+                            {% if form.errors %}
+                                <span class="font-dansketext text-warning">{{ form.errors.status }}</span>
+                            {% endif %}
                             <label for="id_status" class="block text-sm font-dansketext leading-6 text-gray-900">
                                 Paycheck Status
                             </label>
@@ -302,9 +342,15 @@
                         </div>
 
                         <!-- End of Pay Date Section -->
+                        <div class="sm:col-span-4">
+                            <div class="mt-3 flex justify-start">
+                                <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Add Paycheck</button>
+                                 <a href="{% url 'account' %}"><button type="button" class="flex w-auto justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Go Back</button></a>
 
-                    </div>
-                    <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Add Paycheck</button>
+
+                            </div>
+                        </div>
+
                 </div>
             </div>
         </form>

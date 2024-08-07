@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from main.models import Account, Paychecks
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-
+import datetime
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -23,12 +23,20 @@ class CreateAccountForm(forms.Form):
         ('Retirement', 'Retirement'),
         ('other', 'Other')
     )
-    account_name = forms.CharField(max_length=50)
+    account_name = forms.CharField(max_length=20)
     account_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
     account_type = forms.ChoiceField(choices=ACCOUNT_TYPES)
     account_number = forms.CharField(max_length=50, required=False)
     # field for uploading a file
     description = forms.CharField(widget=forms.Textarea, required=False)
+
+    def clean_account_name(self):
+        account_name = self.cleaned_data.get('account_name')
+        if Account.objects.filter(name=account_name).exists():
+            raise ValidationError("An account with that name already exists.")
+        if len(account_name) > 20:
+            raise ValidationError("Account name must be 20 characters or less.")
+        return account_name
 
 
 class NewTransactionForm(forms.Form):
@@ -78,6 +86,8 @@ class UserUpdateForm(forms.ModelForm):
                 validate_email(email)
             except ValidationError:
                 raise ValidationError("Enter a valid email address.")
+        if email and User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("This email is already associated with an account.")
         return email
 
     def clean_username(self):
@@ -127,9 +137,14 @@ class AddPaycheckForm(forms.Form):
         cleaned_data = super().clean()
         start_pay_period = cleaned_data.get('start_pay_period')
         end_pay_period = cleaned_data.get('end_pay_period')
+        status = cleaned_data.get('status')
+        payout_date = cleaned_data.get('pay_date')
 
         if start_pay_period and end_pay_period and start_pay_period > end_pay_period:
             raise ValidationError("End of pay period must be after start of pay period.")
+
+        if status == 'pending' and payout_date < datetime.date.today():
+            raise ValidationError("Pay date must be in the future for pending paychecks.")
 
         return cleaned_data
 

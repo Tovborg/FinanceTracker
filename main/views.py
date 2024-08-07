@@ -327,8 +327,6 @@ def user_info(request):
     user_form = None
     password_form = None
 
-
-
     if request.method == 'POST':
         if 'update_user_info' in request.POST:
             user_form = UserUpdateForm(request.POST, instance=request.user)
