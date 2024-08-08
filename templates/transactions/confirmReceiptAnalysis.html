@@ -2,75 +2,84 @@
 {% block content %}
 
         {% if analysis_results %}
-        <div class="flex justify-center mt-10 mobile-only:h-full mobile-only:mt-0">
-            <div class="bg-cards rounded-lg h-[100%] mb-3 sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
-                <div id="action_icons_info" class="flex flex-row justify-between mt-2">
-                    <div class="flex justify-start">
-                        <a href="{% url 'new_transaction_choice' account.name %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
+        <form method="post" action="{% url 'confirmReceiptAnalysis' account.name %}">
+            {% csrf_token %}
+            <div class="flex justify-center mt-10 mobile-only:mt-0">
+                <div class="bg-cards rounded-lg h-[100%] mb-3 sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
+                    <div id="action_icons_info" class="flex flex-row justify-between mt-2">
+                        <div class="flex justify-start">
+                            <a href="{% url 'new_transaction_choice' account.name %}"><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
+                        </div>
+                        <div class="flex justify-end">
+                            <button id="delete_acc_btn"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></button>
+                        </div>
                     </div>
-                    <div class="flex justify-end">
-                        <button id="delete_acc_btn"><ion-icon class="text-3xl text-warning" name="trash"></ion-icon></button>
-                    </div>
-                </div>
-                <hr class="mt-6 border-gray-500" />
-                <div id="paycheck_info" class="mt-6 space-y-6">
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Account</span>
-                        <span class="font-dansketext" id="paycheck_amount">{{ account }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Merchant Name</span>
-                        <span class="font-dansketext">{{ merchant_name }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Merchant Phone Number</span>
-                        <span class="font-dansketext">{{ merchant_phone_number }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Merchant Address</span>
-                        <span id="accumulated_interest" class="font-dansketext">{{ merchant_address }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Transaction Date</span>
-                        <span class="font-dansketext" id="account_number">{{ transaction_date }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Transaction Time</span>
-                        <span class="font-dansketext" id="account_number">{{ transaction_time }}</span>
-                    </div>
-                    {% if Items %}
+                    <hr class="mt-6 border-gray-500" />
+                    <div id="paycheck_info" class="mt-6 space-y-6">
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Account</span>
+                            <span class="font-dansketext" id="paycheck_amount">{{ account }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Merchant Name</span>
+                            <span class="font-dansketext">{{ merchant_name }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Merchant Phone Number</span>
+                            <span class="font-dansketext">{{ merchant_phone_number }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Merchant Address</span>
+                            <span id="accumulated_interest" class="font-dansketext">{{ merchant_address }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Transaction Date</span>
+                            <span class="font-dansketext" id="account_number">{{ transaction_date }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Transaction Time</span>
+                            <span class="font-dansketext" id="account_number">{{ transaction_time }}</span>
+                        </div>
+                        {% if Items %}
+                            <hr class="mt-6 border-gray-500" />
+                            {% for item in Items %}
+                            <div class="flex flex-row justify-between">
+                                <span class="font-semibold">Item Description</span>
+                                <span class="font-dansketext">{{ item.Description }}</span>
+                            </div>
+                            <div class="flex flex-row justify-between">
+                                <span class="font-semibold">Item Quantity</span>
+                                <span class="font-dansketext">{{ item.Quantity }}</span>
+                            </div>
+                            <div class="flex flex-row justify-between">
+                                <span class="font-semibold">Item Price</span>
+                                <span class="font-dansketext">{{ item.TotalPrice }}</span>
+                            </div>
+                            <hr class="mt-6 border-gray-500" />
+                            {% endfor %}
+                        {% endif %}
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Subtotal</span>
+                            <span class="font-dansketext" id="account_number">{{ Subtotal }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Tax</span>
+                            <span class="font-dansketext" id="account_number">{{ tax }}</span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Total</span>
+                            <span class="font-dansketext" id="account_number">{{ total }}</span>
+                        </div>
                         <hr class="mt-6 border-gray-500" />
-                        {% for item in Items %}
-                        <div class="flex flex-row justify-between">
-                            <span class="font-semibold">Item Description</span>
-                            <span class="font-dansketext">{{ item.Description }}</span>
-                        </div>
-                        <div class="flex flex-row justify-between">
-                            <span class="font-semibold">Item Quantity</span>
-                            <span class="font-dansketext">{{ item.Quantity }}</span>
-                        </div>
-                        <div class="flex flex-row justify-between">
-                            <span class="font-semibold">Item Price</span>
-                            <span class="font-dansketext">{{ item.TotalPrice }}</span>
-                        </div>
-                        <hr class="mt-6 border-gray-500" />
-                        {% endfor %}
-                    {% endif %}
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Subtotal</span>
-                        <span class="font-dansketext" id="account_number">{{ Subtotal }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Tax</span>
-                        <span class="font-dansketext" id="account_number">{{ tax }}</span>
-                    </div>
-                    <div class="flex flex-row justify-between">
-                        <span class="font-semibold">Total</span>
-                        <span class="font-dansketext" id="account_number">{{ total }}</span>
+                        <button type="submit" id="confirm_button" style="background: limegreen !important;" class="w-full font-dansketext hover:bg-accent-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center space-x-2">
+                            <span>Confirm</span>
+                            <ion-icon class="ml-3" name="checkmark-outline"></ion-icon>
+                        </button>
+
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
         <div id="modal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div class="bg-gray-800 p-4 rounded shadow-lg mobile-only:w-[95%] sm:w-[75%] md:w-[60%] lg:w-[50%] xl:w-[35%]">
                 <div class="flex justify-end">

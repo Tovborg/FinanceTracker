@@ -526,6 +526,7 @@ def confirmReceiptAnalysis(request, account_name):
         "tip": "N/A",
         "total": "N/A",
     }
+    print(analysis_results)
     fields = analysis_results.get('fields')
     if analysis_results and isinstance(analysis_results, dict) and len(analysis_results) > 0:
         context['merchant_name'] = fields.get('MerchantName', {}).get('valueString', 'N/A')

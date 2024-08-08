@@ -71,6 +71,7 @@ class Transaction(models.Model):
         ('withdrawal', 'Withdrawal'),
         ('payment', 'Payment'),
         ('transfer', 'Transfer'),
+        ('purchase', 'Purchase'),
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=11, choices=TRANSACTION_TYPES)
@@ -79,8 +80,31 @@ class Transaction(models.Model):
     description = models.TextField(blank=True, null=True)
     balance_after = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0) # Balance after transaction
     transfer_to = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transfer_to', null=True, blank=True)
+
+    # Purchase specific fields
+    merchant_name = models.CharField(max_length=50, blank=True, null=True)
+    merchant_address = models.CharField(max_length=255, blank=True, null=True)
+    transaction_time = models.TimeField(blank=True, null=True)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     def __str__(self):
         return f"{self.get_transaction_type_display()} - {self.amount} kr. on {self.date}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if self.transaction_type == 'purchase':
+            if not self.merchant_name:
+                raise ValidationError('Merchant name is required for purchase transactions.')
+            if not self.transaction_time:
+                raise ValidationError('Transaction time is required for purchase transactions.')
+
+
+class Item(models.Model):
+    description = models.CharField(max_length=50, blank=False, null=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
+    quantity = models.IntegerField(default=1, blank=False, null=False)
+
 
 
 class Paychecks(models.Model):
