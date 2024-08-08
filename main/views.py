@@ -20,10 +20,15 @@ from django.core.mail import send_mail
 import requests
 from bs4 import BeautifulSoup
 from .services.azure_service import AzureDocumentIntelligenceService
-from .utils.utils import compress_image
+from .utils.utils import (compress_image,
+                          serialize_analysis_results,
+                          format_price,
+                          clean_and_parse_json_string)
 from io import BytesIO
 import tempfile
 import os
+import json
+from django.http import HttpResponse
 
 
 
@@ -93,15 +98,17 @@ def index(request):
 
     if favorites_count == 0:
         print('No favorites')
+        context['accounts'] = accounts
         return render(request, "dashboard.html", context=context)
     elif favorites_count < 3:
         # Fetch additional non-favorite accounts to make up the count to 3
         additional_accounts = Account.objects.filter(user=request.user, isFavorite=False)[:3 - favorites_count]
         combined_accounts = list(favorites) + list(additional_accounts)
+        context['accounts'] = combined_accounts
         return render(request, "dashboard.html", context=context)
 
     else:
-        print(favorites)
+        context['accounts'] = favorites
         return render(request, "dashboard.html", context=context)
 
 
@@ -160,7 +167,7 @@ def account_details(request, account_name):
 @login_required
 def add_account(request):
     if request.method == "POST":
-        form = CreateAccountForm(request.POST)
+        form = CreateAccountForm(request.POST, user=request.user)
         if form.is_valid():
             print(form.errors)
             print(form.cleaned_data)
@@ -182,7 +189,7 @@ def add_account(request):
             new_account.save()
             return redirect('account')
     else:
-        form = CreateAccountForm()
+        form = CreateAccountForm(user=request.user)
     return render(request, "account/add_account.html", {"form": form})
 
 @login_required
@@ -219,7 +226,7 @@ def edit_account(request, account_name, field):
 def updateFavorite(request):
     account_name = request.POST.get('account_name')
     print(request)
-    account = Account.objects.get(name=account_name)
+    account = Account.objects.get(name=account_name, user=request.user)
     account.isFavorite = not account.isFavorite
     account.save()
     return JsonResponse({'status': 'ok'})
@@ -266,7 +273,7 @@ def new_transaction(request, account_name):
             print(form.errors)
     else:
         form = NewTransactionForm(user=request.user)
-    return render(request, "new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
+    return render(request, "transactions/new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
 
 
 # Needs new logic to handle insufficient funds
@@ -295,7 +302,7 @@ def handleTransaction(transaction_type, amount, account, transfer_to, transactio
 
 def transaction_detail(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk)
-    return render(request, "transaction_detail.html", context={"transaction": transaction})
+    return render(request, "transactions/transaction_detail.html", context={"transaction": transaction})
 
 
 @login_required
@@ -443,12 +450,15 @@ def delete_paycheck(request, pk):
 
 
 @login_required
-def analyze_receipt_view(request):
+@require_POST
+def analyze_receipt_view(request, account_name):
+    print(request.FILES)
     if request.method == "POST" and 'receipt_image' in request.FILES:
         form = ReceiptUploadForm(request.POST, request.FILES)
         if form.is_valid():
             receipt_image = form.cleaned_data['receipt_image']
             try:
+
                 image_bytes = BytesIO()
                 for chunk in receipt_image.chunks():
                     image_bytes.write(chunk)
@@ -465,15 +475,80 @@ def analyze_receipt_view(request):
                 service = AzureDocumentIntelligenceService()
                 analysis_results = service.analyze_receipts(temp_file_path)
                 print(analysis_results)
-
+                request.session['analysis_results'] = serialize_analysis_results(analysis_results)
                 # Delete the temporary file
                 os.remove(temp_file_path)
 
-                return redirect('analyze_receipt')
-
+                return redirect('confirmReceiptAnalysis', account_name=account_name)
             except ValueError as e:
                 form.add_error('receipt_image', str(e))
+        else:
+            return HttpResponse('Invalid form')
     else:
         form = ReceiptUploadForm()
+        return HttpResponse('No valid image uploaded')
 
-    return render(request, 'upload_receipt.html', {'form': form})
+
+@login_required
+def transaction_import_choice(request, account_name):
+    form = ReceiptUploadForm()
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    return render(request, 'transactions/transactionImportChoice.html', context={'account': account, 'form': form})
+
+
+def confirmReceiptAnalysis(request, account_name):
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    analysis_results = request.session.get('analysis_results', None)
+
+    if analysis_results in request.session:
+        del request.session['analysis_results']
+
+    if isinstance(analysis_results, str):
+        try:
+            # Deserialize the JSON string back into a Python dictionary
+            analysis_results = json.loads(analysis_results)
+        except json.JSONDecodeError:
+            # Handle JSON decoding errors if any
+            analysis_results = None
+
+    analysis_results = analysis_results[0]
+    context = {
+        "account": account,
+        "analysis_results": analysis_results,
+        "merchant_name": "N/A",
+        "merchant_phone_number": "N/A",
+        "merchant_address": "N/A",
+        "transaction_date": "N/A",
+        "transaction_time": "N/A",
+        "Items": [],
+        "Subtotal": "N/A",
+        "tax": "N/A",
+        "tip": "N/A",
+        "total": "N/A",
+    }
+    fields = analysis_results.get('fields')
+    if analysis_results and isinstance(analysis_results, dict) and len(analysis_results) > 0:
+        context['merchant_name'] = fields.get('MerchantName', {}).get('valueString', 'N/A')
+        context['merchant_phone_number'] = fields.get('MerchantPhoneNumber', {}).get('content', 'N/A')
+        if context['merchant_phone_number'] == 'N/A':
+            context['merchant_phone_number'] = fields.get('MerchantPhoneNumber', {}).get('valuePhoneNumber', 'N/A')
+        context['merchant_address'] = fields.get('MerchantAddress', {}).get('valueString', 'N/A')
+        context['transaction_date'] = fields.get('TransactionDate', {}).get('valueDate', 'N/A')
+        context['transaction_time'] = fields.get('TransactionTime', {}).get('valueTime', 'N/A')
+        items = fields.get('Items', [])
+        context['Items'] = [
+            {
+                'Description': item.get('Description', {}).get('valueString', 'N/A'),
+                'Quantity': item.get('Quantity', {}).get('valueNumber', 'N/A'),
+                'TotalPrice': format_price(clean_and_parse_json_string(item.get('TotalPrice', {}).get('valueCurrency', 'N/A'))),
+            }
+            for item in items
+        ]
+
+        context['Subtotal'] = format_price(clean_and_parse_json_string(fields.get('Subtotal', {}).get('valueCurrency', {})))
+        context['tax'] = format_price(clean_and_parse_json_string(fields.get('TotalTax', {}).get('valueCurrency', {})))
+        context['tip'] = format_price(clean_and_parse_json_string(fields.get('Tip', {}).get('valueCurrency', {})))
+        context['total'] = format_price(clean_and_parse_json_string(fields.get('Total', {}).get('valueCurrency', {})))
+        for key, value in context.items():
+            print(f"{key}: {value}")
+    return render(request, "transactions/confirmReceiptAnalysis.html", context=context)

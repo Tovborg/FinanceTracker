@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from main.models import Account, Paychecks
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from django.core.validators import validate_email, FileExtensionValidator
 import datetime
 
 class RegistrationForm(UserCreationForm):
@@ -30,9 +30,14 @@ class CreateAccountForm(forms.Form):
     # field for uploading a file
     description = forms.CharField(widget=forms.Textarea, required=False)
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
     def clean_account_name(self):
         account_name = self.cleaned_data.get('account_name')
-        if Account.objects.filter(name=account_name).exists():
+        # Check if user already has an account with that name
+        if Account.objects.filter(name=account_name, user=self.user).exists():
             raise ValidationError("An account with that name already exists.")
         if len(account_name) > 20:
             raise ValidationError("Account name must be 20 characters or less.")
@@ -150,4 +155,5 @@ class AddPaycheckForm(forms.Form):
 
 
 class ReceiptUploadForm(forms.Form):
-    receipt_image = forms.ImageField()
+    receipt_image = forms.ImageField(required=True,
+                                     validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])])
