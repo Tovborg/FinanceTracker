@@ -20,7 +20,6 @@
                         {% csrf_token %}
                         <span class="font-dansketext flex items-center">
                             <input name="new_value" type="text" placeholder="{{ account.name }}" class="border rounded px-2 py-1 bg-transparent">
-                            <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer" name="checkmark-outline"></ion-icon></button>
                         </span>
                     </form>
                     <span class="font-dansketext" id="account_name">{{ account.name }}</span>

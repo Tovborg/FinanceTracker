@@ -157,3 +157,21 @@ class AddPaycheckForm(forms.Form):
 class ReceiptUploadForm(forms.Form):
     receipt_image = forms.ImageField(required=True,
                                      validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])])
+
+
+class ReceiptAnalysisForm(forms.Form):
+    merchant_name = forms.CharField(max_length=50, required=True)
+    merchant_phone_number = forms.CharField(max_length=15, required=False)
+    merchant_address = forms.CharField(max_length=255, required=False)
+    transaction_date = forms.DateField(widget=forms.SelectDateWidget, required=True)
+    transaction_time = forms.TimeField(required=True)
+    subtotal = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
+    tax = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
+    total = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+
+    def clean_total(self):
+        total = self.cleaned_data.get('total')
+        print(total)
+        if total <= 0 or total == 0.0:
+            raise ValidationError("Total must be greater than 0.")
+        return total

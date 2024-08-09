@@ -5,7 +5,7 @@
          <h2 class="text-3xl text-black font-dansketext text-center mb-7">New Transaction for {{ account.name }}</h2>
          <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
          <div class="justify-center text-center mt-10">
-            <a href="{% url 'new_transaction' account.name %}"><button type="button" class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Manual Transaction</button></a>
+            <a href="{% url 'new_transaction' account.name %}"><button type="button" style="background: #003f63 !important;" class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Manual Transaction</button></a>
          </div>
          <form method="post" id="receipt_upload_form" class="text-center mt-10" action="{% url 'analyze_receipt' account.name %}" enctype="multipart/form-data">
             {% csrf_token %}

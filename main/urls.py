@@ -30,5 +30,5 @@ urlpatterns = [
     path('paycheck/delete/<int:pk>/', delete_paycheck, name='delete_paycheck'),
     path('transaction/upload_receipt/<str:account_name>/', analyze_receipt_view, name='analyze_receipt'),
     path('new_transaction/<str:account_name>/', transaction_import_choice, name='new_transaction_choice'),
-    path('transaction/confirmReceiptAnalysis/<str:account_name>/', confirmReceiptAnalysis, name='confirmReceiptAnalysis'),
+    path('transaction/confirmReceiptAnalysis/<str:account_name>/', ConfirmReceiptAnalysisView.as_view(), name='confirmReceiptAnalysis'),
 ]

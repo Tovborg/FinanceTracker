@@ -4,13 +4,15 @@ from main.forms import (RegistrationForm,
                         NewTransactionForm,
                         UserUpdateForm,
                         AddPaycheckForm,
-                        ReceiptUploadForm)
+                        ReceiptUploadForm,
+                        ReceiptAnalysisForm)
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from main.models import Account, Transaction, Paychecks
+from main.models import Account, Transaction, Paychecks, Item
 from django.views.decorators.http import require_POST
+from django.views import View
 from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -23,7 +25,8 @@ from .services.azure_service import AzureDocumentIntelligenceService
 from .utils.utils import (compress_image,
                           serialize_analysis_results,
                           format_price,
-                          clean_and_parse_json_string)
+                          clean_and_parse_json_string, extract_amount, extract_currency,
+                          create_analysis_context)
 from io import BytesIO
 import tempfile
 import os
@@ -496,60 +499,96 @@ def transaction_import_choice(request, account_name):
     return render(request, 'transactions/transactionImportChoice.html', context={'account': account, 'form': form})
 
 
-def confirmReceiptAnalysis(request, account_name):
-    account = get_object_or_404(Account, name=account_name, user=request.user)
-    analysis_results = request.session.get('analysis_results', None)
+class ConfirmReceiptAnalysisView(View):
+    def get(self, request, account_name):
+        account = get_object_or_404(Account, name=account_name, user=request.user)
+        form = ReceiptAnalysisForm()
+        # Clear session data
+        context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
+        return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
 
-    if analysis_results in request.session:
-        del request.session['analysis_results']
+    def post(self, request, account_name):
+        account = get_object_or_404(Account, name=account_name, user=request.user)
+        form = ReceiptAnalysisForm(request.POST)
 
-    if isinstance(analysis_results, str):
-        try:
-            # Deserialize the JSON string back into a Python dictionary
-            analysis_results = json.loads(analysis_results)
-        except json.JSONDecodeError:
-            # Handle JSON decoding errors if any
-            analysis_results = None
-
-    analysis_results = analysis_results[0]
-    context = {
-        "account": account,
-        "analysis_results": analysis_results,
-        "merchant_name": "N/A",
-        "merchant_phone_number": "N/A",
-        "merchant_address": "N/A",
-        "transaction_date": "N/A",
-        "transaction_time": "N/A",
-        "Items": [],
-        "Subtotal": "N/A",
-        "tax": "N/A",
-        "tip": "N/A",
-        "total": "N/A",
-    }
-    print(analysis_results)
-    fields = analysis_results.get('fields')
-    if analysis_results and isinstance(analysis_results, dict) and len(analysis_results) > 0:
-        context['merchant_name'] = fields.get('MerchantName', {}).get('valueString', 'N/A')
-        context['merchant_phone_number'] = fields.get('MerchantPhoneNumber', {}).get('content', 'N/A')
-        if context['merchant_phone_number'] == 'N/A':
-            context['merchant_phone_number'] = fields.get('MerchantPhoneNumber', {}).get('valuePhoneNumber', 'N/A')
-        context['merchant_address'] = fields.get('MerchantAddress', {}).get('valueString', 'N/A')
-        context['transaction_date'] = fields.get('TransactionDate', {}).get('valueDate', 'N/A')
-        context['transaction_time'] = fields.get('TransactionTime', {}).get('valueTime', 'N/A')
-        items = fields.get('Items', [])
-        context['Items'] = [
-            {
-                'Description': item.get('Description', {}).get('valueString', 'N/A'),
-                'Quantity': item.get('Quantity', {}).get('valueNumber', 'N/A'),
-                'TotalPrice': format_price(clean_and_parse_json_string(item.get('TotalPrice', {}).get('valueCurrency', 'N/A'))),
+        if form.is_valid():
+            # Extract form data (if needed)
+            # Cleaned data is accessed via form.cleaned_data
+            print(form.cleaned_data.get('total'))
+            cleaned_data = {
+                'merchant_name': form.cleaned_data.get('merchant_name'),
+                'merchant_phone_number': form.cleaned_data.get('merchant_phone_number'),
+                'merchant_address': form.cleaned_data.get('merchant_address'),
+                'transaction_date': form.cleaned_data.get('transaction_date'),
+                'transaction_time': form.cleaned_data.get('transaction_time'),
+                'subtotal': form.cleaned_data.get('subtotal'),
+                'tax': form.cleaned_data.get('tax'),
+                'total': form.cleaned_data.get('total'),
             }
-            for item in items
-        ]
 
-        context['Subtotal'] = format_price(clean_and_parse_json_string(fields.get('Subtotal', {}).get('valueCurrency', {})))
-        context['tax'] = format_price(clean_and_parse_json_string(fields.get('TotalTax', {}).get('valueCurrency', {})))
-        context['tip'] = format_price(clean_and_parse_json_string(fields.get('Tip', {}).get('valueCurrency', {})))
-        context['total'] = format_price(clean_and_parse_json_string(fields.get('Total', {}).get('valueCurrency', {})))
-        for key, value in context.items():
-            print(f"{key}: {value}")
-    return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
+            # Process items
+            item_count = len([key for key in request.POST if key.startswith('description_')])
+            has_error = False
+
+            items = [{
+                'Description': request.POST.get(f'description_{i}'),
+                'Quantity': request.POST.get(f'quantity_{i}'),
+                'TotalPrice': request.POST.get(f'price_{i}')
+            } for i in range(1, item_count + 1)]
+
+            for i in range(1, item_count + 1):
+                description = request.POST.get(f'description_{i}')
+                quantity = request.POST.get(f'quantity_{i}')
+                price = request.POST.get(f'price_{i}')
+
+                if not description or not quantity or not price:
+                    form.add_error(None, f"Item {i} has missing fields. All fields are required.")
+                    has_error = True
+                    break  # Optionally, break the loop if you only want the first error
+
+            if has_error:
+                # Return form with errors
+                return render(request, "transactions/confirmReceiptAnalysis.html",
+                              context=create_analysis_context(request, account, form,
+                                                              request.session.get('analysis_results')))
+
+            new_transaction = Transaction(
+                account=account,
+                transaction_type='purchase',
+                amount=cleaned_data['total'],
+                date=cleaned_data['transaction_date'],
+                balance_after=account.balance - cleaned_data['total'],
+                merchant_name=cleaned_data['merchant_name'],
+            )
+            if cleaned_data['merchant_address'] != 'N/A':
+                new_transaction.merchant_address = cleaned_data['merchant_address']
+            if cleaned_data['merchant_phone_number'] != 'N/A':  # Check if phone number is available
+                new_transaction.merchant_phone_number = cleaned_data['merchant_phone_number']
+            if cleaned_data['tax'] != 0.0:
+                new_transaction.tax = cleaned_data['tax']
+            new_transaction.save()
+
+            # Update account balance
+            account.balance -= cleaned_data['total']
+            account.save()
+
+            for item in items:
+                new_item = Item(
+                    transaction=new_transaction,
+                    description=item['Description'],
+                    price=item['TotalPrice'],
+                    quantity=item['Quantity']
+                )
+                new_item.save()
+
+
+            # Create context and redirect
+            context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
+            return redirect('account_details', account_name=account_name)
+
+        else:
+            # Handle form errors
+            print(form.errors)  # Use logging in production
+            context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
+            return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
+

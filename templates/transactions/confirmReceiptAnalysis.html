@@ -16,59 +16,110 @@
                     </div>
                     <hr class="mt-6 border-gray-500" />
                     <div id="paycheck_info" class="mt-6 space-y-6">
+                        {% if form.errors %}
+                            <div class="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <strong class="font-bold">Oops!</strong>
+                                <span class="block sm:inline">Something went wrong. Please look over these errors.</span>
+                                <ul>
+                                    {% for field in form %}
+                                        {% if field.errors %}
+                                            <li>
+
+                                                <ul>
+                                                    {% for error in field.errors %}
+                                                        <li class="font-dansketext text-warning"><strong class="font-bold">{{ field.label }}:</strong> {{ error }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if form.non_field_errors %}
+                                        {% for error in form.non_field_errors %}
+                                            <li class="font-dansketext text-warning">{{ error }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% endif %}
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Account</span>
                             <span class="font-dansketext" id="paycheck_amount">{{ account }}</span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Merchant Name</span>
-                            <span class="font-dansketext">{{ merchant_name }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="merchant_name" id="id_merchant_name" type="text" value="{{ merchant_name }}" class="border rounded px-2 py-1 bg-transparent" required>
+                            </span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Merchant Phone Number</span>
-                            <span class="font-dansketext">{{ merchant_phone_number }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="merchant_phone_number" id="id_merchant_phone_number" type="text" value="{{ merchant_phone_number }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Merchant Address</span>
-                            <span id="accumulated_interest" class="font-dansketext">{{ merchant_address }}</span>
-                        </div>
+                            <span class="font-dansketext flex items-center">
+                                <input name="merchant_address" id="id_merchant_address" type="text" value="{{ merchant_address }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
+                            </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Transaction Date</span>
-                            <span class="font-dansketext" id="account_number">{{ transaction_date }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="transaction_date" id="id_transaction_date" required type="date" value="{{ transaction_date }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Transaction Time</span>
-                            <span class="font-dansketext" id="account_number">{{ transaction_time }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="transaction_time" id="id_transaction_time" required type="time" value="{{ transaction_time }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
                         </div>
                         {% if Items %}
                             <hr class="mt-6 border-gray-500" />
                             {% for item in Items %}
                             <div class="flex flex-row justify-between">
                                 <span class="font-semibold">Item Description</span>
-                                <span class="font-dansketext">{{ item.Description }}</span>
+                                <span class="font-dansketext flex items-center">
+                                    <input required name="description_{{ forloop.counter }}" id="id_description_{{ forloop.counter }}" type="text" value="{{ item.Description }}" class="border rounded px-2 py-1 bg-transparent">
+                                </span>
                             </div>
                             <div class="flex flex-row justify-between">
                                 <span class="font-semibold">Item Quantity</span>
-                                <span class="font-dansketext">{{ item.Quantity }}</span>
+                                <span class="font-dansketext flex items-center">
+                                    <input required name="quantity_{{ forloop.counter }}" id="id_quantity_{{ forloop.counter }}" type="number" value="{{ item.Quantity }}" class="border rounded px-2 py-1 bg-transparent">
+                                </span>
                             </div>
                             <div class="flex flex-row justify-between">
                                 <span class="font-semibold">Item Price</span>
-                                <span class="font-dansketext">{{ item.TotalPrice }}</span>
+                                <span class="font-dansketext flex items-center">
+                                    <input required name="price_{{ forloop.counter }}" id="id_price_{{ forloop.counter }}" type="number" value="{{ item.TotalPrice }}" class="border rounded px-2 py-1 bg-transparent">
+                                </span>
                             </div>
                             <hr class="mt-6 border-gray-500" />
                             {% endfor %}
                         {% endif %}
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Subtotal</span>
-                            <span class="font-dansketext" id="account_number">{{ Subtotal }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="subtotal" id="id_subtotal" type="number" value="{{ Subtotal }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Tax</span>
-                            <span class="font-dansketext" id="account_number">{{ tax }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="tax" id="id_tax" type="number" value="{{ tax }}" class="border rounded px-2 py-1 bg-transparent">
+                            </span>
                         </div>
                         <div class="flex flex-row justify-between">
                             <span class="font-semibold">Total</span>
-                            <span class="font-dansketext" id="account_number">{{ total }}</span>
+                            <span class="font-dansketext flex items-center">
+                                <input name="total" id="id_total" type="number" value="{{ total }}" class="border rounded px-2 py-1 bg-transparent" required>
+                            </span>
+                        </div>
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Currency</span>
+                            <span class="font-dansketext" id="account_number">{{ currency }}</span>
                         </div>
                         <hr class="mt-6 border-gray-500" />
                         <button type="submit" id="confirm_button" style="background: limegreen !important;" class="w-full font-dansketext hover:bg-accent-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center space-x-2">
@@ -100,39 +151,6 @@
                 </div>
             </div>
         </div>
-        <script>
-            const delete_acc_btn = document.getElementById('delete_acc_btn');
-            const modal = document.getElementById('modal');
-            const close_modal = document.querySelector('.bg-gray-800');
-            const yes_btn = document.querySelector('.bg-red-600');
-            const no_btn = document.querySelector('.bg-white');
-
-            delete_acc_btn.addEventListener('click', () => {
-                modal.classList.remove('hidden');
-            });
-
-            close_modal.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-
-            yes_btn.addEventListener('click', () => {
-                window.location.href = "";
-            });
-
-            no_btn.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-
-            function toggleEditForm(field) {
-                const form = document.getElementById(`${field}_edit`);
-                const info = document.getElementById(`${field}`);
-                const pencil = document.getElementById(`${field}_pencil`);
-                pencil.classList.toggle('hidden');
-                form.classList.toggle('hidden');
-                info.classList.toggle('hidden');
-            }
-        </script>
-            <!-- Render analysis results in a more structured format as needed -->
         {% else %}
             <p>No analysis results available.</p>
         {% endif %}
