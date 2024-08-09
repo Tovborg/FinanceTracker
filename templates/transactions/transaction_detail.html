@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <div class="flex justify-center mt-10 mobile-only:h-full mobile-only:mt-0">
-        <div class="bg-cards rounded-lg h-[600px] sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
+    <div class="flex justify-center mt-10 mobile-only:mt-0">
+        <div class="bg-cards rounded-lg h-[100%] mb-3 sm:w-[60%] md:w-[60%] lg:w-[40%] mobile-only:h-full mobile-only:w-full shadow-lg p-6">
             <div id="action_icons_info" class="flex flex-row justify-between">
                 <div class="flex justify-start">
                     <a id="backButton" href=""><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
@@ -17,6 +17,53 @@
                     <span class="font-semibold">Transaction Type</span>
                     <span class="font-dansketext">{{ transaction.transaction_type|upper }}</span>
                 </div>
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Transaction Amount</span>
+                    <span class="font-dansketext">DKK {{ transaction.amount }}</span>
+                </div>
+                {% if transaction.transaction_type == 'purchase' %}
+                    {% if transaction.tax %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Tax</span>
+                        <span class="font-dansketext">{{ transaction.tax }}</span>
+                    </div>
+                    {% endif %}
+                    {% if transaction.tip %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Tip</span>
+                        <span class="font-dansketext">{{ transaction.tip }}</span>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Date of Transaction</span>
+                    <span class="font-dansketext">{{ transaction.date }}</span>
+                </div>
+                {% if transaction.transaction_type == 'purchase' %}
+                    {% if transaction.transaction_time %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Transaction Time</span>
+                        <span class="font-dansketext">{{ transaction.transaction_time }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Merchant Name</span>
+                        <span class="font-dansketext">{{ transaction.merchant_name }}</span>
+                    </div>
+                    {% if transaction.merchant_address %}
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Merchant Address</span>
+                            <span class="font-dansketext">{{ transaction.merchant_address }}</span>
+                        </div>
+                    {% endif %}
+                    {% if transaction.merchant_phone_number %}
+                        <div class="flex flex-row justify-between">
+                            <span class="font-semibold">Merchant Phone Number</span>
+                            <span class="font-dansketext">{{ transaction.merchant_phone_number }}</span>
+                        </div>
+                    {% endif %}
+
+                {% endif %}
                 {% if transaction.transaction_type == 'transfer' %}
                     <div class="flex flex-row justify-between">
                         <span class="font-semibold">Sender</span>
@@ -27,14 +74,7 @@
                         <span class="font-dansketext">{{ transaction.transfer_to|upper }}</span>
                     </div>
                 {% endif %}
-                <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Transaction Amount</span>
-                    <span class="font-dansketext">DKK {{ transaction.amount }}</span>
-                </div>
-                <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Date of Transaction</span>
-                    <span class="font-dansketext">{{ transaction.date }}</span>
-                </div>
+
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Account Balance After</span>
                     <span class="font-dansketext">{{ transaction.balance_after }}</span>
@@ -47,6 +87,26 @@
                     <span class="font-dansketext">No description provided</span>
                     {% endif %}
                 </div>
+                {% if items %}
+                <hr class="mt-6 border-gray-500" />
+                    {% for item in items %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Description</span>
+                        <span class="font-dansketext">{{ item.description }}</span>
+                    </div>
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Quantity</span>
+                        <span class="font-dansketext">{{ item.quantity }}</span>
+                    </div>
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Price</span>
+                        <span class="font-dansketext">{{ item.price }}</span>
+                    </div>
+                    <hr class="mt-6 border-gray-500" />
+                    {% endfor %}
+                {% endif %}
+
+
         </div>
     </div>
     <div id="modal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">

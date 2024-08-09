@@ -2,14 +2,18 @@
 {% load static %}
 {% block content %}
 
-<div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-10 mobile-only:mt-0">
-    <div class="bg-cards mobile-only:h-full rounded-lg h-[600px] w-[70%] mobile-only:w-[100%] shadow-lg p-6">
+<div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-0 sm:mt-10">
+    <div class="bg-cards h-full sm:h-[600px] rounded-lg w-[100%] sm:w-[70%] shadow-lg p-6">
         <a id="backButton" href=""><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
-        <div class="flex flex-col md:flex-row mt-3 mobile-only:mt-2 justify-between items-center md:items-center">
-            <h1 class="text-4xl font-dansketext flex items-center mb-0 mobile-only:!mb-3">
-            {{ account.name }}
-            <a href="{% url 'account_info' account.name %}"><ion-icon class="ml-2 !text-3xl text-gray-500" name="information-circle-outline"></ion-icon></a>
-            </h1>
+        <div class="flex flex-col md:flex-row mt-2 sm:mt-3 justify-between items-center">
+
+            <div class="flex items-center text-3xl !space-x-3">
+                <span class="font-dansketext">{{ account.name }}</span>
+                <a href="{% url 'account_info' account.name %}" class="flex items-center">
+                    <ion-icon class="text-gray-500" name="information-circle-outline"></ion-icon>
+                </a>
+            </div>
+
             <div class="text-3xl font-medium mb-2 md:ml-auto">DKK {{ account.balance }}</div>
         </div>
         <div class="flex flex-col md:flex-row justify-between md:items-center items-center">

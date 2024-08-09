@@ -22,7 +22,7 @@
                             {% else %}
                             <ion-icon id="star_{{ account.name }}" class="mr-2 cursor-pointer" name="star-outline"></ion-icon>
                             {% endif %}
-                            {{ account.name }}<a href="{% url 'account_details' account.name %}"><ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon></a></h2>
+                            {{ account.name }}<a class="flex items-center" href="{% url 'account_details' account.name %}"><ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon></a></h2>
 
                         <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
                     </div>
@@ -33,7 +33,7 @@
                             {% for transaction in account.get_three_recent_transactions %}
                             <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                 <div>
-                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{{ transaction.transaction_type|capfirst }}</span></a>
+                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
                                     <span class="block text-sm">{{ transaction.date }}</span>
                                 </div>
                                 {% if transaction.transaction_type == 'deposit' %}

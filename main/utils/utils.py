@@ -2,6 +2,8 @@ from PIL import Image
 from io import BytesIO
 import json
 import re
+from bs4 import BeautifulSoup
+import requests
 
 
 def extract_amount(price_str):
@@ -42,12 +44,21 @@ def extract_currency(price_str):
         return "DKK"
 
 
-def compress_image(image_bytes):
+def compress_image(image_bytes, max_size_mb=4):
     image_bytes.seek(0)
     with Image.open(image_bytes) as img:
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+
         output_bytes = BytesIO()
         img.save(output_bytes, format="JPEG", optimize=True, quality=85)  # Adjust quality as needed
         output_bytes.seek(0)
+
+    compressed_size_kb = output_bytes.tell() / 1024
+
+    if compressed_size_kb > max_size_mb * 1024:
+        raise ValueError(f"Compressed image size exceeds {max_size_mb} MB limit")
+
     return output_bytes
 
 
@@ -153,3 +164,41 @@ def create_analysis_context(request, account, form, analysis_results):
 
     return context
 
+
+def get_payday_info():
+    url = "https://xn--lnningsdag-0cb.dk/"
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an error for bad status codes
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    payday_span = soup.find('span', id='when')
+
+    if payday_span:
+        # only extract the number
+        return payday_span.text.split()[1]
+    else:
+        return "Not available"
+
+
+# Needs new logic to handle insufficient funds
+def handleTransaction(transaction_type, amount, account, transfer_to, transaction):
+    if transaction_type == 'deposit':
+        account.balance += amount
+    elif transaction_type == 'withdrawal':
+        account.balance -= amount
+    elif transaction_type == 'transfer' and transfer_to:
+        account.balance -= amount
+        transfer_to.balance += amount
+        transfer_to.save()
+        receiver_transaction = Transaction(
+            account=transfer_to,
+            transaction_type='deposit',
+            amount=amount,
+            date=transaction.date,
+            description=f"Transfer from {account.name}",
+            balance_after=transfer_to.balance
+        )
+        receiver_transaction.save()
+    account.save()
+    transaction.balance_after = account.balance
+    transaction.save()

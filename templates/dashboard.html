@@ -55,7 +55,7 @@
                             {% for transaction in account.get_three_recent_transactions %}
                             <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                 <div>
-                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{{ transaction.transaction_type|capfirst }}</span></a>
+                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
                                     <span class="block text-sm">{{ transaction.date }}</span>
                                 </div>
                                 {% if transaction.transaction_type == 'deposit' %}

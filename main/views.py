@@ -21,33 +21,21 @@ from django.contrib import messages
 from django.core.mail import send_mail
 import requests
 from bs4 import BeautifulSoup
+from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
 from .utils.utils import (compress_image,
                           serialize_analysis_results,
                           format_price,
                           clean_and_parse_json_string, extract_amount, extract_currency,
-                          create_analysis_context)
+                          create_analysis_context,
+                          get_payday_info,
+                          handleTransaction)
 from io import BytesIO
 import tempfile
 import os
 import json
 from django.http import HttpResponse
 
-
-
-def get_payday_info():
-    url = "https://xn--lnningsdag-0cb.dk/"
-    response = requests.get(url)
-    response.raise_for_status()  # Raise an error for bad status codes
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    payday_span = soup.find('span', id='when')
-
-    if payday_span:
-        # only extract the number
-        return payday_span.text.split()[1]
-    else:
-        return "Not available"
 
 def translate_payday_info(weekday):
     weekdays = {
@@ -279,32 +267,12 @@ def new_transaction(request, account_name):
     return render(request, "transactions/new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
 
 
-# Needs new logic to handle insufficient funds
-def handleTransaction(transaction_type, amount, account, transfer_to, transaction):
-    if transaction_type == 'deposit':
-        account.balance += amount
-    elif transaction_type == 'withdrawal':
-        account.balance -= amount
-    elif transaction_type == 'transfer' and transfer_to:
-        account.balance -= amount
-        transfer_to.balance += amount
-        transfer_to.save()
-        receiver_transaction = Transaction(
-            account=transfer_to,
-            transaction_type='deposit',
-            amount=amount,
-            date=transaction.date,
-            description=f"Transfer from {account.name}",
-            balance_after=transfer_to.balance
-        )
-        receiver_transaction.save()
-    account.save()
-    transaction.balance_after = account.balance
-    transaction.save()
-
-
 def transaction_detail(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk)
+    if transaction.transaction_type == 'purchase':
+        items = transaction.item_set.all()
+        return render(request, "transactions/transaction_detail.html",
+                      context={"transaction": transaction, "items": items})
     return render(request, "transactions/transaction_detail.html", context={"transaction": transaction})
 
 
@@ -333,6 +301,9 @@ def delete_transaction(request, pk):
             transaction.transfer_to.balance -= corresponding_transaction.amount
             transaction.transfer_to.save()
             corresponding_transaction.delete()
+
+    elif transaction.transaction_type == 'purchase':
+        account.balance += transaction.amount
 
     account.save()
     transaction.delete()
@@ -468,6 +439,7 @@ def analyze_receipt_view(request, account_name):
                 image_bytes.seek(0)
 
                 # Compress the image if needed
+
                 compressed_image = compress_image(image_bytes)
 
                 # Save the compressed image to a temporary file
@@ -476,11 +448,15 @@ def analyze_receipt_view(request, account_name):
                     temp_file_path = temp_file.name
 
                 service = AzureDocumentIntelligenceService()
-                analysis_results = service.analyze_receipts(temp_file_path)
-                print(analysis_results)
-                request.session['analysis_results'] = serialize_analysis_results(analysis_results)
-                # Delete the temporary file
-                os.remove(temp_file_path)
+                try:
+                    analysis_results = service.analyze_receipts(temp_file_path)
+                    request.session['analysis_results'] = serialize_analysis_results(analysis_results)
+                    os.remove(temp_file_path)
+                except HttpResponseError as e:
+                    request.session['error_message'] = str(e)
+                    os.remove(temp_file_path)
+                    del request.session['analysis_results']
+                    return redirect('new_transaction_choice', account_name=account_name)
 
                 return redirect('confirmReceiptAnalysis', account_name=account_name)
             except ValueError as e:
@@ -496,7 +472,13 @@ def analyze_receipt_view(request, account_name):
 def transaction_import_choice(request, account_name):
     form = ReceiptUploadForm()
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, 'transactions/transactionImportChoice.html', context={'account': account, 'form': form})
+    try:
+        error_message = request.session.get('error_message')
+    except KeyError:
+        error_message = None
+    return render(request, 'transactions/transactionImportChoice.html', context={'account': account,
+                                                                                 'form': form,
+                                                                                 'error_message': error_message})
 
 
 class ConfirmReceiptAnalysisView(View):

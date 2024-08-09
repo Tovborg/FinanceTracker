@@ -9,12 +9,17 @@
          </div>
          <form method="post" id="receipt_upload_form" class="text-center mt-10" action="{% url 'analyze_receipt' account.name %}" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" id="id_receipt_image" name="receipt_image" accept="image/*" class="hidden">
+            <input type="file" id="id_receipt_image" name="receipt_image" accept="image/png, image/jpeg, image/jpg" class="hidden">
 
             <!-- Label styled as a button -->
             <label for="id_receipt_image" class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
                 Analyze Receipt
             </label>
+             {% if error_message %}
+             <div class="mt-4" id="error_message">
+                 <p class="text-red-700 font-dansketext">File is too big or another error occured</p>
+             </div>
+             {% endif %}
         </form>
      </div>
 
