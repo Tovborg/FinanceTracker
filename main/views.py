@@ -474,6 +474,7 @@ def transaction_import_choice(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
     try:
         error_message = request.session.get('error_message')
+        del request.session['error_message']
     except KeyError:
         error_message = None
     return render(request, 'transactions/transactionImportChoice.html', context={'account': account,

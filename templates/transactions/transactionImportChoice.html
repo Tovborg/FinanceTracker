@@ -15,6 +15,7 @@
             <label for="id_receipt_image" class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
                 Analyze Receipt
             </label>
+
              {% if error_message %}
              <div class="mt-4" id="error_message">
                  <p class="text-red-700 font-dansketext">File is too big or another error occured</p>
@@ -27,7 +28,29 @@
         document.getElementById('id_receipt_image').addEventListener('change', function () {
             if (this.files.length > 0) {
                 document.getElementById('receipt_upload_form').submit();
+
+                // change the text of the label to "Analyzing..."
+                const label = document.querySelector('label[for="id_receipt_image"]');
+                label.innerText = 'Analyzing';
+
+                let dotCount = 0;
+                const maxDots = 3;
+
+                const interval = setInterval(() => {
+                    dotCount++;
+                    if (dotCount > maxDots) {
+                        dotCount = 0;
+                        label.innerText = 'Analyzing'; // reset to base text
+                    } else {
+                        label.innerText += '.'; // add a dot
+                    }
+                }, 500); // Adjust the interval timing as needed
+
+                // Stop the interval after a certain condition if necessary
+                // For example, after form submission is complete
+                setTimeout(() => clearInterval(interval), 10000); // example: stop after 10 seconds
             }
-        })
+        });
+
     </script>
 {% endblock %}
