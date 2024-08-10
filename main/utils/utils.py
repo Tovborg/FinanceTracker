@@ -4,6 +4,7 @@ import json
 import re
 from bs4 import BeautifulSoup
 import requests
+from main.models import Transaction
 
 
 def extract_amount(price_str):
@@ -181,7 +182,7 @@ def get_payday_info():
 
 
 # Needs new logic to handle insufficient funds
-def handleTransaction(transaction_type, amount, account, transfer_to, transaction):
+def handleTransaction(transaction_type, amount, account, transaction, transfer_to=None):
     if transaction_type == 'deposit':
         account.balance += amount
     elif transaction_type == 'withdrawal':
@@ -199,6 +200,14 @@ def handleTransaction(transaction_type, amount, account, transfer_to, transactio
             balance_after=transfer_to.balance
         )
         receiver_transaction.save()
+    elif transaction_type == 'payment':
+        account.balance -= amount
+    elif transaction_type == 'purchase':
+        account.balance -= amount
+    elif transaction_type == 'wage deposit':
+        account.balance += amount
+    else:
+        raise ValueError("Invalid transaction type")
     account.save()
     transaction.balance_after = account.balance
     transaction.save()

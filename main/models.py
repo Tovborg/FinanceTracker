@@ -38,7 +38,8 @@ class Account(models.Model):
         transactions = self.transaction_set.filter(
             date__gte=first_day_of_month,
             date__lte=last_day_of_month,
-            transaction_type__in=['withdrawal', 'payment', 'purchase']
+            transaction_type__in=['withdrawal', 'payment', 'purchase'],
+            include_in_statistics=True
         )
 
         total_expenses = sum(transaction.amount for transaction in transactions)
@@ -56,7 +57,8 @@ class Account(models.Model):
         transactions = self.transaction_set.filter(
             date__gte=first_day_of_month,
             date__lte=last_day_of_month,
-            transaction_type__in=['deposit', 'wage deposit']
+            transaction_type__in=['deposit', 'wage deposit'],
+            include_in_statistics=True
         ).exclude(description__startswith='Transfer from')
 
         # Calculate the total income for the month
@@ -81,7 +83,7 @@ class Transaction(models.Model):
     description = models.TextField(blank=True, null=True)
     balance_after = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0) # Balance after transaction
     transfer_to = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transfer_to', null=True, blank=True)
-
+    include_in_statistics = models.BooleanField(default=True)
     # Purchase specific fields
     merchant_name = models.CharField(max_length=50, blank=True, null=True)
     merchant_address = models.CharField(max_length=255, blank=True, null=True)

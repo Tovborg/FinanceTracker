@@ -5,7 +5,8 @@ from main.forms import (RegistrationForm,
                         UserUpdateForm,
                         AddPaycheckForm,
                         ReceiptUploadForm,
-                        ReceiptAnalysisForm)
+                        ReceiptAnalysisForm,
+                        IncludeTransactionInStatisticsForm)
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
@@ -19,6 +20,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.contrib.auth.mixins import LoginRequiredMixin
 import requests
 from bs4 import BeautifulSoup
 from azure.core.exceptions import HttpResponseError
@@ -242,6 +244,8 @@ def new_transaction(request, account_name):
                 balance_after = account.balance + amount
             elif transaction_type == 'withdrawal':
                 balance_after = account.balance - amount
+            elif transaction_type == 'payment':
+                balance_after = account.balance - amount
             elif transaction_type == 'transfer' and transfer_to:
                 balance_after = account.balance - amount
             else:
@@ -267,13 +271,31 @@ def new_transaction(request, account_name):
     return render(request, "transactions/new_transaction.html", context={"account": account, "form": form, "accounts": accounts})
 
 
-def transaction_detail(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk)
-    if transaction.transaction_type == 'purchase':
-        items = transaction.item_set.all()
-        return render(request, "transactions/transaction_detail.html",
-                      context={"transaction": transaction, "items": items})
-    return render(request, "transactions/transaction_detail.html", context={"transaction": transaction})
+class TransactionDetailView(View, LoginRequiredMixin):
+    def get(self, request, pk):
+        transaction = get_object_or_404(Transaction, pk=pk)
+        if transaction.transaction_type == 'purchase':
+            items = transaction.item_set.all()
+            return render(request, "transactions/transaction_detail.html",
+                          context={"transaction": transaction, "items": items})
+        return render(request, "transactions/transaction_detail.html", context={"transaction": transaction})
+
+    def post(self, request, pk):
+        transaction = get_object_or_404(Transaction, pk=pk)
+        form = IncludeTransactionInStatisticsForm(request.POST)
+        if form.is_valid():
+            include_in_statistics = form.cleaned_data['include_in_statistics']
+            transaction.include_in_statistics = include_in_statistics
+            transaction.save()
+            return redirect('transaction_detail', pk=pk)
+        else:
+            print(form.errors)
+            return redirect('transaction_detail', pk=pk)
+
+
+
+
+
 
 
 @login_required
@@ -414,8 +436,7 @@ def add_new_paycheck(request):
                     balance_after=payout_account.balance + amount
                 )
                 new_wage_deposit.save()
-                payout_account.balance += amount
-                payout_account.save()
+                handleTransaction('wage deposit', amount, payout_account, new_wage_deposit)
             return redirect('paychecks')
         else:
             print(form.errors)
@@ -510,7 +531,7 @@ def transaction_import_choice(request, account_name):
                                                                                  'error_message': error_message})
 
 
-class ConfirmReceiptAnalysisView(View):
+class ConfirmReceiptAnalysisView(View, LoginRequiredMixin):
     def get(self, request, account_name):
         account = get_object_or_404(Account, name=account_name, user=request.user)
         form = ReceiptAnalysisForm()

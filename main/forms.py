@@ -183,3 +183,7 @@ class ReceiptAnalysisForm(forms.Form):
         if total <= 0 or total == 0.0:
             raise ValidationError("Total must be greater than 0.")
         return total
+
+
+class IncludeTransactionInStatisticsForm(forms.Form):
+    include_in_statistics = forms.BooleanField(required=False)

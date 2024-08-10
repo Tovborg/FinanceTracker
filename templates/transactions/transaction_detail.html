@@ -105,6 +105,13 @@
                     <hr class="mt-6 border-gray-500" />
                     {% endfor %}
                 {% endif %}
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Include in expense overview?</span>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="checkbox" onchange="this.form.submit()" name="include_in_statistics" id="id_include_in_statistics" {% if transaction.include_in_statistics %} checked {% endif %} />
+                    </form>
+                </div>
 
 
         </div>
