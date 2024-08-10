@@ -6,6 +6,7 @@ from main.forms import (CreateAccountForm,
                         ReceiptUploadForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
+from allauth.account.forms import ChangePasswordForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
