@@ -158,6 +158,7 @@ USE_TZ = True
 
 # Allauth settings
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_FORMS = {
     'signup': 'main.forms.CustomSignupForm',  # replace 'your_app' with your actual app name
