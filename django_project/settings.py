@@ -155,6 +155,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Allauth settings
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_FORMS = {
+    'signup': 'main.forms.CustomSignupForm',  # replace 'your_app' with your actual app name
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

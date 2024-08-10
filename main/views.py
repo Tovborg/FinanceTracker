@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from main.forms import (RegistrationForm,
-                        CreateAccountForm,
+from main.forms import (CreateAccountForm,
                         NewTransactionForm,
                         UserUpdateForm,
                         AddPaycheckForm,
@@ -103,18 +102,6 @@ def index(request):
     else:
         context['accounts'] = favorites
         return render(request, "dashboard.html", context=context)
-
-
-def sign_up(request):
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('/')
-    else:
-        form = RegistrationForm()
-    return render(request, "registration/signup.html", {"form": form})
 
 
 # Views to display and handle accounts
