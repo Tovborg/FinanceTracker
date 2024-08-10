@@ -8,10 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 urlpatterns = [
     path("", index, name="index"),
     path('delete_user/', delete_user, name='delete_user'),
-    path('account/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('account/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('password-reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('password-reset/complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('account/', account_view, name='account'),
     path('account/add_account/', add_account, name='add_account'),
     path('account/update_favorite/', csrf_exempt(updateFavorite), name='update_favorite'),
