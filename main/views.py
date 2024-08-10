@@ -121,13 +121,13 @@ def sign_up(request):
 @login_required
 def account_view(request):
     user_accounts = Account.objects.filter(user=request.user)
-    return render(request, "account/account.html", context={"accounts": user_accounts})
+    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts})
 
 
 @login_required
 def account_info(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, "account/account_info.html", context={"account": account})
+    return render(request, "bank_accounts/account_info.html", context={"account": account})
 
 
 @require_POST
@@ -154,7 +154,7 @@ def account_details(request, account_name):
     except EmptyPage:
         transactions = paginator.page(paginator.num_pages)
 
-    return render(request, "account/account_details.html", context={"account": account, "transactions": transactions})
+    return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
 
 
 @login_required
@@ -183,7 +183,7 @@ def add_account(request):
             return redirect('account')
     else:
         form = CreateAccountForm(user=request.user)
-    return render(request, "account/add_account.html", {"form": form})
+    return render(request, "bank_accounts/add_account.html", {"form": form})
 
 @login_required
 @require_POST
