@@ -8,7 +8,7 @@
 
             <div class="container mx-auto p-6">
                <div class="flex justify-between items-start mb-6">
-                   <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Welcome, {{ user.username }}!</h1>
+                   <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Welcome, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
                </div>
             </div>
             <div class="grid grid-cols-1 mx-3 md:mx-0 lg:mx-0 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 lg:mb-15 md:mb-20">
@@ -58,7 +58,7 @@
                                     <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
                                     <span class="block text-sm">{{ transaction.date }}</span>
                                 </div>
-                                {% if transaction.transaction_type == 'deposit' %}
+                                {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
                                 <div class="text-right">
                                     <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
                                     <span class="text-gray-400">{{ transaction.balance_after }}</span>

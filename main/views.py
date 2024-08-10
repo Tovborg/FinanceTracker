@@ -286,6 +286,8 @@ def delete_transaction(request, pk):
         account.balance -= transaction.amount
     elif transaction.transaction_type == 'payment':
         account.balance += transaction.amount
+    elif transaction.transaction_type == 'wage deposit':
+        account.balance -= transaction.amount
     elif transaction.transaction_type == 'transfer':
         account.balance += transaction.amount
 
@@ -304,6 +306,7 @@ def delete_transaction(request, pk):
 
     elif transaction.transaction_type == 'purchase':
         account.balance += transaction.amount
+
 
     account.save()
     transaction.delete()
@@ -401,6 +404,18 @@ def add_new_paycheck(request):
                 status=status
             )
             new_paycheck.save()
+            if new_paycheck.status == 'paid':
+                new_wage_deposit = Transaction(
+                    account=payout_account,
+                    transaction_type='wage deposit',
+                    amount=amount,
+                    date=pay_date,
+                    description=f"Wage deposit from {employer}",
+                    balance_after=payout_account.balance + amount
+                )
+                new_wage_deposit.save()
+                payout_account.balance += amount
+                payout_account.save()
             return redirect('paychecks')
         else:
             print(form.errors)
@@ -419,6 +434,19 @@ def paycheck_info(request, pk):
 @require_POST
 def delete_paycheck(request, pk):
     paycheck = get_object_or_404(Paychecks, pk=pk)
+    if paycheck.status == 'paid':
+        # revert transaction
+        wage_deposit = Transaction.objects.filter(
+            account=paycheck.payout_account,
+            transaction_type='wage deposit',
+            amount=paycheck.amount,
+            date=paycheck.pay_date,
+            description=f"Wage deposit from {paycheck.employer}"
+        ).first()
+        if wage_deposit:
+            paycheck.payout_account.balance -= wage_deposit.amount
+            paycheck.payout_account.save()
+            wage_deposit.delete()
     paycheck.delete()
     return redirect('paychecks')
 

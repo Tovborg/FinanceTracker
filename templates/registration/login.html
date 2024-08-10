@@ -15,8 +15,9 @@
     <form class="space-y-6" method="post">
         {% csrf_token %}
         {% if form.errors %}
-        <div class="flex justify-center font-bold">
-        <p class="" style="color:red !important;">Wrong username or password, try again.</p>
+        <div>
+            <p class="text-center" style="color:red !important;">Wrong username or password, try again.</p>
+            <p style="" class="text-center mt-2">username and password is case-sensitive</p>
         </div>
         {% endif %}
       <div>

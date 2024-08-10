@@ -38,7 +38,7 @@ class Account(models.Model):
         transactions = self.transaction_set.filter(
             date__gte=first_day_of_month,
             date__lte=last_day_of_month,
-            transaction_type__in=['withdrawal', 'payment']
+            transaction_type__in=['withdrawal', 'payment', 'purchase']
         )
 
         total_expenses = sum(transaction.amount for transaction in transactions)
@@ -56,7 +56,7 @@ class Account(models.Model):
         transactions = self.transaction_set.filter(
             date__gte=first_day_of_month,
             date__lte=last_day_of_month,
-            transaction_type='deposit'
+            transaction_type__in=['deposit', 'wage deposit']
         ).exclude(description__startswith='Transfer from')
 
         # Calculate the total income for the month
@@ -72,9 +72,10 @@ class Transaction(models.Model):
         ('payment', 'Payment'),
         ('transfer', 'Transfer'),
         ('purchase', 'Purchase'),
+        ('wage deposit', 'Wage Deposit')
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=11, choices=TRANSACTION_TYPES)
+    transaction_type = models.CharField(max_length=12, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=datetime.date.today)
     description = models.TextField(blank=True, null=True)
@@ -114,6 +115,7 @@ class Paychecks(models.Model):
     PAYCHECK_STATUS = (
         ('pending', 'Pending'),
         ('paid', 'Paid'),
+        ('old paycheck', 'Old Paycheck')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

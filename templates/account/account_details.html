@@ -35,7 +35,7 @@
                                     <a href="{% url 'transaction_detail' transaction.id %}"><span class="block font-semibold text-gray-900">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
                                     <span class="block text-sm text-gray-500">{{ transaction.date }}</span>
                                 </div>
-                                {% if transaction.transaction_type == 'deposit' %}
+                                {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
                                 <div class="text-right">
                                     <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
                                     <span class="text-gray-400">{{ transaction.balance_after }}</span>

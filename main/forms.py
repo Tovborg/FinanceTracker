@@ -143,6 +143,7 @@ class AddPaycheckForm(forms.Form):
         start_pay_period = cleaned_data.get('start_pay_period')
         end_pay_period = cleaned_data.get('end_pay_period')
         status = cleaned_data.get('status')
+
         payout_date = cleaned_data.get('pay_date')
 
         if start_pay_period and end_pay_period and start_pay_period > end_pay_period:
@@ -150,6 +151,13 @@ class AddPaycheckForm(forms.Form):
 
         if status == 'pending' and payout_date < datetime.date.today():
             raise ValidationError("Pay date must be in the future for pending paychecks.")
+
+        if payout_date == 'paid' and payout_date > datetime.date.today():
+            raise ValidationError("Pay date must be in the past for paid paychecks.")
+
+        if payout_date < end_pay_period:
+            raise ValidationError("Pay date must be after the end of the pay period.")
+
 
         return cleaned_data
 
