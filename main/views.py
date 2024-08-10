@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from main.forms import (CreateAccountForm,
+from main.forms import (RegistrationForm,
+                        CreateAccountForm,
                         NewTransactionForm,
                         UserUpdateForm,
                         AddPaycheckForm,
                         ReceiptUploadForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
-from allauth.account.forms import ChangePasswordForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
@@ -105,17 +105,29 @@ def index(request):
         return render(request, "dashboard.html", context=context)
 
 
+def sign_up(request):
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('/')
+    else:
+        form = RegistrationForm()
+    return render(request, "registration/signup.html", {"form": form})
+
+
 # Views to display and handle accounts
 @login_required
 def account_view(request):
     user_accounts = Account.objects.filter(user=request.user)
-    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts})
+    return render(request, "account/account.html", context={"accounts": user_accounts})
 
 
 @login_required
 def account_info(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, "bank_accounts/account_info.html", context={"account": account})
+    return render(request, "account/account_info.html", context={"account": account})
 
 
 @require_POST
@@ -142,7 +154,7 @@ def account_details(request, account_name):
     except EmptyPage:
         transactions = paginator.page(paginator.num_pages)
 
-    return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
+    return render(request, "account/account_details.html", context={"account": account, "transactions": transactions})
 
 
 @login_required
@@ -171,7 +183,7 @@ def add_account(request):
             return redirect('account')
     else:
         form = CreateAccountForm(user=request.user)
-    return render(request, "bank_accounts/add_account.html", {"form": form})
+    return render(request, "account/add_account.html", {"form": form})
 
 @login_required
 @require_POST
@@ -350,7 +362,7 @@ def user_info(request):
                 print(user_form.errors)
         elif 'change_password' in request.POST:
             print('Changing password')
-            password_form = ChangePasswordForm(request.user, request.POST)
+            password_form = PasswordChangeForm(request.user, request.POST)
             user_form = UserUpdateForm(instance=request.user)  # Initialize the user form in case of errors
             if password_form.is_valid():
                 user = password_form.save()
