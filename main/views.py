@@ -350,7 +350,7 @@ def user_info(request):
                 print(user_form.errors)
         elif 'change_password' in request.POST:
             print('Changing password')
-            password_form = PasswordChangeForm(request.user, request.POST)
+            password_form = ChangePasswordForm(request.user, request.POST)
             user_form = UserUpdateForm(instance=request.user)  # Initialize the user form in case of errors
             if password_form.is_valid():
                 user = password_form.save()
