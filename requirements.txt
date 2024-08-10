@@ -7,3 +7,4 @@ requests
 azure-ai-documentintelligence
 Pillow
 django-allauth==64.0.0
+django-allauth[mfa]

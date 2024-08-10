@@ -8,6 +8,7 @@ from main.forms import (RegistrationForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
 from django.contrib.auth import authenticate, login
+
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
@@ -121,13 +122,13 @@ def sign_up(request):
 @login_required
 def account_view(request):
     user_accounts = Account.objects.filter(user=request.user)
-    return render(request, "account/account.html", context={"accounts": user_accounts})
+    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts})
 
 
 @login_required
 def account_info(request, account_name):
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, "account/account_info.html", context={"account": account})
+    return render(request, "bank_accounts/account_info.html", context={"account": account})
 
 
 @require_POST
@@ -154,7 +155,7 @@ def account_details(request, account_name):
     except EmptyPage:
         transactions = paginator.page(paginator.num_pages)
 
-    return render(request, "account/account_details.html", context={"account": account, "transactions": transactions})
+    return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
 
 
 @login_required
@@ -238,7 +239,7 @@ def new_transaction(request, account_name):
             date = form.cleaned_data['date']
             description = form.cleaned_data['description']
             transfer_to = form.cleaned_data['transfer_to']
-
+            print(f"Transfer to: {transfer_to.balance}")
             # Calculate balance after transaction
             if transaction_type == 'deposit':
                 balance_after = account.balance + amount
@@ -248,6 +249,7 @@ def new_transaction(request, account_name):
                 balance_after = account.balance - amount
             elif transaction_type == 'transfer' and transfer_to:
                 balance_after = account.balance - amount
+
             else:
                 balance_after = account.balance
 
@@ -262,7 +264,7 @@ def new_transaction(request, account_name):
             )
             transaction.save()
 
-            handleTransaction(transaction_type, amount, account, transfer_to, transaction)
+            handleTransaction(transaction_type, amount, account, transaction, transfer_to)
             return redirect('account_details', account_name=account_name)
         else:
             print(form.errors)
