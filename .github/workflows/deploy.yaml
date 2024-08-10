@@ -46,6 +46,8 @@ jobs:
             echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
             echo "AZURE_KEY=${{ secrets.AZURE_KEY }}" >> .env
             echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> .env
+            echo "MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN=${{ secrets.MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN }}" >> .env
+          
                
             source venv/bin/activate
             python manage.py migrate

@@ -7,14 +7,14 @@
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account' %}">Accounts</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'paychecks' %}">Paychecks</a>
             <a class="hover:text-gray-400 text-primary md:text-white font-bold" style="font-family: 'Danske Text v2 Regular'" href="{% url 'user_info' %}">Settings</a>
-            <form method="post" action="{% url 'logout' %}" class="hover:text-gray-400">
+            <form method="post" action="{% url 'account_logout' %}" class="hover:text-gray-400">
                 {% csrf_token %}
                 <button type="submit" class="text-primary md:text-white hover:text-gray-400 font-bold" style="font-family: 'Danske Text v2 Regular'">Log out</button>
             </form>
 
             {% else %}
-            <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'login' %}">Login</a>
-            <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'sign_up' %}">Register</a>
+            <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account_login' %}">Login</a>
+            <a class="hover:text-gray-400 text-primary md:text-white" style="font-family: 'Danske Text v2 Regular'" href="{% url 'account_signup' %}">Register</a>
             {% endif %}
             <!-- Must add another tab for user authentication (login etc.) -->
         </div>

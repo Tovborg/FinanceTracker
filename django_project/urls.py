@@ -23,7 +23,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')), # Include main app URLs
-    path('accounts/', include('django.contrib.auth.urls')), # Include Django's built-in authentication URL
+    path('accounts/', include('allauth.urls')), # Include allauth URLs
 ]
 
 if settings.DEBUG:

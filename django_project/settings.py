@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'allauth',
+    'allauth.account',
+    'allauth.mfa',  # Enable Allauth MFA
 ]
 
 if DEBUG:
@@ -54,6 +57,7 @@ if DEBUG:
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -151,6 +156,20 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Allauth settings
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_FORMS = {
+    'signup': 'main.forms.CustomSignupForm',  # replace 'your_app' with your actual app name
+}
+
+MFA_SUPPORTED_TYPES = ['totp', 'webauthn', 'recovery_codes']
+
+MFA_PASSKEY_LOGIN_ENABLED = True
+
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = env('MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN')
+
+MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

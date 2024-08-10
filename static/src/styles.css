@@ -1056,6 +1056,10 @@ select {
   height: 4rem;
 }
 
+.h-4 {
+  height: 1rem;
+}
+
 .max-h-\[200px\] {
   max-height: 200px;
 }
@@ -1110,6 +1114,10 @@ select {
 
 .w-16 {
   width: 4rem;
+}
+
+.w-4 {
+  width: 1rem;
 }
 
 .min-w-\[50px\] {
@@ -1847,6 +1855,11 @@ select {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-button {
+  --tw-text-opacity: 1;
+  color: rgb(7 125 200 / var(--tw-text-opacity));
 }
 
 .placeholder-gray-400::-moz-placeholder {
