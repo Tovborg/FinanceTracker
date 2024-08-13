@@ -122,6 +122,22 @@
     </div>
     <hr class="mt-10 border-black">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <div>
+            <h2 class="text-2xl font-semibold">Security Settings</h2>
+            <p class="text-gray-600">Update your security settings associated with your account.</p>
+        </div>
+        <div class="flex items-center md:justify-end md:col-span-1">
+            <a href="{% url 'mfa_index' %}">
+
+                <button id="security_settings_btn" type="button" class="flex justify-center text-white bg-primary hover:bg-account-cards focus:ring-4 focus:outline-none focus:ring-offset-button_hover dark:focus:ring-offset-button_hover font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <span class="ml-2">Security Settings</span>
+                </button>
+            </a>
+        </div>
+    </div>
+    <hr class="mt-10 border-black">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
         <div class="md:col-span-1">
             <h2 class="text-2xl font-semibold">Delete Account</h2>
             <p class="text-gray-600">No longer want to use this service? You can delete your account here. This action is irreversible. All information related to your account will be deleted permanently!</p>

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load allauth %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+    <div class="container mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+            <div>
+                <h2 class="text-2xl font-semibold">Two-Factor Authentication</h2>
+                <p class="text-gray-600">Activate or disable two-factor authentication for your account</p>
+            </div>
+            <div class="flex items-center md:justify-end md:col-span-1">
+                {% if authenticators.totp %}
+                    {% url 'mfa_deactivate_totp' as disable_url %}
+                <a href="{{ disable_url }}">
+                    <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <span class="ml-2">Disable Two-Factor Authentication</span>
+                    </button>
+                </a>
+
+                {% else %}
+                    {% url 'mfa_activate_totp' as activate_url %}
+                <a href="{{ activate_url }}">
+                    <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-accent hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-offset-accent font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                        <ion-icon name="lock-closed-outline"></ion-icon>
+                        <span class="ml-2">Enable Two-Factor Authentication</span>
+                    </button>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <hr class="mt-10 border-black">
+        {% if "webauthn" in MFA_SUPPORTED_TYPES %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+                <div>
+                    <h2 class="text-2xl font-semibold">Security Keys</h2>
+                    <p class="text-gray-600">Add or remove security keys used for accessing your account using a physical security key like yubikey.</p>
+                    {% if authenticators.webauthn|length %}
+                        <p>
+                            {% blocktranslate count count=authenticators.webauthn|length %}You have added {{ count }} security key.{% plural %}You have added {{ count }} security keys.{% endblocktranslate %}
+                        </p>
+                    {% else %}
+                        <p class="mt-5 text-warning">You have not added any security keys.</p>
+                    {% endif %}
+                </div>
+                <div class="flex items-center md:justify-end md:col-span-1">
+                    {% if authenticators.webauthn|length %}
+                        {% url 'mfa_list_webauthn' as webauthn_list_url %}
+                        <a href="{{ webauthn_list_url }}">
+                            <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-primary hover:bg-account-cards focus:ring-4 focus:outline-none focus:ring-offset-button_hover dark:focus:ring-offset-button_hover font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                <ion-icon name="lock-closed-outline"></ion-icon>
+                                <span class="ml-2">Manage Keys</span>
+                            </button>
+                        </a>
+                    {% else %}
+                        {% url 'mfa_add_webauthn' as webauthn_add_url %}
+                        <a href="{{ webauthn_add_url }}">
+                            <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-accent hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-offset-accent font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                <ion-icon name="lock-closed-outline"></ion-icon>
+                                <span class="ml-2">Add Keys</span>
+                            </button>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <hr class="mt-10 border-black">
+            {% with total_count=authenticators.recovery_codes.generate_codes|length unused_count=authenticators.recovery_codes.get_unused_codes|length %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+                <div>
+                    <h2 class="text-2xl font-semibold">Recovery Codes</h2>
+                    <p class="text-gray-600">Download, Generate or disable recovery codes used for accessing your account if you eg. lose your authenticator app.</p>
+                    {% if authenticators.recovery_codes %}
+
+                        <p class="mt-5 text-accent">{% blocktranslate count unused_count=unused_count %}There is {{ unused_count }} out of {{ total_count }} recovery codes available.{% plural %}There are {{ unused_count }} out of {{ total_count }} recovery codes available.{% endblocktranslate %}</p>
+
+                    {% else %}
+                        <p class="text-warning mt-5">
+                            No recovery codes set up.
+                        </p>
+                    {% endif %}
+                </div>
+                {% if is_mfa_enabled %}
+                <div class="flex flex-col justify-between h-full md:col-span-1">
+                    <div class="flex flex-col items-start md:items-end space-y-4 mt-auto">
+                        {% if authenticators.recovery_codes %}
+                            {% if unused_count > 0 %}
+                                {% url 'mfa_view_recovery_codes' as view_url %}
+                                <a href="{{ view_url }}">
+                                    <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-primary hover:bg-account-cards focus:ring-4 focus:outline-none focus:ring-offset-button_hover dark:focus:ring-offset-button_hover font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                        <ion-icon name="lock-closed-outline"></ion-icon>
+                                        <span class="ml-2">View Codes</span>
+                                    </button>
+                                </a>
+                                {% url 'mfa_download_recovery_codes' as download_url %}
+                                <a href="{{ download_url }}">
+                                    <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-primary hover:bg-account-cards focus:ring-4 focus:outline-none focus:ring-offset-button_hover dark:focus:ring-offset-button_hover font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                        <ion-icon name="lock-closed-outline"></ion-icon>
+                                        <span class="ml-2">Download Codes</span>
+                                    </button>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                        {% url 'mfa_generate_recovery_codes' as generate_url %}
+                            <a href="{{ generate_url }}">
+                                <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-accent hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-offset-accent font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                                    <ion-icon name="lock-closed-outline"></ion-icon>
+                                    <span class="ml-2">Generate Codes</span>
+                                </button>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+            </div>
+            {% endwith %}
+        {% endif %}
+    </div>
+{% endblock %}
