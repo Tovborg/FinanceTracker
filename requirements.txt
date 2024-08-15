@@ -6,5 +6,5 @@ beautifulsoup4
 requests
 azure-ai-documentintelligence
 Pillow
-django-allauth==64.0.0
+django-allauth==64.1.0
 django-allauth[mfa]
