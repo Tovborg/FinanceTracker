@@ -30,6 +30,7 @@ jobs:
             rm -rf FinanceTracker
             git clone https://github.com/Tovborg/FinanceTracker.git
             cd /home/django/FinanceTracker
+            mkdir -p /home/django/FinanceTracker/logs
             
             python3 -m venv venv
             source venv/bin/activate
