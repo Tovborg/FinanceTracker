@@ -191,35 +191,3 @@ CSRF_TRUSTED_ORIGINS = ['https://tovborg-finance.com', 'https://www.tovborg-fina
 
 AZURE_KEY = env('AZURE_KEY')
 AZURE_ENDPOINT = env('AZURE_ENDPOINT')
-
-
-# Sentry settings
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s [%(name)s:%(funcName)s] {%(process)d} %(message)s'
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/django_debug.log'),
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
