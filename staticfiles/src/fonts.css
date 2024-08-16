@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'Danske Text v2 Regular';
+  src: url("/static/fonts/DanskeTextv2Regular.woff") format('woff'),
+      url("/static/fonts/DanskeTextv2Regular.woff2") format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
