@@ -47,12 +47,9 @@
                 <div class="flex items-center md:justify-end md:col-span-1">
                     {% if authenticators.webauthn|length %}
                         {% url 'mfa_list_webauthn' as webauthn_list_url %}
-                        <a href="{{ webauthn_list_url }}">
-                            <button id="disable_mfa_btn" type="button" class="flex justify-center text-white bg-primary hover:bg-account-cards focus:ring-4 focus:outline-none focus:ring-offset-button_hover dark:focus:ring-offset-button_hover font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-                                <ion-icon name="lock-closed-outline"></ion-icon>
-                                <span class="ml-2">Manage Keys</span>
-                            </button>
-                        </a>
+                        {% element button href=webauthn_list_url %}
+                            {% translate "Manage" %}
+                        {% endelement %}
                     {% else %}
                         {% url 'mfa_add_webauthn' as webauthn_add_url %}
                         <a href="{{ webauthn_add_url }}">
