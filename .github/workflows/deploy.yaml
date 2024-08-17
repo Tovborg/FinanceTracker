@@ -27,15 +27,19 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'EOF'
             cd /home/django
+            # Remove old project and clone new one
             rm -rf FinanceTracker
             git clone https://github.com/Tovborg/FinanceTracker.git
             cd /home/django/FinanceTracker
+            # Create logs folder
             mkdir -p /home/django/FinanceTracker/logs
-            
+          
+            # Create virtual environment and install requirements
             python3 -m venv venv
             source venv/bin/activate
             pip install -r requirements.txt
-          
+            
+            # Create .env file from actions secrets
             touch .env
             echo "DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}" >> .env
             echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
@@ -49,14 +53,16 @@ jobs:
             echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> .env
             echo "MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN=${{ secrets.MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN }}" >> .env
           
-               
+            # Activate venv, run migrations and collect static files
             source venv/bin/activate
             python manage.py migrate
             python manage.py collectstatic --noinput
           
+            # Give permissions to logs folder
             sudo chown -R emil:www-data /home/django/FinanceTracker/logs
             sudo chmod -R 775 /home/django/FinanceTracker/logs
             
+            # Restart gunicorn and nginx
             sudo systemctl restart gunicorn
             sudo nginx -t && sudo systemctl restart nginx
           EOF

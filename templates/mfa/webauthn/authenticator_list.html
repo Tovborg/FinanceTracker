@@ -1,71 +1,69 @@
-{% extends "mfa/webauthn/base.html" %}
+{% extends 'base.html' %}
 {% load i18n %}
 {% load static %}
+{% load static %}
 {% load allauth %}
+{% load humanize %}
 {% block content %}
-    {% element h1 %}
-        {% trans "Security Keys" %}
-    {% endelement %}
-    {% if authenticators|length == 0 %}
-        <p>{% blocktranslate %}No security keys have been added.{% endblocktranslate %}</p>
-    {% else %}
-        {% element table %}
-            {% element thead %}
-                {% element th %}
-                    {% translate "Key" %}
-                {% endelement %}
-                {% element th %}
-                    {% translate "Usage" %}
-                {% endelement %}
-                {% element th %}
-                {% endelement %}
-            {% endelement %}
-            {% element tbody %}
-                {% for authenticator in authenticators %}
-                    {% element tr %}
-                        {% element td %}
-                            {{ authenticator }}
-                            {% if authenticator.wrap.is_passwordless is True %}
-                                {% element badge tags="mfa,key,primary" %}
-                                    {% translate "Passkey" %}
-                                {% endelement %}
-                            {% elif authenticator.wrap.is_passwordless is False %}
-                                {% element badge tags="mfa,key,secondary" %}
-                                    {% translate "Security key" %}
-                                {% endelement %}
-                            {% else %}
-                                {% element badge title=_("This key does not indicate whether it is a passkey.") tags="mfa,key,warning" %}
-                                    {% translate "Unspecified" %}
-                                {% endelement %}
-                            {% endif %}
-                        {% endelement %}
-                        {% element td %}
-                            {% blocktranslate with created_at=authenticator.created_at|date:"SHORT_DATE_FORMAT" %}Added on {{ created_at }}{% endblocktranslate %}.
-                            {% if authenticator.last_used_at %}
-                                {% blocktranslate with last_used=authenticator.last_used_at %}Last used {{ last_used }}{% endblocktranslate %}
-                            {% else %}
-                                Not used.
-                            {% endif %}
-                        {% endelement %}
-                        {% element td align="right" %}
-                            {% url 'mfa_edit_webauthn' pk=authenticator.pk as edit_url %}
-                            {% element button tags="mfa,authenticator,edit,tool" href=edit_url %}
-                                {% translate "Edit" %}
-                            {% endelement %}
-                            {% url 'mfa_remove_webauthn' pk=authenticator.pk as remove_url %}
-                            {% element button tags="mfa,authenticator,danger,delete,tool" href=remove_url %}
-                                {% translate "Remove" %}
-                            {% endelement %}
-                        {% endelement %}
-                    {% endelement %}
-                {% endfor %}
-            {% endelement %}
-        {% endelement %}
-    {% endif %}
-    {% url 'mfa_add_webauthn' as add_url %}
-    {% element button href=add_url %}
-        {% translate "Add" %}
-    {% endelement %}
-</li>
-</ul>
+        <section>
+          <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
+              <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
+                {% if authenticators|length == 0 %}
+                    <h2 class="mb-1 text-center font-dansketext leading-tight tracking-tight md:text-2xl text-warning">
+                        No Active Security Keys
+                    </h2>
+                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+                    <p class="font-extralight text-center text-gray-500 mt-3">{% blocktranslate %}You don't have any active authenticators at the moments. Click below to add a new one.{% endblocktranslate %}</p>
+              {% else %}
+                  <h2 class="mb-1 text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
+                      Active Security Keys
+                  </h2>
+                  <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+                  <p class="font-extralight text-center text-gray-500 mt-3">{% blocktranslate %}Here you can see a list and mange your active security keys. You can also add new ones{% endblocktranslate %}</p>
+                    <ul class="text-white mt-5">
+                        {% for authenticator in authenticators %}
+                        <li class="p-2 flex justify-between items-stretch border-b border-neutral-500">
+                            <div class="flex items-center">
+            <!-- Icon on the left -->
+                                <!-- Text Content -->
+                                <div>
+                                    {% if authenticator.wrap.is_passwordless is True %}
+                                    <span class="block font-dansketext text-white">Passkey #{{ forloop.counter }}</span>
+                                    {% elif authenticator.wrap.is_passwordless is False %}
+                                    <span class="block font-dansketext text-white">Security Key #{{ forloop.counter }}</span>
+                                    {% else %}
+                                    <span class="block font-dansketext text-white">Unspecified #{{ forloop.counter }}</span>
+                                    {% endif %}
+                                    <span class="block text-sm text-gray-500">Added: {{ authenticator.created_at|date:"SHORT_DATE_FORMAT" }}</span>
+                                    <span class="block text-sm text-gray-500">Last used: {{ authenticator.last_used_at|naturaltime }}</span>
+                                </div>
+                            </div>
+                            <!-- Amount and Balance -->
+                            <div class="text-right flex justify-center items-center space-x-1">
+                                {% url 'mfa_edit_webauthn' pk=authenticator.pk as edit_url %}
+                                <a href="{{ edit_url }}">
+                                    <button class="p-2 text-white">
+                                        <ion-icon name="pencil-outline"></ion-icon>
+                                    </button>
+                                </a>
+                                {% url 'mfa_remove_webauthn' pk=authenticator.pk as remove_url %}
+                                <a href="{{ remove_url }}">
+                                    <button class="p-2 text-white">
+                                        <ion-icon name="trash-outline"></ion-icon>
+                                    </button>
+                                </a>
+                            </div>
+                        </li>
+                        {% endfor %}
+
+
+                    </ul>
+              {% endif %}
+              {% url 'mfa_add_webauthn' as add_url %}
+                <a href="{{ add_url }}"><button type="submit" class="mt-10 flex justify-center w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add security key</button></a>
+
+              </div>
+          </div>
+
+        </section>
 {% endblock %}
