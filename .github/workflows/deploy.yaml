@@ -62,6 +62,10 @@ jobs:
             sudo chown -R emil:www-data /home/django/FinanceTracker/logs
             sudo chmod -R 775 /home/django/FinanceTracker/logs
             
+            # Build tailwindcss
+            cd /home/django/FinanceTracker/
+            npm run build
+            
             # Restart gunicorn and nginx
             sudo systemctl restart gunicorn
             sudo nginx -t && sudo systemctl restart nginx
