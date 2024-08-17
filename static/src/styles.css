@@ -972,10 +972,6 @@ select {
   margin-top: 1.75rem;
 }
 
-.mr-1 {
-  margin-right: 0.25rem;
-}
-
 .mt-auto {
   margin-top: auto;
 }
@@ -1150,12 +1146,12 @@ select {
   align-items: flex-start;
 }
 
-.items-end {
-  align-items: flex-end;
-}
-
 .items-center {
   align-items: center;
+}
+
+.items-stretch {
+  align-items: stretch;
 }
 
 .justify-start {
@@ -1210,6 +1206,12 @@ select {
   --tw-space-x-reverse: 0;
   margin-right: calc(-1px * var(--tw-space-x-reverse));
   margin-left: calc(-1px * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.space-x-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.25rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
@@ -1328,6 +1330,11 @@ select {
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
 
+.bg-accent {
+  --tw-bg-opacity: 1;
+  background-color: rgb(39 174 96 / var(--tw-bg-opacity));
+}
+
 .bg-account-cards {
   --tw-bg-opacity: 1;
   background-color: rgb(0 35 55 / var(--tw-bg-opacity));
@@ -1373,6 +1380,11 @@ select {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
+.bg-gray-900 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+}
+
 .bg-navigation_mobile {
   --tw-bg-opacity: 1;
   background-color: rgb(214 232 241 / var(--tw-bg-opacity));
@@ -1397,24 +1409,14 @@ select {
   background-color: transparent;
 }
 
-.bg-white {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.bg-accent {
-  --tw-bg-opacity: 1;
-  background-color: rgb(39 174 96 / var(--tw-bg-opacity));
-}
-
 .bg-warning {
   --tw-bg-opacity: 1;
   background-color: rgb(231 76 60 / var(--tw-bg-opacity));
 }
 
-.bg-gray-900 {
+.bg-white {
   --tw-bg-opacity: 1;
-  background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {
@@ -1443,6 +1445,12 @@ select {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+.from-button {
+  --tw-gradient-from: #077DC8 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(7 125 200 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 .from-gray-900 {
   --tw-gradient-from: #111827 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(17 24 39 / 0) var(--tw-gradient-to-position);
@@ -1460,12 +1468,21 @@ select {
   --tw-gradient-stops: var(--tw-gradient-from), #737373 var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
+.via-secondary {
+  --tw-gradient-to: rgb(52 152 219 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #3498DB var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
 .to-\[\#C4C4C400\] {
   --tw-gradient-to: #C4C4C400 var(--tw-gradient-to-position);
 }
 
 .to-gray-800 {
   --tw-gradient-to: #1f2937 var(--tw-gradient-to-position);
+}
+
+.to-primary {
+  --tw-gradient-to: #003f63 var(--tw-gradient-to-position);
 }
 
 .to-transparent {
@@ -1677,18 +1694,6 @@ select {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.text-\[10px\] {
-  font-size: 10px;
-}
-
-.text-\[15px\] {
-  font-size: 15px;
-}
-
-.\!text-\[15px\] {
-  font-size: 15px !important;
 }
 
 .font-bold {
@@ -1929,6 +1934,14 @@ select {
   transition-duration: 150ms;
 }
 
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.duration-500 {
+  transition-duration: 500ms;
+}
+
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1983,6 +1996,11 @@ select {
   background-color: rgb(243 244 246 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-green-800:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 101 52 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-red-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(153 27 27 / var(--tw-bg-opacity));
@@ -1993,9 +2011,23 @@ select {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
-.hover\:bg-green-800:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(22 101 52 / var(--tw-bg-opacity));
+.hover\:bg-gradient-to-r:hover {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+.hover\:from-button_hover:hover {
+  --tw-gradient-from: #106097 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(16 96 151 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.hover\:via-primary:hover {
+  --tw-gradient-to: rgb(0 63 99 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #003f63 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+.hover\:to-secondary:hover {
+  --tw-gradient-to: #3498DB var(--tw-gradient-to-position);
 }
 
 .hover\:text-blue-700:hover {
@@ -2115,12 +2147,12 @@ select {
   --tw-ring-color: rgb(252 165 165 / var(--tw-ring-opacity));
 }
 
-.focus\:ring-offset-button_hover:focus {
-  --tw-ring-offset-color: #106097;
-}
-
 .focus\:ring-offset-accent:focus {
   --tw-ring-offset-color: #27AE60;
+}
+
+.focus\:ring-offset-button_hover:focus {
+  --tw-ring-offset-color: #106097;
 }
 
 .focus-visible\:outline:focus-visible {
@@ -2137,6 +2169,10 @@ select {
 
 .focus-visible\:outline-indigo-600:focus-visible {
   outline-color: #4f46e5;
+}
+
+.focus-visible\:outline-primary:focus-visible {
+  outline-color: #003f63;
 }
 
 .focus-visible\:outline-secondary:focus-visible {

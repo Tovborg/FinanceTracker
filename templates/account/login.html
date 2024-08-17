@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load i18n %}
+{% load allauth account %}
 {% load static %}
 
 {% block content %}
@@ -50,11 +52,19 @@
 
       </div>
     <div class="mt-1">
-                    <button type="submit" class="flex w-full justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Sign in</button>
-                </div>
+        <button type="submit" class="flex w-full justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Sign in</button>
+    </div>
 
     </form>
+    {% if PASSKEY_LOGIN_ENABLED %}
+    <hr class="mt-6 border-gray-300">
+    <div class="mt-1">
+        <button type="submit" form="mfa_login" id="passkey_login" class="flex w-full justify-center rounded-md bg-gradient-to-r from-button via-secondary to-primary px-4 py-2 text-sm font-semibold leading-6 text-white shadow-lg hover:bg-gradient-to-r hover:from-button_hover hover:via-primary hover:to-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-500 ease-in-out mt-5">
+            {% trans "Sign in with a passkey" %}
+        </button>
 
+    </div>
+    {% endif %}
     <p class="mt-10 text-center text-sm text-gray-500">
       Don't have an account?
       <a href="{% url 'account_signup' %}" class="font-semibold leading-6 text-registration_text hover:text-button_hover">Create one now</a>
@@ -74,4 +84,10 @@
             }
         });
     </script>
+{% endblock %}
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+    {% endif %}
 {% endblock %}
