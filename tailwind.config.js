@@ -2,6 +2,7 @@
 const plugin = require('tailwindcss/plugin')
 
 module.exports = {
+  purge: false,
   content: [
       './templates/**/*.html' //new
   ],
