@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load allauth %}
+{% block content %}
+<section>
+    <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
+        <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
+            <h2 class="mb-1 text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
+                Add new Security Key
+            </h2>
+            <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+            {% if form.errors %}
+                <div class="bg-red-100 mb-3 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold text-gray-50">Oops!</strong>
+                    <span class="block sm:inline text-warning">{{ form.errors }}</span>
+                </div>
+             {% endif %}
+            <p class="font-extralight text-center text-gray-500 mt-3">
+                {% blocktranslate %}To protect your account with a physical security key or passkey, fill in the name and follow the on-screen instructions.{% endblocktranslate %}
+            </p>
+            {% url 'mfa_add_webauthn' as action_url %}
+            <form method="post" class="mt-4 space-y-4 lg:mt-5 md:space-y-5" action="{{ action_url }}">
+            {% csrf_token %}
+                    <div>
+                        <label for="id_name" class="block mb-3 text-sm font-medium text-gray-900 text-white">Name</label>
+                        <input type="text" placeholder="Master Key" id="id_name" name="name" class="bg-gray-700 border border-gray-600 font-dansketext text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 block w-full p-2.5">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" name="passwordless" id="id_passwordless" class="bg-gray-700 border border-gray-600 text-blue-600 rounded focus:ring-blue-500 focus:border-blue-500 cursor-pointer w-5 h-5">
+                        <label for="id_passwordless" class="ml-2 text-sm font-medium text-gray-900 text-white">Passwordless?</label>
+                    </div>
+                    <input type="hidden" name="credential" value="null" id="id_credential">
+                    <button type="button" id="mfa_webauthn_add" class="w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add Security Key</button>
+                </form>
+            {% include "mfa/webauthn/snippets/scripts.html" %}
+            {{ js_data|json_script:"js_data" }}
+            <script>
+                allauth.webauthn.forms.addForm({
+                    ids: {
+                        add: "mfa_webauthn_add",
+                        passwordless: "{{ form.passwordless.auto_id }}",
+                        credential: "id_credential"
+                    },
+                    data: JSON.parse(document.getElementById('js_data').textContent)
+                });
+
+                // This JavaScript should handle the WebAuthn process and populate the hidden credential field.
+            </script>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
