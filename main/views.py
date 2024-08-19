@@ -6,9 +6,6 @@ from main.forms import (CreateAccountForm,
                         ReceiptUploadForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
-from django.contrib.auth import authenticate, login
-
-from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from main.models import Account, Transaction, Paychecks, Item
@@ -19,10 +16,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import datetime
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
-import requests
-from bs4 import BeautifulSoup
 from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
 from .utils.utils import (compress_image,
@@ -57,7 +52,6 @@ def index(request):
     accounts = Account.objects.filter(user=request.user)
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
-    current_date = datetime.date.today()
     payday = get_payday_info()
     try:
         payday = int(payday)
@@ -86,7 +80,8 @@ def index(request):
                "no_accounts": no_accounts,
                'total_expenses': total_expenses,
                'total_income': total_income,
-               'current_date': current_date,
+               'current_date': timezone.now().date(),
+               'current_hour': timezone.now().hour,
                'payday': payday}
 
     if favorites_count == 0:
