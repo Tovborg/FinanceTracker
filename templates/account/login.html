@@ -4,76 +4,88 @@
 {% load static %}
 
 {% block content %}
-<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <div class="flex justify-center">
-          <ion-icon class="text-5xl text-primary" name="wallet-outline"></ion-icon>
-      </div>
-
-    <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign in to your account</h2>
-  </div>
-
-  <div class="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
-    <form class="space-y-6" method="post" action="{% url 'account_login' %}">
-        {% csrf_token %}
-        {% if form.errors %}
-        <div>
-            <p class="text-center" style="color:red !important;">Wrong username or password, try again.</p>
-            <p style="" class="text-center mt-2">username and password is case-sensitive</p>
-        </div>
-        {% endif %}
-      <div>
-        <label for="id_login" class="block text-sm font-medium leading-6 text-gray-900">Username</label>
-        <div class="mt-2">
-          <input type="hidden" name="webauthn" autocomplete="webauthn">
-          <input id="id_login" name="login" type="text" autocomplete="email" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
-        </div>
-      </div>
-
-      <div>
-        <div class="flex items-center justify-between">
-          <label for="id_password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-          <div class="text-sm">
-            <a href="{% url 'account_reset_password' %}" class="font-light text-registration_text hover:text-button_hover">Forgot password?</a>
-          </div>
-        </div>
-        <div class="relative w-full mt-2">
-            <div class="absolute inset-y-0 right-0 flex items-center px-2">
-              <ion-icon id="visibility-toggle" class="py-2 text-xl cursor-pointer text-gray-500" name="eye-off-outline"></ion-icon>
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="flex justify-center">
+                <ion-icon class="text-5xl text-primary" name="wallet-outline"></ion-icon>
             </div>
-            <input id="id_password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+
+            <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign in to your
+                account</h2>
         </div>
-{#          Remember me field #}
-        <div class="flex items-center mt-3">
-          <input id="id_remember" name="remember" type="checkbox" class="h-4 w-4 text-button border-gray-300 rounded focus:ring-button_hover">
-          <label for="remember-me" class="ml-2 block
+
+        <div class="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form class="space-y-6" method="post" action="{% url 'account_login' %}">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div>
+                        <p class="text-center" style="color:red !important;">Wrong username or password, try again.</p>
+                        <p style="" class="text-center mt-2">username and password is case-sensitive</p>
+                    </div>
+                {% endif %}
+                <div>
+                    <label for="id_login" class="block text-sm font-medium leading-6 text-gray-900">Username</label>
+                    <div class="mt-2">
+                        <input type="hidden" name="webauthn" autocomplete="webauthn">
+                        <input id="id_login" name="login" type="text" autocomplete="email" required
+                               class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between">
+                        <label for="id_password"
+                               class="block text-sm font-medium leading-6 text-gray-900">Password</label>
+                        <div class="text-sm">
+                            <a href="{% url 'account_reset_password' %}"
+                               class="font-light text-registration_text hover:text-button_hover">Forgot password?</a>
+                        </div>
+                    </div>
+                    <div class="relative w-full mt-2">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                            <ion-icon id="visibility-toggle" class="py-2 text-xl cursor-pointer text-gray-500"
+                                      name="eye-off-outline"></ion-icon>
+                        </div>
+                        <input id="id_password" name="password" type="password" autocomplete="current-password" required
+                               class="block w-full rounded-md border-0 py-1.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-button_hover sm:text-sm sm:leading-6">
+                    </div>
+                    {#          Remember me field #}
+                    <div class="flex items-center mt-3">
+                        <input id="id_remember" name="remember" type="checkbox"
+                               class="h-4 w-4 text-button border-gray-300 rounded focus:ring-button_hover">
+                        <label for="remember-me" class="ml-2 block
             text-sm font-medium leading-6 text-gray-900">Remember me</label>
+                    </div>
+
+                </div>
+                <div class="mt-1">
+                    <button type="submit"
+                            class="flex w-full justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">
+                        Sign in
+                    </button>
+                </div>
+
+            </form>
+            {% if PASSKEY_LOGIN_ENABLED %}
+                <hr class="mt-6 border-gray-300">
+                <div class="mt-1">
+                    <button type="submit" form="mfa_login" id="passkey_login"
+                            class="flex w-full justify-center rounded-md px-4 py-2 text-sm font-semibold leading-6 text-white shadow-lg mt-5 transition-all duration-500 ease-in-out"
+                            style="background-image: linear-gradient(to right, #077DC8, #3498DB, #003f63);"
+                            onmouseover="this.style.backgroundImage='linear-gradient(to right, #106097, #4A90E2, #002d4b)'"
+                            onmouseout="this.style.backgroundImage='linear-gradient(to right, #077DC8, #3498DB, #003f63)'">
+                        Sign in with passkey
+                    </button>
+
+                </div>
+            {% endif %}
+            <p class="mt-10 text-center text-sm text-gray-500">
+                Don't have an account?
+                <a href="{% url 'account_signup' %}"
+                   class="font-semibold leading-6 text-registration_text hover:text-button_hover">Create one now</a>
+            </p>
         </div>
-
-      </div>
-    <div class="mt-1">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Sign in</button>
     </div>
-
-    </form>
-    {% if PASSKEY_LOGIN_ENABLED %}
-    <hr class="mt-6 border-gray-300">
-    <div class="mt-1">
-        <button type="submit" form="mfa_login" id="passkey_login" class="flex w-full justify-center rounded-md px-4 py-2 text-sm font-semibold leading-6 text-white shadow-lg mt-5 transition-all duration-500 ease-in-out"
-        style="background-image: linear-gradient(to right, #077DC8, #3498DB, #003f63);"
-        onmouseover="this.style.backgroundImage='linear-gradient(to right, #106097, #4A90E2, #002d4b)'"
-        onmouseout="this.style.backgroundImage='linear-gradient(to right, #077DC8, #3498DB, #003f63)'">
-            Sign in with passkey
-        </button>
-
-    </div>
-    {% endif %}
-    <p class="mt-10 text-center text-sm text-gray-500">
-      Don't have an account?
-      <a href="{% url 'account_signup' %}" class="font-semibold leading-6 text-registration_text hover:text-button_hover">Create one now</a>
-    </p>
-  </div>
-</div>
     <script>
         const visibilityToggle = document.getElementById('visibility-toggle');
         const passwordInput = document.getElementById('id_password');

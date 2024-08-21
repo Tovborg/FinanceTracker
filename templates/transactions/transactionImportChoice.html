@@ -1,28 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-     <div class="container mx-auto mt-10 h-screen">
-         <h2 class="text-3xl text-black font-dansketext text-center mb-7">New Transaction for {{ account.name }}</h2>
-         <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-         <div class="justify-center text-center mt-10">
-            <a href="{% url 'new_transaction' account.name %}"><button type="button" style="background: #003f63 !important;" class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Manual Transaction</button></a>
-         </div>
-         <form method="post" id="receipt_upload_form" class="text-center mt-10" action="{% url 'analyze_receipt' account.name %}" enctype="multipart/form-data">
+    <div class="container mx-auto mt-10 h-screen">
+        <h2 class="text-3xl text-black font-dansketext text-center mb-7">New Transaction for {{ account.name }}</h2>
+        <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+        <div class="justify-center text-center mt-10">
+            <a href="{% url 'new_transaction' account.name %}">
+                <button type="button" style="background: #003f63 !important;"
+                        class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                    Manual Transaction
+                </button>
+            </a>
+        </div>
+        <form method="post" id="receipt_upload_form" class="text-center mt-10"
+              action="{% url 'analyze_receipt' account.name %}" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" id="id_receipt_image" name="receipt_image" accept="image/png, image/jpeg, image/jpg" class="hidden">
+            <input type="file" id="id_receipt_image" name="receipt_image" accept="image/png, image/jpeg, image/jpg"
+                   class="hidden">
 
             <!-- Label styled as a button -->
-            <label for="id_receipt_image" class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
+            <label for="id_receipt_image"
+                   class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
                 Analyze Receipt
             </label>
 
-             {% if error_message %}
-             <div class="mt-4" id="error_message">
-                 <p class="text-red-700 font-dansketext">File is too big or another error occured</p>
-             </div>
-             {% endif %}
+            {% if error_message %}
+                <div class="mt-4" id="error_message">
+                    <p class="text-red-700 font-dansketext">File is too big or another error occured</p>
+                </div>
+            {% endif %}
         </form>
-     </div>
+    </div>
 
     <script>
         document.getElementById('id_receipt_image').addEventListener('change', function () {

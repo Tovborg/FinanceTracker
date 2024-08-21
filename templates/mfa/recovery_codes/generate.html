@@ -3,19 +3,24 @@
 {% load allauth %}
 {% block content %}
     <section>
-          <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
-              <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
-                  <h2 class="mb-1 text-xl text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
-                      Generate Recovery Codes
-                  </h2>
-                  <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-                  <p class="font-extralight mt-3 text-gray-500 dark:text-gray-400 text-center">You're about to generate a new set of recovery codes for your account{% if unused_code_count %}, this will invalidate your existing codes. Are you sure?{% else %}. Are you sure?{% endif %}</p>
-                  {% url 'mfa_generate_recovery_codes' as generate_codes %}
-                  <form method="post" action="{{ generate_codes }}">
+        <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
+            <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
+                <h2 class="mb-1 text-xl text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
+                    Generate Recovery Codes
+                </h2>
+                <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+                <p class="font-extralight mt-3 text-gray-500 dark:text-gray-400 text-center">You're about to generate a
+                    new set of recovery codes for your account{% if unused_code_count %}, this will invalidate your
+                        existing codes. Are you sure?{% else %}. Are you sure?{% endif %}</p>
+                {% url 'mfa_generate_recovery_codes' as generate_codes %}
+                <form method="post" action="{{ generate_codes }}">
                     {% csrf_token %}
-                    <button id="resend-button" type="submit" class="mt-5 w-full text-white {% if unused_code_count %}bg-warning hover:bg-red-800{% else %}bg-button hover:bg-button_hover{% endif %} focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">Yes, I'm sure.</button>
-                  </form>
-              </div>
-          </div>
+                    <button id="resend-button" type="submit"
+                            class="mt-5 w-full text-white {% if unused_code_count %}bg-warning hover:bg-red-800{% else %}bg-button hover:bg-button_hover{% endif %} focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Yes, I'm sure.
+                    </button>
+                </form>
+            </div>
+        </div>
     </section>
 {% endblock %}

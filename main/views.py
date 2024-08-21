@@ -8,6 +8,7 @@ from main.forms import (CreateAccountForm,
                         IncludeTransactionInStatisticsForm)
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.sessions.models import Session
 from main.models import Account, Transaction, Paychecks, Item
 from django.views.decorators.http import require_POST
 from django.views import View
@@ -22,11 +23,10 @@ from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
 from .utils.utils import (compress_image,
                           serialize_analysis_results,
-                          format_price,
-                          clean_and_parse_json_string, extract_amount, extract_currency,
                           create_analysis_context,
                           get_payday_info,
                           handleTransaction)
+from allauth.mfa.base.views import IndexView as AllauthIndexView
 from io import BytesIO
 import tempfile
 import os
@@ -608,3 +608,20 @@ class ConfirmReceiptAnalysisView(View, LoginRequiredMixin):
             context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
             return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
 
+
+class CustomIndexView(AllauthIndexView):
+    template_name = "mfa/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        sessions = Session.objects.filter(expire_date__gte=timezone.now())
+
+        user_sessions = []
+        for session in sessions:
+            print(session.user_agent)
+            data = session.get_decoded()
+            if data.get('_auth_user_id') == str(self.request.user.id):
+                user_sessions.append(session)
+        context['user_sessions'] = user_sessions
+        return context

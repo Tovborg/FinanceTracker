@@ -5,7 +5,7 @@
         <div class="bg-cards rounded-lg h-[80%] w-[80%] mb-8 md:w-[70%] lg:w-[50%] shadow-lg p-6">
             <!-- Content goes here -->
             <h1 class="text-3xl font-dansketext mb-4 text-center">New transaction for {{ account.name }}</h1>
-            <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+            <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
             <form method="post" action="{% url 'new_transaction' account.name %}">
                 {% csrf_token %}
                 {% if form.errors %}
@@ -31,7 +31,10 @@
                                 </label>
                                 <div class="mt-2">
                                     <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline sm:max-w-md">
-                                        <input type="number" maxlength="10" step="0.1" required name="amount" id="id_amount" class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="Account Balance {{ account.balance }}">
+                                        <input type="number" maxlength="10" step="0.1" required name="amount"
+                                               id="id_amount"
+                                               class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                                               placeholder="Account Balance {{ account.balance }}">
 
                                     </div>
                                 </div>
@@ -43,12 +46,14 @@
                                 {% if form.errors %}
                                     <span class="font-dansketext text-warning">{{ form.errors.transaction_type }}</span>
                                 {% endif %}
-                                <label for="id_transaction_type" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                <label for="id_transaction_type"
+                                       class="block text-sm font-dansketext leading-6 text-gray-900">
                                     Transaction Type
                                 </label>
                                 <div class="mt-2">
                                     <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline sm:max-w-md">
-                                        <select name="transaction_type" id="id_transaction_type" required class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                        <select name="transaction_type" id="id_transaction_type" required
+                                                class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
                                             <option value="deposit">Deposit</option>
                                             <option value="withdrawal">Withdrawal</option>
                                             <option value="transfer">Transfer</option>
@@ -64,15 +69,17 @@
                                 {% if form.errors %}
                                     <span class="font-dansketext text-warning">{{ form.errors.transfer_to }}</span>
                                 {% endif %}
-                                <label for="id_transfer_to" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                <label for="id_transfer_to"
+                                       class="block text-sm font-dansketext leading-6 text-gray-900">
                                     Transfer To?
                                 </label>
                                 <div class="mt-2">
                                     <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline sm:max-w-md">
-                                        <select name="transfer_to" id="id_transfer_to"  class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
-                                        {% for account in accounts %}
-                                            <option value="{{ account.pk }}">{{ account.name }}</option>
-                                        {% endfor %}
+                                        <select name="transfer_to" id="id_transfer_to"
+                                                class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                            {% for account in accounts %}
+                                                <option value="{{ account.pk }}">{{ account.name }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -84,81 +91,85 @@
                                 {% if form.errors %}
                                     <span class="font-dansketext text-warning">{{ form.errors.date }}</span>
                                 {% endif %}
-                                <label for="id_date_month" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                <label for="id_date_month"
+                                       class="block text-sm font-dansketext leading-6 text-gray-900">
                                     Date of Transaction
                                 </label>
                                 <div class="mt-2 flex space-x-2">
-                                <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
-                                    <select name="date_month" id="id_date_month" required class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>
-                                        <option value="7">July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
-                                    </select>
+                                    <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
+                                        <select name="date_month" id="id_date_month" required
+                                                class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                            <option value="1">January</option>
+                                            <option value="2">February</option>
+                                            <option value="3">March</option>
+                                            <option value="4">April</option>
+                                            <option value="5">May</option>
+                                            <option value="6">June</option>
+                                            <option value="7">July</option>
+                                            <option value="8">August</option>
+                                            <option value="9">September</option>
+                                            <option value="10">October</option>
+                                            <option value="11">November</option>
+                                            <option value="12">December</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
+                                        <select name="date_day" id="id_date_day" required
+                                                class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                            <option value="24">24</option>
+                                            <option value="25">25</option>
+                                            <option value="26">26</option>
+                                            <option value="27">27</option>
+                                            <option value="28">28</option>
+                                            <option value="29">29</option>
+                                            <option value="30">30</option>
+                                            <option value="31">31</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
+                                        <select name="date_year" id="id_date_year" required
+                                                class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                            <option value="2024">2024</option>
+                                            <option value="2022">2023</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2016">2016</option>
+                                            <option value="2015">2015</option>
+                                            <option value="2014">2014</option>
+                                            <option value="2013">2013</option>
+                                            <option value="2012">2012</option>
+                                            <option value="2011">2011</option>
+                                            <option value="2010">2010</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
-                                    <select name="date_day" id="id_date_day" required class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
-                                        <option value="9">9</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
-                                        <option value="13">13</option>
-                                        <option value="14">14</option>
-                                        <option value="15">15</option>
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
-                                        <option value="22">22</option>
-                                        <option value="23">23</option>
-                                        <option value="24">24</option>
-                                        <option value="25">25</option>
-                                        <option value="26">26</option>
-                                        <option value="27">27</option>
-                                        <option value="28">28</option>
-                                        <option value="29">29</option>
-                                        <option value="30">30</option>
-                                        <option value="31">31</option>
-                                    </select>
-                                </div>
-                                <div class="flex-1 rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline">
-                                    <select name="date_year" id="id_date_year" required class="block w-full border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
-                                        <option value="2024">2024</option>
-                                        <option value="2022">2023</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2021">2021</option>
-                                        <option value="2020">2020</option>
-                                        <option value="2019">2019</option>
-                                        <option value="2018">2018</option>
-                                        <option value="2017">2017</option>
-                                        <option value="2016">2016</option>
-                                        <option value="2015">2015</option>
-                                        <option value="2014">2014</option>
-                                        <option value="2013">2013</option>
-                                        <option value="2012">2012</option>
-                                        <option value="2011">2011</option>
-                                        <option value="2010">2010</option>
-                                    </select>
-                                </div>
-                            </div>
 
                             </div>
 
@@ -168,12 +179,15 @@
                                 {% if form.errors %}
                                     <span class="font-dansketext text-warning">{{ form.errors.description }}</span>
                                 {% endif %}
-                                <label for="id_description" type="" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                <label for="id_description" type=""
+                                       class="block text-sm font-dansketext leading-6 text-gray-900">
                                     Transaction Description (Optional)
                                 </label>
                                 <div class="mt-2">
                                     <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline sm:max-w-md">
-                                        <input type="text" name="description" id="id_description" class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="Danske Opsparing">
+                                        <input type="text" name="description" id="id_description"
+                                               class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                                               placeholder="Danske Opsparing">
 
                                     </div>
                                 </div>
@@ -181,20 +195,28 @@
 
                         </div>
                         <div class="mt-3 flex justify-start">
-                            <button type="submit" class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Add Transaction</button>
-                             <a href="{% url 'account_details' account.name %}"><button type="button" class="flex w-auto justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Go Back</button></a>
+                            <button type="submit"
+                                    class="flex mr-2 w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">
+                                Add Transaction
+                            </button>
+                            <a href="{% url 'account_details' account.name %}">
+                                <button type="button"
+                                        class="flex w-auto justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">
+                                    Go Back
+                                </button>
+                            </a>
 
-{#                            <div class="grow flex justify-start gap-4 md:gap"#}
+                            {#                            <div class="grow flex justify-start gap-4 md:gap"#}
 
-{#                    <div class="grid grid-cols-2 w-1/3 gap-x-3">#}
-{#                        <div class="flex flex-col">#}
-{#                            <button type="submit" class="flex w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Add Account</button>#}
-{#                        </div>#}
-{#                        <div class="flex flex-col">#}
-{#                            <a href="{% url 'account' %}"><button type="button" class="flex w-auto justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Go Back</button></a>#}
-{#                        </div>#}
-{#                    </div>#}
-                </div>
+                            {#                    <div class="grid grid-cols-2 w-1/3 gap-x-3">#}
+                            {#                        <div class="flex flex-col">#}
+                            {#                            <button type="submit" class="flex w-auto justify-center rounded-md bg-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Add Account</button>#}
+                            {#                        </div>#}
+                            {#                        <div class="flex flex-col">#}
+                            {#                            <a href="{% url 'account' %}"><button type="button" class="flex w-auto justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-button_hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 mt-5">Go Back</button></a>#}
+                            {#                        </div>#}
+                            {#                    </div>#}
+                        </div>
                     </div>
 
                 </div>
@@ -220,7 +242,7 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-        // Get the current date
+            // Get the current date
             const today = new Date();
             const currentMonth = today.getMonth() + 1; // Months are 0-based in JavaScript
             const currentDay = today.getDate();

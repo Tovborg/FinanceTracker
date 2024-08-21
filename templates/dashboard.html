@@ -7,15 +7,18 @@
 
 
             <div class="container mx-auto p-6">
-               <div class="flex justify-between items-start mb-6">
-               {% if current_hour < 12 %}
-                   <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Morning, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
-                {% elif current_hour < 18 %}
-                   <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Afternoon, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
-               {% else %}
-                   <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Evening, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
-               {% endif %}
-               </div>
+                <div class="flex justify-between items-start mb-6">
+                    {% if current_hour < 12 %}
+                        <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Morning,
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
+                    {% elif current_hour < 18 %}
+                        <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Afternoon,
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
+                    {% else %}
+                        <h1 class="text-4xl" style="font-family: 'Danske Text v2 Regular'">Good Evening,
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!</h1>
+                    {% endif %}
+                </div>
             </div>
             <div class="grid grid-cols-1 mx-3 md:mx-0 lg:mx-0 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 lg:mb-15 md:mb-20">
                 <div class="bg-cards p-4 shadow">
@@ -24,62 +27,68 @@
                 </div>
                 <div class="bg-cards p-4 shadow">
                     {% if payday|is_number %}
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday in</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }} days</p>
+                        <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday in</h2>
+                        <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }} days</p>
                     {% else %}
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday on</h2>
-                    <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }}</p>
+                        <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Payday on</h2>
+                        <p class="text-2xl text-center md:text-start lg:text-start">{{ payday }}</p>
                     {% endif %}
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income ({{ current_date|date:"F" }})</h2>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Income
+                        ({{ current_date|date:"F" }})</h2>
                     <p class="text-2xl text-accent text-center md:text-start lg:text-start">DKK {{ total_income }}</p>
                 </div>
                 <div class="bg-cards p-4 shadow">
-                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Expenses ({{ current_date|date:"F" }})</h2>
-                    <p class="text-2xl text-red-700 text-center md:text-start lg:text-start">DKK -{{ total_expenses }}</p>
+                    <h2 class="text-xl text-center md:text-start lg:text-start font-dansketext">Total Expenses
+                        ({{ current_date|date:"F" }})</h2>
+                    <p class="text-2xl text-red-700 text-center md:text-start lg:text-start">DKK
+                        -{{ total_expenses }}</p>
                 </div>
             </div>
 
-            <div id="accounts" class="grid mb-3 mx-3 md:mx-0 lg:mx-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:grow mb-6">
+            <div id="accounts"
+                 class="grid mb-3 mx-3 md:mx-0 lg:mx-0 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:grow mb-6">
                 {% for account in accounts %}
-                <div class="bg-account-cards mobile-only:mb-3 rounded-lg p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
-                    <div class="flex flex-col md:flex-row justify-between items-center">
-                        <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
-                            {{ account.name }}
-                            <a href="{% url 'account_details' account.name %}" class="flex items-center ml-2">
-                                <ion-icon name="chevron-forward-outline" class="text-gray-500"></ion-icon>
-                            </a>
-                        </h2>
-                        <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
-                    </div>
+                    <div class="bg-account-cards mobile-only:mb-3 rounded-lg p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
+                        <div class="flex flex-col md:flex-row justify-between items-center">
+                            <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
+                                {{ account.name }}
+                                <a href="{% url 'account_details' account.name %}" class="flex items-center ml-2">
+                                    <ion-icon name="chevron-forward-outline" class="text-gray-500"></ion-icon>
+                                </a>
+                            </h2>
+                            <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
+                        </div>
 
 
-                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-                    <div class="overflow-y-auto mobile-only:!hidden max-h-[200px]">
-                        <ul class="text-white">
-                            {% for transaction in account.get_three_recent_transactions %}
-                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
-                                <div>
-                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
-                                    <span class="block text-sm">{{ transaction.date }}</span>
-                                </div>
-                                {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
-                                <div class="text-right">
-                                    <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
-                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
-                                </div>
-                                {% else %}
-                                <div class="text-right">
-                                    <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
-                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
-                                </div>
-                                {% endif %}
-                            </li>
-                            {% endfor %}
-                        </ul>
+                        <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+                        <div class="overflow-y-auto mobile-only:!hidden max-h-[200px]">
+                            <ul class="text-white">
+                                {% for transaction in account.get_three_recent_transactions %}
+                                    <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                        <div>
+                                            <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}
+                                                {{ transaction.merchant_name }}{% else %}
+                                                {{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
+                                            <span class="block text-sm">{{ transaction.date }}</span>
+                                        </div>
+                                        {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
+                                            <div class="text-right">
+                                                <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                                <span class="text-gray-400">{{ transaction.balance_after }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-right">
+                                                <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
+                                                <span class="text-gray-400">{{ transaction.balance_after }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
 

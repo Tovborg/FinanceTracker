@@ -2,52 +2,60 @@
 {% load i18n %}
 {% load allauth %}
 {% block content %}
-        <section>
-          <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
-              <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
-                  <h2 class="mb-1 text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
-                      Two-Factor Authentication
-                  </h2>
-                  <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
-                  <p class="font-extralight text-center text-gray-500 mt-3">{% blocktranslate %}This account is protected by two-factor authentication. Enter authenticator code below to sign in.{% endblocktranslate %}</p>
-                  {% url 'mfa_authenticate' as action_url %}
-                  <form class="mt-4 space-y-4 lg:mt-5 md:space-y-5" method="post" action="{{ action_url }}">
-                      {% csrf_token %}
-                      <div>
-                          <label for="authenticator_secret" class="block mb-3 text-sm font-medium text-gray-900 text-white">Authenticator Code</label>
-                          <input type="text" required id="id_code" name="code" class="bg-gray-700 border border-gray-600 font-dansketext text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 block w-full p-2.5">
-                      </div>
-                      <button type="submit" class="w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">Authenticate</button>
-                  </form>
-                  {% if "webauthn" in MFA_SUPPORTED_TYPES %}
-                        <button type="button" id="mfa_webauthn_authenticate" class="flex items-center justify-center w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 mt-5 py-2.5 text-center">
-                            <ion-icon class="text-xl mr-2" name="key-outline" class="mr-2"></ion-icon>
-                            Use Security Key
-                        </button>
-                    {% endif %}
+    <section>
+        <div class="flex flex-col items-center px-6 py-8 mx-auto md:h-screen">
+            <div class="w-full p-6 bg-account-cards rounded-lg shadow md:mt-0 sm:max-w-md sm:p-8">
+                <h2 class="mb-1 text-center font-dansketext leading-tight tracking-tight md:text-2xl text-white">
+                    Two-Factor Authentication
+                </h2>
+                <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+                <p class="font-extralight text-center text-gray-500 mt-3">{% blocktranslate %}This account is protected
+                    by two-factor authentication. Enter authenticator code below to sign in.{% endblocktranslate %}</p>
+                {% url 'mfa_authenticate' as action_url %}
+                <form class="mt-4 space-y-4 lg:mt-5 md:space-y-5" method="post" action="{{ action_url }}">
+                    {% csrf_token %}
+                    <div>
+                        <label for="authenticator_secret"
+                               class="block mb-3 text-sm font-medium text-gray-900 text-white">Authenticator
+                            Code</label>
+                        <input type="text" required id="id_code" name="code"
+                               class="bg-gray-700 border border-gray-600 font-dansketext text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 block w-full p-2.5">
+                    </div>
+                    <button type="submit"
+                            class="w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        Authenticate
+                    </button>
+                </form>
+                {% if "webauthn" in MFA_SUPPORTED_TYPES %}
+                    <button type="button" id="mfa_webauthn_authenticate"
+                            class="flex items-center justify-center w-full text-white bg-button hover:bg-button_hover focus:ring-4 focus:outline-none focus:ring-offset-button_hover font-medium rounded-lg text-sm px-5 mt-5 py-2.5 text-center">
+                        <ion-icon class="text-xl mr-2" name="key-outline" class="mr-2"></ion-icon>
+                        Use Security Key
+                    </button>
+                {% endif %}
 
-                    {% if "webauthn" in MFA_SUPPORTED_TYPES %}
-                        {% element form id="webauthn_form" form=webauthn_form method="post" action=action_url no_visible_fields=True %}
-                            {% slot body %}
-                                {% csrf_token %}
-                                {% element fields form=webauthn_form %}
-                                {% endelement %}
-                            {% endslot %}
-                        {% endelement %}
-                        {{ js_data|json_script:"js_data" }}
-                        {% include "mfa/webauthn/snippets/scripts.html" %}
-                        <script type="text/javascript">
-                            allauth.webauthn.forms.authenticateForm({
-                                ids: {
-                                    authenticate: "mfa_webauthn_authenticate",
-                                    credential: "{{ webauthn_form.credential.auto_id }}"
-                                },
-                                data: JSON.parse(document.getElementById('js_data').textContent)
-                            });
-                        </script>
-                    {% endif %}
+                {% if "webauthn" in MFA_SUPPORTED_TYPES %}
+                    {% element form id="webauthn_form" form=webauthn_form method="post" action=action_url no_visible_fields=True %}
+                        {% slot body %}
+                            {% csrf_token %}
+                            {% element fields form=webauthn_form %}
+                            {% endelement %}
+                        {% endslot %}
+                    {% endelement %}
+                    {{ js_data|json_script:"js_data" }}
+                    {% include "mfa/webauthn/snippets/scripts.html" %}
+                    <script type="text/javascript">
+                        allauth.webauthn.forms.authenticateForm({
+                            ids: {
+                                authenticate: "mfa_webauthn_authenticate",
+                                credential: "{{ webauthn_form.credential.auto_id }}"
+                            },
+                            data: JSON.parse(document.getElementById('js_data').textContent)
+                        });
+                    </script>
+                {% endif %}
 
-              </div>
-          </div>
-        </section>
+            </div>
+        </div>
+    </section>
 {% endblock %}

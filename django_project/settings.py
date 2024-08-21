@@ -144,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    }
 ]
 
 
@@ -159,13 +159,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Allauth settings
+# Allauth account settings
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 ACCOUNT_FORMS = {
     'signup': 'main.forms.CustomSignupForm',  # replace 'your_app' with your actual app name
 }
+
+# Allauth MFA settings
 
 MFA_SUPPORTED_TYPES = ['totp', 'webauthn', 'recovery_codes']
 
@@ -174,6 +176,11 @@ MFA_PASSKEY_LOGIN_ENABLED = True
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = env('MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN')
 
 MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
+
+# Allauth user sessions settings
+USERSESSIONS_TRACK_ACTIVITY = True
+USERSESSIONS_ADAPTER = 'main.adapters.CustomUserSessionsAdapter'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

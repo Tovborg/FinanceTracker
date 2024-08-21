@@ -2,79 +2,92 @@
 {% load static %}
 {% block content %}
 
-<div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-0 sm:mt-10">
-    <div class="bg-cards h-full sm:h-[600px] rounded-lg w-[100%] sm:w-[70%] shadow-lg p-6">
-        <a id="backButton" href=""><ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon></a>
-        <div class="flex flex-col md:flex-row mt-2 sm:mt-3 justify-between items-center">
+    <div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-0 sm:mt-10">
+        <div class="bg-cards h-full sm:h-[600px] rounded-lg w-[100%] sm:w-[70%] shadow-lg p-6">
+            <a id="backButton" href="">
+                <ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon>
+            </a>
+            <div class="flex flex-col md:flex-row mt-2 sm:mt-3 justify-between items-center">
 
-            <div class="flex items-center text-3xl !space-x-3">
-                <span class="font-dansketext">{{ account.name }}</span>
-                <a href="{% url 'account_info' account.name %}" class="flex items-center">
-                    <ion-icon class="text-gray-500" name="information-circle-outline"></ion-icon>
-                </a>
+                <div class="flex items-center text-3xl !space-x-3">
+                    <span class="font-dansketext">{{ account.name }}</span>
+                    <a href="{% url 'account_info' account.name %}" class="flex items-center">
+                        <ion-icon class="text-gray-500" name="information-circle-outline"></ion-icon>
+                    </a>
+                </div>
+
+                <div class="text-3xl font-medium mb-2 md:ml-auto">DKK {{ account.balance }}</div>
             </div>
-
-            <div class="text-3xl font-medium mb-2 md:ml-auto">DKK {{ account.balance }}</div>
-        </div>
-        <div class="flex flex-col md:flex-row justify-between md:items-center items-center">
-            {% if account.account_number %}
-            <div class="text-gray-500 mobile-only:!hidden align-top">{{ account.account_number }}</div>
-            {% else %}
-            <div class="text-gray-500 mobile-only:!hidden align-top">Not available</div>
-            {% endif %}
-            <form action="{% url 'new_transaction_choice' account.name %}">
-                <button class="select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full" type="submit">New Transaction</button>
-            </form>
-        </div>
-        <hr class="mt-6 border-gray-500">
-        <div class="overflow-y-auto max-h-[600px]">
-                        <ul class="text-white">
-                            {% for transaction in transactions %}
-                            <li class="p-2 flex justify-between items-start border-b border-neutral-500">
-                                <div>
-                                    <a href="{% url 'transaction_detail' transaction.id %}"><span class="block font-semibold text-gray-900">{% if transaction.transaction_type == 'purchase' %}{{ transaction.merchant_name }}{% else %}{{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
-                                    <span class="block text-sm text-gray-500">{{ transaction.date }}</span>
-                                </div>
-                                {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
+            <div class="flex flex-col md:flex-row justify-between md:items-center items-center">
+                {% if account.account_number %}
+                    <div class="text-gray-500 mobile-only:!hidden align-top">{{ account.account_number }}</div>
+                {% else %}
+                    <div class="text-gray-500 mobile-only:!hidden align-top">Not available</div>
+                {% endif %}
+                <form action="{% url 'new_transaction_choice' account.name %}">
+                    <button class="select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full"
+                            type="submit">New Transaction
+                    </button>
+                </form>
+            </div>
+            <hr class="mt-6 border-gray-500">
+            <div class="overflow-y-auto max-h-[600px]">
+                <ul class="text-white">
+                    {% for transaction in transactions %}
+                        <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                            <div>
+                                <a href="{% url 'transaction_detail' transaction.id %}"><span
+                                        class="block font-semibold text-gray-900">{% if transaction.transaction_type == 'purchase' %}
+                                    {{ transaction.merchant_name }}{% else %}
+                                    {{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
+                                <span class="block text-sm text-gray-500">{{ transaction.date }}</span>
+                            </div>
+                            {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
                                 <div class="text-right">
                                     <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
                                     <span class="text-gray-400">{{ transaction.balance_after }}</span>
                                 </div>
-                                {% else %}
+                            {% else %}
                                 <div class="text-right">
                                     <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
                                     <span class="text-gray-400">{{ transaction.balance_after }}</span>
                                 </div>
-                                {% endif %}
-                            </li>
-                            {% endfor %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
 
-                        </ul>
-                    </div>
-                    <div class="flex mt-4">
-                        {% if transactions.has_previous %}
-                        <a href="?page={{ transactions.previous_page_number }}" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            Previous
-                            <svg class="w-3.5 ml-1 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-                            </svg>
-                        </a>
-                        {% endif %}
+                </ul>
+            </div>
+            <div class="flex mt-4">
+                {% if transactions.has_previous %}
+                    <a href="?page={{ transactions.previous_page_number }}"
+                       class="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                        Previous
+                        <svg class="w-3.5 ml-1 h-3.5 me-2 rtl:rotate-180" aria-hidden="true"
+                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                        </svg>
+                    </a>
+                {% endif %}
 
-                        {% if transactions.has_next %}
-                        <a href="?page={{ transactions.next_page_number }}" class="flex items-center justify-center px-3 h-8 ms-auto text-sm font-medium text-white bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                            Next
-                            <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                            </svg>
-                        </a>
-                        {% endif %}
-                    </div>
+                {% if transactions.has_next %}
+                    <a href="?page={{ transactions.next_page_number }}"
+                       class="flex items-center justify-center px-3 h-8 ms-auto text-sm font-medium text-white bg-primary border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                        Next
+                        <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true"
+                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                        </svg>
+                    </a>
+                {% endif %}
+            </div>
 
+        </div>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
             const backButton = document.getElementById('backButton');
             const referrer = document.referrer;
             const dashboardUrl = "{% url 'index' %}";
@@ -93,7 +106,7 @@
                 backButton.href = dashboardUrl;
             }
         });
-</script>
+    </script>
 
 
 {% endblock %}
