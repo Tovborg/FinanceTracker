@@ -647,3 +647,29 @@ class CustomSecurityIndexView(AllauthIndexView):
                     })
         context['user_sessions'] = user_sessions
         return context
+
+
+@require_POST
+@login_required
+def terminate_all_sessions(request):
+    sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    if not sessions:
+        messages.error(request, 'No active sessions to terminate.')
+        return redirect('mfa_index')
+
+    for session in sessions:
+        data = session.get_decoded()
+        if data.get('_auth_user_id') == str(request.user.id):
+            session.delete()
+
+    messages.success(request, 'All active sessions terminated.')
+    return redirect('mfa_index')
+
+
+@require_POST
+@login_required
+def terminate_session(request, session_key):
+    session = Session.objects.get(session_key=session_key)
+    session.delete()
+    messages.success(request, f'Session with session key {session_key} terminated.')
+    return redirect('mfa_index')

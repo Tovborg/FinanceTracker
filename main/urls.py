@@ -27,4 +27,6 @@ urlpatterns = [
     path('new_transaction/<str:account_name>/', transaction_import_choice, name='new_transaction_choice'),
     path('transaction/confirmReceiptAnalysis/<str:account_name>/', ConfirmReceiptAnalysisView.as_view(), name='confirmReceiptAnalysis'),
     path('accounts/2fa/', CustomSecurityIndexView.as_view(), name='mfa_index'),
+    path('terminate_all_sessions/', terminate_all_sessions, name='terminate_all_sessions'),
+    path('terminate_session/<str:session_key>/', terminate_session, name='terminate_session'),
 ]
