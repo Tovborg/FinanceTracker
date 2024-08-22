@@ -634,6 +634,10 @@ class CustomSecurityIndexView(AllauthIndexView):
                         'browser': session_info.get('browser'),
                         'os': session_info.get('os'),
                         'login_time': session_info.get('login_time'),
+                        'country': session_info.get('country'),
+                        'city': session_info.get('city'),
+                        'latitude': session_info.get('latitude'),
+                        'longitude': session_info.get('longitude'),
                     })
                 else:
                     user_sessions.append({
@@ -644,6 +648,10 @@ class CustomSecurityIndexView(AllauthIndexView):
                         'browser': None,
                         'os': None,
                         'login_time': None,
+                        'country': None,
+                        'city': None,
+                        'latitude': None,
+                        'longitude': None,
                     })
         context['user_sessions'] = user_sessions
         return context
