@@ -8,3 +8,7 @@ azure-ai-documentintelligence
 Pillow
 django-allauth==64.1.0
 django-allauth[mfa]
+pyyaml
+ua-parser
+user-agents
+django-user-agents

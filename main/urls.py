@@ -26,5 +26,5 @@ urlpatterns = [
     path('transaction/upload_receipt/<str:account_name>/', analyze_receipt_view, name='analyze_receipt'),
     path('new_transaction/<str:account_name>/', transaction_import_choice, name='new_transaction_choice'),
     path('transaction/confirmReceiptAnalysis/<str:account_name>/', ConfirmReceiptAnalysisView.as_view(), name='confirmReceiptAnalysis'),
-    path('accounts/2fa/', CustomIndexView.as_view(), name='mfa_index'),
+    path('accounts/2fa/', CustomSecurityIndexView.as_view(), name='mfa_index'),
 ]

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.humanize',
     'allauth.usersessions',
+    'django_user_agents',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
@@ -67,11 +68,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'allauth.usersessions.middleware.UserSessionsMiddleware'
+    'allauth.usersessions.middleware.UserSessionsMiddleware',
+    'main.middleware.ActiveUserSessionMiddleware',
 ]
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

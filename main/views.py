@@ -52,6 +52,7 @@ def index(request):
     accounts = Account.objects.filter(user=request.user)
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
     three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
+
     payday = get_payday_info()
     try:
         payday = int(payday)
@@ -609,7 +610,7 @@ class ConfirmReceiptAnalysisView(View, LoginRequiredMixin):
             return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
 
 
-class CustomIndexView(AllauthIndexView):
+class CustomSecurityIndexView(AllauthIndexView):
     template_name = "mfa/index.html"
 
     def get_context_data(self, **kwargs):
@@ -619,9 +620,30 @@ class CustomIndexView(AllauthIndexView):
 
         user_sessions = []
         for session in sessions:
-            print(session.user_agent)
             data = session.get_decoded()
+            # print(data)
             if data.get('_auth_user_id') == str(self.request.user.id):
-                user_sessions.append(session)
+                session_info = data.get('session_info')
+                print(session_info)
+                if isinstance(session_info, dict):
+                    user_sessions.append({
+                        'session_key': session.session_key,
+                        'expire_date': session.expire_date,
+                        'ip_address': session_info.get('ip_address'),
+                        'device': session_info.get('device'),
+                        'browser': session_info.get('browser'),
+                        'os': session_info.get('os'),
+                        'login_time': session_info.get('login_time'),
+                    })
+                else:
+                    user_sessions.append({
+                        'session_key': session.session_key,
+                        'expire_date': session.expire_date,
+                        'ip_address': None,
+                        'device': None,
+                        'browser': None,
+                        'os': None,
+                        'login_time': None,
+                    })
         context['user_sessions'] = user_sessions
         return context
