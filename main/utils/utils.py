@@ -2,9 +2,12 @@ from PIL import Image
 from io import BytesIO
 import json
 import re
+import os
 from bs4 import BeautifulSoup
 import requests
 from main.models import Transaction
+from django.conf import settings
+import geoip2.database
 
 
 def extract_amount(price_str):
@@ -211,3 +214,26 @@ def handleTransaction(transaction_type, amount, account, transaction, transfer_t
     account.save()
     transaction.balance_after = account.balance
     transaction.save()
+
+
+def get_geoip_data(ip_address):
+    geoip_city_db = os.path.join(settings.GEOIP_PATH, 'GeoLite2-City.mmdb')
+    geoip_country_db = os.path.join(settings.GEOIP_PATH, 'GeoLite2-Country.mmdb')
+
+    location_data = {}
+
+    try:
+        with geoip2.database.Reader(geoip_city_db) as city_reader:
+            city_response = city_reader.city(ip_address)
+            location_data['city'] = city_response.city.name
+            location_data['country'] = city_response.country.name
+            location_data['latitude'] = city_response.location.latitude
+            location_data['longitude'] = city_response.location.longitude
+    except geoip2.errors.AddressNotFoundError:
+        location_data['city'] = None
+        location_data['country'] = None
+        location_data['latitude'] = None
+        location_data['longitude'] = None
+
+    return location_data
+

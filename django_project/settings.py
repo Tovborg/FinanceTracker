@@ -204,3 +204,6 @@ CSRF_TRUSTED_ORIGINS = ['https://tovborg-finance.com', 'https://www.tovborg-fina
 
 AZURE_KEY = env('AZURE_KEY')
 AZURE_ENDPOINT = env('AZURE_ENDPOINT')
+
+# GeoIP2 settings
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')

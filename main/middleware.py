@@ -3,6 +3,7 @@
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django_user_agents.utils import get_user_agent
+from .utils.utils import get_geoip_data
 
 
 class ActiveUserSessionMiddleware:
@@ -18,20 +19,28 @@ class ActiveUserSessionMiddleware:
 
         if request.user.is_authenticated and not request.session.get('session_info_stored'):
             user_agent = get_user_agent(request)
+            location_data = get_geoip_data(self.get_client_ip(request))
             session_data = {
                 'ip_address': self.get_client_ip(request),
-                'device: ': self.get_device_type(user_agent),
+                'device': self.get_device_type(user_agent),
                 'browser': user_agent.browser.family,
                 'browser_version': user_agent.browser.version_string,
                 'os': user_agent.os.family,
                 'os_version': user_agent.os.version_string,
                 'device_type': self.get_device_type(user_agent),
                 'login_time': timezone.now().isoformat(),
+                # Location data
+                'country': location_data['country'],
+                'city': location_data['city'],
+                'latitude': location_data['latitude'],
+                'longitude': location_data['longitude'],
+                # 'time_zone': location_data['time_zone'],
             }
             request.session['session_info'] = session_data
             request.session['session_info_stored'] = True  # To prevent updating the session data on every request
 
         return response
+
     @staticmethod
     def get_client_ip(request):
         """
