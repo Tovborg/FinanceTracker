@@ -15,7 +15,6 @@ from django.views import View
 from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import datetime
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -167,7 +166,7 @@ def add_account(request):
             return redirect('account')
     else:
         form = CreateAccountForm(user=request.user)
-    return render(request, "account/add_account.html", {"form": form})
+    return render(request, "bank_accounts/add_account.html", {"form": form})
 
 @login_required
 @require_POST
@@ -624,7 +623,6 @@ class CustomSecurityIndexView(AllauthIndexView):
             # print(data)
             if data.get('_auth_user_id') == str(self.request.user.id):
                 session_info = data.get('session_info')
-                print(session_info)
                 if isinstance(session_info, dict):
                     user_sessions.append({
                         'session_key': session.session_key,
@@ -638,6 +636,7 @@ class CustomSecurityIndexView(AllauthIndexView):
                         'city': session_info.get('city'),
                         'latitude': session_info.get('latitude'),
                         'longitude': session_info.get('longitude'),
+                        'is_current_session': session.session_key == self.request.session.session_key
                     })
                 else:
                     user_sessions.append({
@@ -652,7 +651,9 @@ class CustomSecurityIndexView(AllauthIndexView):
                         'city': None,
                         'latitude': None,
                         'longitude': None,
+                        'is_current_session': session.session_key == self.request.session.session_key
                     })
+        print(user_sessions)
         context['user_sessions'] = user_sessions
         return context
 

@@ -154,7 +154,7 @@
                     {% for session in user_sessions %}
                         <li class="flex flex-col md:flex-row justify-between items-start md:items-center p-6 bg-gray-100 rounded-lg shadow-md">
                             <div class="mb-4 md:mb-0">
-                                <p class="text-gray-800 font-semibold">{% if session.country and session.city %}{{ session.city }}, {{ session.country }}{% else %}Unknown Location{% endif %}</p>
+                                <p class="text-gray-800 font-semibold">{% if session.country and session.city %}{{ session.city }}, {{ session.country }}{% else %}Unknown Location{% endif %}{% if session.is_current_session %}<span class="text-gray-500 font-light">   (current session)</span>{% endif %}</p>
                                 <p class="text-sm text-gray-600">Session Expiry: {{ session.expire_date }}</p>
                                 <p class="text-sm text-gray-600">IP Address: {{ session.ip_address }}</p>
                                 <p class="text-sm text-gray-600">Device: {{ session.device }}</p>
