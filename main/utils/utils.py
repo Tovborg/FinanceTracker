@@ -216,6 +216,20 @@ def handleTransaction(transaction_type, amount, account, transaction, transfer_t
     transaction.save()
 
 
+def get_client_ip(request):
+    """
+    Retrieve the client's IP address from the request object.
+    :param request:
+    :return: ip_address
+    """
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
 def get_geoip_data(ip_address):
     geoip_city_db = os.path.join(settings.GEOIP_PATH, 'GeoLite2-City.mmdb')
     geoip_country_db = os.path.join(settings.GEOIP_PATH, 'GeoLite2-Country.mmdb')

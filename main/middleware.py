@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django_user_agents.utils import get_user_agent
 from .utils.utils import get_geoip_data
+from main.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ActiveUserSessionMiddleware:
@@ -36,6 +38,17 @@ class ActiveUserSessionMiddleware:
                 'longitude': location_data['longitude'],
                 # 'time_zone': location_data['time_zone'],
             }
+
+            # Update the user's last known country
+            try:
+                user_profile = UserProfile.objects.get(user=request.user)
+                if user_profile.last_known_country != location_data['country']:
+                    if location_data['country']:
+                        user_profile.last_known_country = location_data['country']
+                        user_profile.save()
+            except ObjectDoesNotExist:
+                UserProfile.objects.create(user=request.user, last_known_country=location_data['country'])
+
             request.session['session_info'] = session_data
             request.session['session_info_stored'] = True  # To prevent updating the session data on every request
 

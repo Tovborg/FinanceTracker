@@ -9,7 +9,7 @@ from main.forms import (CreateAccountForm,
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.sessions.models import Session
-from main.models import Account, Transaction, Paychecks, Item
+from main.models import Account, Transaction, Paychecks, Item, UserProfile
 from django.views.decorators.http import require_POST
 from django.views import View
 from django.http import JsonResponse
@@ -655,6 +655,7 @@ class CustomSecurityIndexView(AllauthIndexView):
                     })
         print(user_sessions)
         context['user_sessions'] = user_sessions
+        context['last_known_country'] = UserProfile.objects.get(user=self.request.user).last_known_country
         return context
 
 
