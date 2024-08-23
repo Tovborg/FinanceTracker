@@ -655,7 +655,7 @@ class CustomSecurityIndexView(AllauthIndexView):
                     })
         print(user_sessions)
         context['user_sessions'] = user_sessions
-        context['last_known_country'] = UserProfile.objects.get(user=self.request.user).last_known_country
+        # context['last_known_country'] = UserProfile.objects.get(user=self.request.user).last_known_country
         return context
 
 
