@@ -4,8 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.sessions.models import Session
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views import View
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -13,6 +15,8 @@ from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
+from django.views.generic.edit import FormView
+from django.views.generic import TemplateView
 # Import app specific modules
 from main.forms import (CreateAccountForm,
                         NewTransactionForm,
@@ -446,65 +450,92 @@ def delete_user(request):
 
 @login_required
 def paychecks(request):
-    user_paychecks = Paychecks.objects.filter(user=request.user).order_by('-pay_date')
+    """
+    Display the user's paychecks with pagination
+    :param request:
+    :return:
+    """
+    user_paychecks = Paychecks.objects.filter(user=request.user).order_by('-pay_date')  # Get paychecks
     paginator = Paginator(user_paychecks, 5)  # Show 10 paychecks per page
 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'page_obj': page_obj}
+    page_number = request.GET.get('page')  # Get the page number from the request
+    page_obj = paginator.get_page(page_number)  # Get the paychecks for the current page
+    context = {'page_obj': page_obj}  # Update the context with the paychecks for the current page
     return render(request, 'paychecks/paychecks.html', context)
 
 
-@login_required
-def add_new_paycheck(request):
-    if request.method == "POST":
-        form = AddPaycheckForm(request.POST, user=request.user)
-        if form.is_valid():
-            print(form.errors)
-            print(form.cleaned_data)
-            # Create a new paycheck
-            amount = form.cleaned_data['amount']
-            pay_date = form.cleaned_data['pay_date']
-            start_pay_period = form.cleaned_data['start_pay_period']
-            payout_account = form.cleaned_data['payout_account']
-            end_pay_period = form.cleaned_data['end_pay_period']
-            employer = form.cleaned_data['employer']
-            description = form.cleaned_data['description']
-            status = form.cleaned_data['status']
+class AddNewPaycheckView(LoginRequiredMixin, FormView):
+    """
+    Display the form to add a new paycheck and handle the form submission.
+    """
+    form_class = AddPaycheckForm
+    template_name = "paychecks/add_paycheck.html"
+    success_url = reverse_lazy('paychecks')
 
-            new_paycheck = Paychecks(
-                user=request.user,
-                amount=amount,
-                pay_date=pay_date,
-                pay_period_start=start_pay_period,
-                pay_period_end=end_pay_period,
-                employer=employer,
-                description=description,
-                payout_account=payout_account,
-                status=status
-            )
-            new_paycheck.save()
-            if new_paycheck.status == 'paid':
-                new_wage_deposit = Transaction(
-                    account=payout_account,
-                    transaction_type='wage deposit',
-                    amount=amount,
-                    date=pay_date,
-                    description=f"Wage deposit from {employer}",
-                    balance_after=payout_account.balance + amount
-                )
-                new_wage_deposit.save()
-                handle_transaction('wage deposit', amount, payout_account, new_wage_deposit)
-            return redirect('paychecks')
-        else:
-            print(form.errors)
-    else:
-        form = AddPaycheckForm(user=request.user)
-    return render(request, "paychecks/add_paycheck.html", {"form": form, "accounts": Account.objects.filter(user=request.user)})
+    def get_form_kwargs(self):
+        """Passes the user to the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        amount = form.cleaned_data['amount']
+        pay_date = form.cleaned_data['pay_date']
+        start_pay_period = form.cleaned_data['start_pay_period']
+        payout_account = form.cleaned_data['payout_account']
+        end_pay_period = form.cleaned_data['end_pay_period']
+        employer = form.cleaned_data['employer']
+        description = form.cleaned_data['description']
+        status = form.cleaned_data['status']
+
+        new_paycheck = Paychecks(
+            user=self.request.user,
+            amount=amount,
+            pay_date=pay_date,
+            pay_period_start=start_pay_period,
+            pay_period_end=end_pay_period,
+            employer=employer,
+            description=description,
+            payout_account=payout_account,
+            status=status
+        )
+        new_paycheck.save()
+
+        if new_paycheck.status == 'paid':
+            self.create_wage_deposit(new_paycheck)
+
+        return super().form_valid(form)
+
+    def create_wage_deposit(self, paycheck):
+        """Create a wage deposit transaction."""
+        payout_account = paycheck.payout_account
+        wage_deposit = Transaction(
+            account=payout_account,
+            transaction_type='wage deposit',
+            amount=paycheck.amount,
+            date=paycheck.pay_date,
+            description=f"Wage deposit from {paycheck.employer}",
+            balance_after=payout_account.balance + paycheck.amount
+        )
+        wage_deposit.save()
+        handle_transaction('wage deposit', paycheck.amount, payout_account, wage_deposit)
+
+    def get_context_data(self, **kwargs):
+        """Add accounts to the context."""
+        context = super().get_context_data(**kwargs)
+        context['accounts'] = Account.objects.filter(user=self.request.user)
+        return context
 
 
 @login_required()
 def paycheck_info(request, pk):
+    """
+    Display the details of a paycheck.
+    :param request:
+    :param pk:
+    :return:
+    """
     paycheck = get_object_or_404(Paychecks, pk=pk)
     return render(request, "paychecks/paycheck_info.html", context={"paycheck": paycheck})
 
@@ -512,7 +543,14 @@ def paycheck_info(request, pk):
 @login_required
 @require_POST
 def delete_paycheck(request, pk):
-    paycheck = get_object_or_404(Paychecks, pk=pk)
+    """
+    View to delete a paycheck and revert the transaction if the paycheck was paid.
+    :param request:
+    :param pk:
+    :return:
+    """
+    paycheck = get_object_or_404(Paychecks, pk=pk)  # Get the paycheck
+    # Revert transaction if paycheck was paid
     if paycheck.status == 'paid':
         # revert transaction
         wage_deposit = Transaction.objects.filter(
@@ -521,8 +559,9 @@ def delete_paycheck(request, pk):
             amount=paycheck.amount,
             date=paycheck.pay_date,
             description=f"Wage deposit from {paycheck.employer}"
-        ).first()
+        ).first()  # Get the wage deposit transaction
         if wage_deposit:
+            # Revert the transaction from the payout account
             paycheck.payout_account.balance -= wage_deposit.amount
             paycheck.payout_account.save()
             wage_deposit.delete()
@@ -530,229 +569,244 @@ def delete_paycheck(request, pk):
     return redirect('paychecks')
 
 
-@login_required
-@require_POST
-def analyze_receipt_view(request, account_name):
-    print(request.FILES)
-    if request.method == "POST" and 'receipt_image' in request.FILES:
-        form = ReceiptUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            receipt_image = form.cleaned_data['receipt_image']
-            try:
-
-                image_bytes = BytesIO()
-                for chunk in receipt_image.chunks():
-                    image_bytes.write(chunk)
-                image_bytes.seek(0)
-
-                # Compress the image if needed
-
-                compressed_image = compress_image(image_bytes)
-
-                # Save the compressed image to a temporary file
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
-                    temp_file.write(compressed_image.getvalue())
-                    temp_file_path = temp_file.name
-
-                service = AzureDocumentIntelligenceService()
+class AnalyzeReceiptView(LoginRequiredMixin, View):
+    """
+    Here the post request is handled, image compressed, and sent to the Azure service for analysis. Doesn't return
+    any response, but redirects to the confirmReceiptAnalysis view while storing the analysis results in the session.
+    """
+    def post(self, request, account_name):
+        if 'receipt_image' in request.FILES:
+            form = ReceiptUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                receipt_image = form.cleaned_data['receipt_image']
                 try:
-                    analysis_results = service.analyze_receipts(temp_file_path)
-                    request.session['analysis_results'] = serialize_analysis_results(analysis_results)
-                    os.remove(temp_file_path)
-                except HttpResponseError as e:
-                    request.session['error_message'] = str(e)
-                    os.remove(temp_file_path)
-                    del request.session['analysis_results']
-                    return redirect('new_transaction_choice', account_name=account_name)
+                    image_bytes = self.get_image_bytes(receipt_image)
 
-                return redirect('confirmReceiptAnalysis', account_name=account_name)
-            except ValueError as e:
-                form.add_error('receipt_image', str(e))
+                    compressed_image = compress_image(image_bytes)
+
+                    temp_file_path = self.save_temp_image(compressed_image)
+
+                    service = AzureDocumentIntelligenceService()
+
+                    try:
+                        analysis_results = service.analyze_receipts(temp_file_path)
+                        request.session['analysis_results'] = serialize_analysis_results(analysis_results)
+                    except HttpResponseError as e:
+                        request.session['error_message'] = str(e)
+                        del request.session['analysis_results']
+                    finally:
+                        os.remove(temp_file_path)
+
+                    return redirect('confirmReceiptAnalysis', account_name=account_name)
+                except ValueError as e:
+                    form.add_error('receipt_image', str(e))
+            else:
+                return HttpResponse('Invalid form')
         else:
-            return HttpResponse('Invalid form')
-    else:
+            return HttpResponse('No valid image uploaded')
+
+    @staticmethod
+    def get_image_bytes(receipt_image: InMemoryUploadedFile) -> BytesIO:
+        """Reads the uploaded image into a BytesIO object."""
+        image_bytes = BytesIO()
+        for chunk in receipt_image.chunks():
+            image_bytes.write(chunk)
+        image_bytes.seek(0)
+        return image_bytes
+
+    @staticmethod
+    def save_temp_image(compressed_image: BytesIO) -> str:
+        """Saves the compressed image to a temporary file and returns the file path."""
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
+            temp_file.write(compressed_image.getvalue())
+            return temp_file.name
+
+
+class TransactionImportChoiceView(LoginRequiredMixin, TemplateView):
+    """
+    Display the choice between manual transaction creation and receipt analysis
+    """
+    template_name = 'transactions/transactionImportChoice.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account_name = kwargs.get('account_name')
+        account = get_object_or_404(Account, name=account_name, user=self.request.user)
+
         form = ReceiptUploadForm()
-        return HttpResponse('No valid image uploaded')
+        error_message = self.request.session.pop('error_message', None)
+
+        context.update({
+            'account': account,
+            'form': form,
+            'error_message': error_message,
+        })
+        return context
 
 
-@login_required
-def transaction_import_choice(request, account_name):
-    form = ReceiptUploadForm()
-    account = get_object_or_404(Account, name=account_name, user=request.user)
-    try:
-        error_message = request.session.get('error_message')
-        del request.session['error_message']
-    except KeyError:
-        error_message = None
-    return render(request, 'transactions/transactionImportChoice.html', context={'account': account,
-                                                                                 'form': form,
-                                                                                 'error_message': error_message})
+class ConfirmReceiptAnalysisView(LoginRequiredMixin, View):
+    """
+    Display the analysis results and form to confirm the analysis and edit possible missing fields or errors.
+    Create the transaction and items if the form is valid and the user confirms the analysis.
+    """
+    template_name = "transactions/confirmReceiptAnalysis.html"
 
-
-class ConfirmReceiptAnalysisView(View, LoginRequiredMixin):
     def get(self, request, account_name):
-        account = get_object_or_404(Account, name=account_name, user=request.user)
+        account = self._get_account(request, account_name)
         form = ReceiptAnalysisForm()
-        # Clear session data
-        context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
-        return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
+        context = self._create_context(request, account, form)
+        return render(request, self.template_name, context)
 
     def post(self, request, account_name):
         account = get_object_or_404(Account, name=account_name, user=request.user)
         form = ReceiptAnalysisForm(request.POST)
 
         if form.is_valid():
-            # Extract form data (if needed)
-            # Cleaned data is accessed via form.cleaned_data
-            print(form.cleaned_data.get('total'))
-            cleaned_data = {
-                'merchant_name': form.cleaned_data.get('merchant_name'),
-                'merchant_phone_number': form.cleaned_data.get('merchant_phone_number'),
-                'merchant_address': form.cleaned_data.get('merchant_address'),
-                'transaction_date': form.cleaned_data.get('transaction_date'),
-                'transaction_time': form.cleaned_data.get('transaction_time'),
-                'subtotal': form.cleaned_data.get('subtotal'),
-                'tax': form.cleaned_data.get('tax'),
-                'total': form.cleaned_data.get('total'),
-            }
-
-            # Process items
-            item_count = len([key for key in request.POST if key.startswith('description_')])
-            has_error = False
-
-            items = [{
-                'Description': request.POST.get(f'description_{i}'),
-                'Quantity': request.POST.get(f'quantity_{i}'),
-                'TotalPrice': request.POST.get(f'price_{i}')
-            } for i in range(1, item_count + 1)]
-
-            for i in range(1, item_count + 1):
-                description = request.POST.get(f'description_{i}')
-                quantity = request.POST.get(f'quantity_{i}')
-                price = request.POST.get(f'price_{i}')
-
-                if not description or not quantity or not price:
-                    form.add_error(None, f"Item {i} has missing fields. All fields are required.")
-                    has_error = True
-                    break  # Optionally, break the loop if you only want the first error
-
-            if has_error:
-                # Return form with errors
-                return render(request, "transactions/confirmReceiptAnalysis.html",
-                              context=create_analysis_context(request, account, form,
-                                                              request.session.get('analysis_results')))
-
-            new_transaction = Transaction(
-                account=account,
-                transaction_type='purchase',
-                amount=cleaned_data['total'],
-                date=cleaned_data['transaction_date'],
-                balance_after=account.balance - cleaned_data['total'],
-                merchant_name=cleaned_data['merchant_name'],
-            )
-            if cleaned_data['merchant_address'] != 'N/A':
-                new_transaction.merchant_address = cleaned_data['merchant_address']
-            if cleaned_data['merchant_phone_number'] != 'N/A':  # Check if phone number is available
-                new_transaction.merchant_phone_number = cleaned_data['merchant_phone_number']
-            if cleaned_data['tax'] != 0.0:
-                new_transaction.tax = cleaned_data['tax']
-            new_transaction.save()
-
-            # Update account balance
-            account.balance -= cleaned_data['total']
-            account.save()
-
-            for item in items:
-                new_item = Item(
-                    transaction=new_transaction,
-                    description=item['Description'],
-                    price=item['TotalPrice'],
-                    quantity=item['Quantity']
-                )
-                new_item.save()
-
-
-            # Create context and redirect
-            context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
-            return redirect('account_details', account_name=account_name)
-
+            if self._process_items(request, form):
+                cleaned_data = form.cleaned_data
+                new_transaction = self._create_transaction(account, cleaned_data)
+                self._create_items(request, new_transaction)
+                account.balance -= cleaned_data['total']
+                account.save()
+                return redirect('account_details', account_name=account_name)
+            else:
+                context = self._create_context(request, account, form)
+                return render(request, self.template_name, context)
         else:
-            # Handle form errors
-            print(form.errors)  # Use logging in production
-            context = create_analysis_context(request, account, form, request.session.get('analysis_results'))
-            return render(request, "transactions/confirmReceiptAnalysis.html", context=context)
+            context = self._create_context(request, account, form)
+            return render(request, self.template_name, context)
+
+    def _create_context(self, request, account, form):
+        """
+        Create the context for the view using the create_analysis_context utility function
+        """
+        return create_analysis_context(request, account, form, request.session.get('analysis_results'))
+
+    def _process_items(self, request, form):
+        """
+        Process the items in the form and check if all fields are filled.
+        """
+        item_count = len([key for key in request.POST if key.startswith('description_')])
+
+        for i in range(1, item_count + 1):
+            description = request.POST.get(f'description_{i}')
+            quantity = request.POST.get(f'quantity_{i}')
+            price = request.POST.get(f'price_{i}')
+
+            if not all([description, quantity, price]):
+                form.add_error(None, f"Item {i} has missing fields. All fields are required.")
+                return False
+
+        return True
+
+    def _create_transaction(self, account, cleaned_data):
+        new_transaction = Transaction(
+            account=account,
+            transaction_type='purchase',
+            amount=cleaned_data['total'],
+            date=cleaned_data['transaction_date'],
+            balance_after=account.balance - cleaned_data['total'],
+            merchant_name=cleaned_data['merchant_name'],
+            merchant_address=cleaned_data.get('merchant_address', 'N/A') if cleaned_data.get('merchant_address') != 'N/A' else None,
+            merchant_phone_number=cleaned_data.get('merchant_phone_number', 'N/A') if cleaned_data.get('merchant_phone_number') != 'N/A' else None,
+            tax=cleaned_data.get('tax', 0.0) if cleaned_data.get('tax') != 0.0 else None,
+        )
+        new_transaction.save()
+        return new_transaction
+
+    def _create_items(self, request, transaction):
+        item_count = len([key for key in request.POST if key.startswith('description_')])
+
+        for i in range(1, item_count + 1):
+            Item.objects.create(
+                transaction=transaction,
+                description=request.POST.get(f'description_{i}'),
+                price=request.POST.get(f'price_{i}'),
+                quantity=request.POST.get(f'quantity_{i}')
+            )
 
 
 class CustomSecurityIndexView(AllauthIndexView):
+    """
+    Custom view for the allauth mfa index view, so we can add additional context data. such as user sessions.
+    """
     template_name = "mfa/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        sessions = Session.objects.filter(expire_date__gte=timezone.now())
-
-        user_sessions = []
-        for session in sessions:
-            data = session.get_decoded()
-            # print(data)
-            if data.get('_auth_user_id') == str(self.request.user.id):
-                session_info = data.get('session_info')
-                if isinstance(session_info, dict):
-                    user_sessions.append({
-                        'session_key': session.session_key,
-                        'expire_date': session.expire_date,
-                        'ip_address': session_info.get('ip_address'),
-                        'device': session_info.get('device'),
-                        'browser': session_info.get('browser'),
-                        'os': session_info.get('os'),
-                        'login_time': session_info.get('login_time'),
-                        'country': session_info.get('country'),
-                        'city': session_info.get('city'),
-                        'latitude': session_info.get('latitude'),
-                        'longitude': session_info.get('longitude'),
-                        'is_current_session': session.session_key == self.request.session.session_key
-                    })
-                else:
-                    user_sessions.append({
-                        'session_key': session.session_key,
-                        'expire_date': session.expire_date,
-                        'ip_address': None,
-                        'device': None,
-                        'browser': None,
-                        'os': None,
-                        'login_time': None,
-                        'country': None,
-                        'city': None,
-                        'latitude': None,
-                        'longitude': None,
-                        'is_current_session': session.session_key == self.request.session.session_key
-                    })
-        print(user_sessions)
+        user_sessions = self._get_user_sessions()
         context['user_sessions'] = user_sessions
-        # context['last_known_country'] = UserProfile.objects.get(user=self.request.user).last_known_country
         return context
 
+    def _get_user_sessions(self):
+        sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        user_id = str(self.request.user.id)
+        current_session_key = self.request.session.session_key
 
-@require_POST
-@login_required
-def terminate_all_sessions(request):
-    sessions = Session.objects.filter(expire_date__gte=timezone.now())
-    if not sessions:
-        messages.error(request, 'No active sessions to terminate.')
+        user_sessions = [
+            self._extract_session_info(session, session.get_decoded(), current_session_key)
+            for session in sessions
+            if session.get_decoded().get('_auth_user_id') == user_id
+        ]
+
+        return user_sessions
+
+    def _extract_session_info(self, session, session_data, current_session_key):
+        session_info = session_data.get('session_info', {})
+
+        return {
+            'session_key': session.session_key,
+            'expire_date': session.expire_date,
+            'ip_address': session_info.get('ip_address'),
+            'device': session_info.get('device'),
+            'browser': session_info.get('browser'),
+            'os': session_info.get('os'),
+            'login_time': session_info.get('login_time'),
+            'country': session_info.get('country'),
+            'city': session_info.get('city'),
+            'latitude': session_info.get('latitude'),
+            'longitude': session_info.get('longitude'),
+            'is_current_session': session.session_key == current_session_key
+        }
+
+
+class TerminateAllSessionsView(LoginRequiredMixin, View):
+    """
+    View to terminate all active sessions for the user.
+    """
+    def post(self, request, *args, **kwargs):
+        sessions = Session.objects.filter(expire_date__gte=timezone.now())
+
+        if not sessions.exists():
+            messages.error(request, 'No active sessions to terminate.')
+            return redirect('mfa_index')
+
+        user_id = str(request.user.id)
+        terminated = False
+
+        for session in sessions:
+            data = session.get_decoded()
+            if data.get('_auth_user_id') == user_id:
+                session.delete()
+                terminated = True
+
+        if terminated:
+            messages.success(request, 'All active sessions terminated.')
+        else:
+            messages.error(request, 'No active sessions to terminate.')
+
         return redirect('mfa_index')
-
-    for session in sessions:
-        data = session.get_decoded()
-        if data.get('_auth_user_id') == str(request.user.id):
-            session.delete()
-
-    messages.success(request, 'All active sessions terminated.')
-    return redirect('mfa_index')
 
 
 @require_POST
 @login_required
 def terminate_session(request, session_key):
+    """
+    View to terminate a specific session.
+    :param request:
+    :param session_key:
+    :return:
+    """
     session = Session.objects.get(session_key=session_key)
     session.delete()
     messages.success(request, f'Session with session key {session_key} terminated.')
