@@ -652,7 +652,7 @@ class ConfirmReceiptAnalysisView(LoginRequiredMixin, View):
     template_name = "transactions/confirmReceiptAnalysis.html"
 
     def get(self, request, account_name):
-        account = self._get_account(request, account_name)
+        account = get_object_or_404(Account, name=account_name, user=request.user)
         form = ReceiptAnalysisForm()
         context = self._create_context(request, account, form)
         return render(request, self.template_name, context)
