@@ -1,0 +1,17 @@
+
+
+Hello {{ user.first_name }},
+
+We have detected a suspicious login attempt for from a new location that differs from your last known location.
+
+If this was you, you can safely ignore this email. If this was not you, please change your password immediately and set up MFA if you haven't already.
+
+Location details:
+ - IP Address: {{ location.ip_address }}
+ - City: {{ location.city }}
+ - Country: {{ location.country }}
+
+If you have any questions or concerns, please contact us at
+
+Kind regards,
+Tovborg-Finance

@@ -4,6 +4,7 @@ from main.models import UserProfile
 from .utils.utils import get_client_ip, get_geoip_data
 from django.core.mail import send_mail
 from django.conf import settings
+from django.template.loader import render_to_string
 
 # User profile signals
 
@@ -34,12 +35,18 @@ def check_suspicious_activity(sender, request, user, **kwargs):
     location_data = get_geoip_data(current_ip)
     current_country = location_data['country']
 
+    context = {
+        'user': user,
+        'ip_address': current_ip,
+        'city': location_data['city'],
+        'country': current_country,
+    }
+
     if profile.last_known_country and profile.last_known_country != current_country:
+        message = render_to_string('emails/suspicious_activity.txt', context)
         send_mail(
             'Suspicious Login Attempt',
-            f'We detected a login from a new location: {location_data["city"]}, {location_data["country"]}.'
-            f' If this was you, you can ignore this message. If not, please change your password immediately.'
-            f'IP address: {current_ip}',
+            message,
             settings.EMAIL_HOST_USER,
             [user.email],
             fail_silently=False,
