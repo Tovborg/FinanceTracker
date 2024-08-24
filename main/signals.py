@@ -43,7 +43,7 @@ def check_suspicious_activity(sender, request, user, **kwargs):
     }
 
     if profile.last_known_country and profile.last_known_country != current_country:
-        message = render_to_string('emails/suspicious_activity.txt', context)
+        message = render_to_string('emails/suspicious_activity.html', context)
         send_mail(
             'Suspicious Login Attempt',
             message,
