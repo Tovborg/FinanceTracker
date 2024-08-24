@@ -101,8 +101,6 @@ def clean_and_parse_json_string(json_string):
     return parsed_dict
 
 
-# utils.py
-
 def create_analysis_context(request, account, form, analysis_results):
     context = {
         "account": account,
@@ -169,6 +167,18 @@ def create_analysis_context(request, account, form, analysis_results):
     return context
 
 
+def translate_payday_info(weekday):
+    weekdays = {
+        'mandag': 'Monday',
+        'tirsdag': 'Tuesday',
+        'onsdag': 'Wednesday',
+        'torsdag': 'Thursday',
+        'fredag': 'Friday',
+        'lørdag': 'Saturday',
+        'søndag': 'Sunday'
+    }
+    return weekdays[weekday]
+
 def get_payday_info():
     url = "https://xn--lnningsdag-0cb.dk/"
     response = requests.get(url)
@@ -184,8 +194,7 @@ def get_payday_info():
         return "Not available"
 
 
-# Needs new logic to handle insufficient funds
-def handleTransaction(transaction_type, amount, account, transaction, transfer_to=None):
+def handle_transaction(transaction_type, amount, account, transaction, transfer_to=None):
     if transaction_type == 'deposit':
         account.balance += amount
     elif transaction_type == 'withdrawal':

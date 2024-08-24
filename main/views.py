@@ -1,15 +1,9 @@
+# Import django modules
+from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import render, redirect, get_object_or_404
-from main.forms import (CreateAccountForm,
-                        NewTransactionForm,
-                        UserUpdateForm,
-                        AddPaycheckForm,
-                        ReceiptUploadForm,
-                        ReceiptAnalysisForm,
-                        IncludeTransactionInStatisticsForm)
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.sessions.models import Session
-from main.models import Account, Transaction, Paychecks, Item, UserProfile
 from django.views.decorators.http import require_POST
 from django.views import View
 from django.http import JsonResponse
@@ -18,40 +12,43 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+# Import app specific modules
+from main.forms import (CreateAccountForm,
+                        NewTransactionForm,
+                        UserUpdateForm,
+                        AddPaycheckForm,
+                        ReceiptUploadForm,
+                        ReceiptAnalysisForm,
+                        IncludeTransactionInStatisticsForm)
+from main.models import Account, Transaction, Paychecks, Item, UserProfile
+# Azure modules
 from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
+# Import other modules
 from .utils.utils import (compress_image,
                           serialize_analysis_results,
                           create_analysis_context,
                           get_payday_info,
-                          handleTransaction)
+                          handle_transaction,
+                          translate_payday_info)
 from allauth.mfa.base.views import IndexView as AllauthIndexView
 from io import BytesIO
 import tempfile
 import os
-import json
-from django.http import HttpResponse
-
-
-def translate_payday_info(weekday):
-    weekdays = {
-        'mandag': 'Monday',
-        'tirsdag': 'Tuesday',
-        'onsdag': 'Wednesday',
-        'torsdag': 'Thursday',
-        'fredag': 'Friday',
-        'lørdag': 'Saturday',
-        'søndag': 'Sunday'
-    }
-    return weekdays[weekday]
 
 
 @login_required
 def index(request):
+    """
+    Display the dashboard with the user's accounts, total balance, payday, total expenses, and total income.
+    :param request:
+    :return:
+    """
     accounts = Account.objects.filter(user=request.user)
     favorites = Account.objects.filter(user=request.user, isFavorite=True)
-    three_recent_transactions = Transaction.objects.filter(account__user=request.user).order_by('-date')[:3]
 
+    # Get payday info
     payday = get_payday_info()
     try:
         payday = int(payday)
@@ -59,63 +56,80 @@ def index(request):
         pass
     if type(payday) is str:
         payday = translate_payday_info(str(payday))
+
+    # Get total expenses and income
     total_expenses = 0
     total_income = 0
     for account in accounts:
         total_expenses += account.get_monthly_expenses()
-    # Dashboard info
     for account in accounts:
         total_income += account.get_monthly_income()
+
+    # Get total balance
     total_balance = sum([account.balance for account in accounts])
+
+    # Determine the number of favorites and accounts
+    no_favorites = len(favorites)
     no_accounts = len(accounts)
-    if len(accounts) > 3:
-        accounts = accounts[:3]
 
-    if len(favorites) > 3:
-        favorites = favorites[:3]
-    favorites_count = len(favorites)
-
-    context = {"accounts": accounts,
-               "total_balance": total_balance,
-               "no_accounts": no_accounts,
-               'total_expenses': total_expenses,
-               'total_income': total_income,
-               'current_date': timezone.now().date(),
-               'current_hour': timezone.now().hour,
-               'payday': payday}
-
-    if favorites_count == 0:
-        print('No favorites')
-        context['accounts'] = accounts
-        return render(request, "dashboard.html", context=context)
-    elif favorites_count < 3:
-        # Fetch additional non-favorite accounts to make up the count to 3
-        additional_accounts = Account.objects.filter(user=request.user, isFavorite=False)[:3 - favorites_count]
-        combined_accounts = list(favorites) + list(additional_accounts)
-        context['accounts'] = combined_accounts
-        return render(request, "dashboard.html", context=context)
-
+    # Logic to select accounts for display
+    if no_favorites >= 3:
+        # If there are 3 or more favorites, take the first 3 favorites
+        displayed_accounts = favorites[:3]
     else:
-        context['accounts'] = favorites
-        return render(request, "dashboard.html", context=context)
+        # If there are fewer than 3 favorites, get all favorites and fill with non-favorites
+        additional_needed = 3 - no_favorites
+        non_favorites = accounts.filter(isFavorite=False)[:additional_needed]
+        displayed_accounts = list(favorites) + list(non_favorites)
+
+    # Update the context with the accounts to display and other relevant data
+    context = {
+        "accounts": displayed_accounts,
+        "total_balance": total_balance,
+        "no_accounts": no_accounts,
+        'total_expenses': total_expenses,
+        'total_income': total_income,
+        'current_date': timezone.now().date(),
+        'current_hour': timezone.now().hour,
+        'payday': payday,
+    }
+
+    # Render the dashboard with the updated context
+    return render(request, "dashboard.html", context=context)
 
 
-# Views to display and handle accounts
 @login_required
-def account_view(request):
+def accounts_view(request):
+    """
+    Display the user's accounts.
+    :param request:
+    :return:
+    """
     user_accounts = Account.objects.filter(user=request.user)
     return render(request, "bank_accounts/account.html", context={"accounts": user_accounts})
 
 
 @login_required
 def account_info(request, account_name):
+    """
+    Display information about a specific account.
+    :param request:
+    :param account_name:
+    :return:
+    """
     account = get_object_or_404(Account, name=account_name, user=request.user)
     return render(request, "bank_accounts/account_info.html", context={"account": account})
 
 
-@require_POST
+@require_POST  # Only allow POST requests
 @login_required
 def delete_account(request, account_name):
+    """
+    Delete an account and all transactions associated with it.
+    :param request:
+    :param account_name:
+    :return:
+    """
     account = get_object_or_404(Account, name=account_name, user=request.user)
     # Delete transactions associated with the account
     account.transaction_set.all().delete()
@@ -124,12 +138,26 @@ def delete_account(request, account_name):
 
 
 @login_required
-def account_details(request, account_name):
-    account = get_object_or_404(Account, name=account_name, user=request.user)
-    transactions_list = account.transaction_set.all().order_by('-date')
+def account_view(request, account_name):
+    """
+    Display the details and transactions for a specific account. Paginate the transactions with 5 transactions per page.
+    :param request:
+    :param account_name:
+    :return:
+    """
+    # Handle exceptional cases where multiple accounts with the same name exist.
+    # User should not have multiple accounts with the same name
+    try:
+        account = get_object_or_404(Account, name=account_name, user=request.user)
+    except MultipleObjectsReturned:
+        account = Account.objects.filter(name=account_name, user=request.user).first()
+    transactions_list = account.transaction_set.all().order_by('-date')  # Get all transactions for the account and order by date
 
+    # Paginate the transactions with 5 transactions per page
     paginator = Paginator(transactions_list, 5)
+    # Get the page number from the request
     page_number = request.GET.get('page')
+    # Get the transactions for the current page
     try:
         transactions = paginator.page(page_number)
     except PageNotAnInteger:
@@ -140,72 +168,90 @@ def account_details(request, account_name):
     return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
 
 
-@login_required
-def add_account(request):
-    if request.method == "POST":
+class AddAccountView(LoginRequiredMixin, View):
+    template_name = "bank_accounts/add_account.html"
+
+    def get(self, request, *args, **kwargs):
+        form = CreateAccountForm(user=request.user)
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request, *args, **kwargs):
         form = CreateAccountForm(request.POST, user=request.user)
         if form.is_valid():
-            print(form.errors)
-            print(form.cleaned_data)
             # Create a new account
-            account_name = form.cleaned_data['account_name']
-            account_balance = form.cleaned_data['account_balance']
-            account_type = form.cleaned_data['account_type']
-            account_number = form.cleaned_data['account_number']
-            description = form.cleaned_data['description']
-
             new_account = Account(
                 user=request.user,
-                name=account_name,
-                balance=account_balance,
-                account_type=account_type,
-                description=description,
-                account_number=account_number
+                name=form.cleaned_data['account_name'],
+                balance=form.cleaned_data['account_balance'],
+                account_type=form.cleaned_data['account_type'],
+                description=form.cleaned_data['description'],
+                account_number=form.cleaned_data['account_number']
             )
             new_account.save()
             return redirect('account')
-    else:
-        form = CreateAccountForm(user=request.user)
-    return render(request, "bank_accounts/add_account.html", {"form": form})
+        else:
+            print(form.errors)
+
+        return render(request, self.template_name, {"form": form})
+
 
 @login_required
 @require_POST
 def edit_account(request, account_name, field):
+    """
+    Edit an account's field. The request comes from the account_info page.
+    :param request:
+    :param account_name:
+    :param field:
+    :return:
+    """
     account = get_object_or_404(Account, name=account_name, user=request.user)
-    new_value = request.POST.get('new_value')
-    print(new_value)
-    if new_value is None:
-        messages.error(request, 'New value cannot be empty')
-        return redirect('account_info', account_name=account_name)
-    if new_value == '':
+
+    new_value = request.POST.get('new_value')  # Get the new value from the POST request
+
+    # Check if the new value is empty
+    if not new_value:
         messages.error(request, 'New value cannot be empty')
         return redirect('account_info', account_name=account_name)
 
+    # Check if the field is valid
     valid_fields = ['name', 'account_number', 'account_type', 'accumulated_interest']
     if field in valid_fields:
-        print('Valid field')
+        # Check if the new name already exists for another account
+        if field == 'name' and Account.objects.filter(name=new_value, user=request.user).exclude(
+                pk=account.pk).exists():
+            messages.error(request, 'An account with this name already exists.')
+            return redirect('account_info', account_name=account_name)
+        # Update the field and save the account
         setattr(account, field, new_value)
         account.save()
+        # Display a success message
         messages.success(request, f'{field.replace("_", " ").capitalize()} updated successfully.')
     else:
+        # Display an error message for invalid fields
         messages.error(request, 'Invalid field.')
+
+    # Update account_name for the redirect in case the name was changed
     if field == 'name':
-        if new_value:
-            account_name = new_value
-        else:
-            account_name = account.name
+        account_name = account.name
+
     return redirect('account_info', account_name=account_name)
 
 
 @require_POST
 @login_required
-def updateFavorite(request):
-    account_name = request.POST.get('account_name')
-    print(request)
-    account = Account.objects.get(name=account_name, user=request.user)
-    account.isFavorite = not account.isFavorite
-    account.save()
-    return JsonResponse({'status': 'ok'})
+def update_favorite(request):
+    """
+    Update the favorite status of an account, the request comes from JavaScript to make the request experience smoother.
+    That's also the reason why the response is a JSON response and the view is csrf_exempt.
+    :param request:
+    :return:
+    """
+    account_name = request.POST.get('account_name')  # Get the account name from the POST request
+    account = Account.objects.get(name=account_name, user=request.user)  # Get the account
+    account.isFavorite = not account.isFavorite  # Toggle the favorite status
+    account.save()  # Save the account
+    return JsonResponse({'status': 'ok'})  # Return a JSON response
 
 
 @login_required
@@ -246,7 +292,7 @@ def new_transaction(request, account_name):
             )
             transaction.save()
 
-            handleTransaction(transaction_type, amount, account, transaction, transfer_to)
+            handle_transaction(transaction_type, amount, account, transaction, transfer_to)
             return redirect('account_details', account_name=account_name)
         else:
             print(form.errors)
@@ -256,118 +302,146 @@ def new_transaction(request, account_name):
 
 
 class TransactionDetailView(View, LoginRequiredMixin):
+    """
+    Display the details of a transaction. And handle the form to include the transaction in statistics.
+    """
+    template_name = "transactions/transaction_detail.html"
+
     def get(self, request, pk):
-        transaction = get_object_or_404(Transaction, pk=pk)
+        transaction = get_object_or_404(Transaction, pk=pk)  # Get the transaction
         if transaction.transaction_type == 'purchase':
             items = transaction.item_set.all()
             return render(request, "transactions/transaction_detail.html",
                           context={"transaction": transaction, "items": items})
-        return render(request, "transactions/transaction_detail.html", context={"transaction": transaction})
+        return render(request, self.template_name, context={"transaction": transaction})
 
     def post(self, request, pk):
-        transaction = get_object_or_404(Transaction, pk=pk)
-        form = IncludeTransactionInStatisticsForm(request.POST)
+        transaction = get_object_or_404(Transaction, pk=pk)  # Get the transaction
+        form = IncludeTransactionInStatisticsForm(request.POST)  # Get the form
         if form.is_valid():
-            include_in_statistics = form.cleaned_data['include_in_statistics']
-            transaction.include_in_statistics = include_in_statistics
-            transaction.save()
-            return redirect('transaction_detail', pk=pk)
+            include_in_statistics = form.cleaned_data['include_in_statistics']  # Get the value of the form
+            transaction.include_in_statistics = include_in_statistics  # Update the transaction
+            transaction.save()  # Save the transaction
+            return redirect('transaction_detail', pk=pk)  # Redirect to the transaction detail page
         else:
-            print(form.errors)
-            return redirect('transaction_detail', pk=pk)
-
-
-
-
-
+            return redirect('transaction_detail', pk=pk)  # Redirect to the transaction detail page
 
 
 @login_required
 @require_POST
 def delete_transaction(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk, account__user=request.user)
+    """
+    Delete a transaction and revert the balance of the account.
+    :param request:
+    :param pk:
+    :return:
+    """
+    transaction = get_object_or_404(Transaction, pk=pk, account__user=request.user)  # Get the transaction
+
     # Revert back transaction
     account = transaction.account
-    if transaction.transaction_type == 'deposit':
-        account.balance -= transaction.amount
-    elif transaction.transaction_type == 'payment':
-        account.balance += transaction.amount
-    elif transaction.transaction_type == 'wage deposit':
-        account.balance -= transaction.amount
-    elif transaction.transaction_type == 'transfer':
-        account.balance += transaction.amount
+    # Match transaction type and revert back the balance
+    match transaction.transaction_type:
+        case 'deposit':
+            account.balance -= transaction.amount
+        case 'payment':
+            account.balance += transaction.amount
+        case 'wage deposit':
+            account.balance -= transaction.amount
+        case 'transfer':
+            account.balance += transaction.amount
+            corresponding_transaction = Transaction.objects.filter(
+                account=transaction.transfer_to,
+                transaction_type='deposit',
+                amount=transaction.amount,
+                description=f"Transfer from {account.name}",
+                date=transaction.date
+            ).first()
+            if corresponding_transaction:
+                transaction.transfer_to.balance -= corresponding_transaction.amount
+                transaction.transfer_to.save()
+                corresponding_transaction.delete()
+        case 'purchase':
+            account.balance += transaction.amount
+        case _:
+            pass
 
-        corresponding_transaction = Transaction.objects.filter(
-            account=transaction.transfer_to,
-            transaction_type='deposit',
-            amount=transaction.amount,
-            description=f"Transfer from {account.name}",
-            date=transaction.date
-        ).first()
-
-        if corresponding_transaction:
-            transaction.transfer_to.balance -= corresponding_transaction.amount
-            transaction.transfer_to.save()
-            corresponding_transaction.delete()
-
-    elif transaction.transaction_type == 'purchase':
-        account.balance += transaction.amount
-
-
-    account.save()
-    transaction.delete()
-    messages.success(request, 'Transaction deleted and balance reverted.')
+    account.save()  # Save the account
+    transaction.delete()  # Delete the transaction
     return redirect('account_details', account_name=account.name)
 
 
-@login_required
-def user_info(request):
-    user_form = None
-    password_form = None
+class UserInfoView(LoginRequiredMixin, View):
+    """
+    Display the user's account details and handle the form to update the user's information and change password.
+    As well as delete the user's account.
+    """
+    template_name = "account/user_account_details.html"
+    user_form_class = UserUpdateForm
+    password_form_class = PasswordChangeForm
 
-    if request.method == 'POST':
+    def get(self, request, *args, **kwargs):
+        user_form = self.user_form_class(instance=request.user)
+        password_form = self.password_form_class(request.user)
+        return self.render_forms(request, user_form, password_form)
+
+    def post(self, request, *args, **kwargs):
         if 'update_user_info' in request.POST:
-            user_form = UserUpdateForm(request.POST, instance=request.user)
-            if user_form.is_valid():
-                print('User form is valid')
-                user_form.save(commit=False)
-                if not user_form.cleaned_data['email']:
-                    user_form.cleaned_data['email'] = request.user.email
-                if not user_form.cleaned_data['username']:
-                    user_form.cleaned_data['username'] = request.user.username
-                if not user_form.cleaned_data['first_name']:
-                    user_form.cleaned_data['first_name'] = request.user.first_name
-                if not user_form.cleaned_data['last_name']:
-                    user_form.cleaned_data['last_name'] = request.user.last_name
-                user_form.save()
-                messages.success(request, 'User profile updated successfully.', extra_tags='user_profile')
-                return redirect('user_info')
-            else:
-                print(user_form.errors)
+            return self.handle_user_info_update(request)
         elif 'change_password' in request.POST:
-            print('Changing password')
-            password_form = PasswordChangeForm(request.user, request.POST)
-            user_form = UserUpdateForm(instance=request.user)  # Initialize the user form in case of errors
-            if password_form.is_valid():
-                user = password_form.save()
-                update_session_auth_hash(request, user)
-                messages.success(request, 'Your Password was successfully updated!', extra_tags='password')
-                return redirect('user_info')
-            else:
-                print(password_form.errors)
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        password_form = PasswordChangeForm(request.user)
+            return self.handle_password_change(request)
+        else:
+            return self.get(request)
 
-    return render(request, "account/user_account_details.html", context={"user_form": user_form, "password_form": password_form})
+    def handle_user_info_update(self, request):
+        user_form = self.user_form_class(request.POST, instance=request.user)
+        password_form = self.password_form_class(request.user)  # Pre-fill password form
+
+        if user_form.is_valid():
+            self.update_user_info(user_form, request)
+            messages.success(request, 'User profile updated successfully.', extra_tags='user_profile')
+            return redirect('user_info')
+        else:
+            return self.render_forms(request, user_form, password_form)
+
+    def update_user_info(self, user_form, request):
+        user = user_form.save(commit=False)
+        user.email = user_form.cleaned_data['email'] or request.user.email
+        user.username = user_form.cleaned_data['username'] or request.user.username
+        user.first_name = user_form.cleaned_data['first_name'] or request.user.first_name
+        user.last_name = user_form.cleaned_data['last_name'] or request.user.last_name
+        user.save()
+
+    def handle_password_change(self, request):
+        password_form = self.password_form_class(request.user, request.POST)
+        user_form = self.user_form_class(instance=request.user)  # Pre-fill user form
+
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Important to prevent logout after password change
+            messages.success(request, 'Your password was successfully updated!', extra_tags='password')
+            return redirect('user_info')
+        else:
+            return self.render_forms(request, user_form, password_form)
+
+    def render_forms(self, request, user_form, password_form):
+        return render(request, self.template_name, context={
+            "user_form": user_form,
+            "password_form": password_form
+        })
 
 
 @require_POST
 @login_required
 def delete_user(request):
+    """
+    Delete the user's account and log the user out.
+    :param request:
+    :return:
+    """
     user = request.user
     user.delete()
-    return redirect('login')
+    return redirect('account_login')
 
 
 @login_required
@@ -420,7 +494,7 @@ def add_new_paycheck(request):
                     balance_after=payout_account.balance + amount
                 )
                 new_wage_deposit.save()
-                handleTransaction('wage deposit', amount, payout_account, new_wage_deposit)
+                handle_transaction('wage deposit', amount, payout_account, new_wage_deposit)
             return redirect('paychecks')
         else:
             print(form.errors)

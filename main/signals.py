@@ -6,8 +6,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 
-# User profile signals
-
 
 @receiver(user_logged_in)
 def check_user_profile(sender, request, user, **kwargs):
@@ -18,7 +16,7 @@ def check_user_profile(sender, request, user, **kwargs):
         UserProfile.objects.create(user=user)
 
 
-@receiver(user_signed_up)
+@receiver(user_signed_up)  # Signal is sent when a user signs up
 def create_user_profile(sender, request, user, **kwargs):
     """
     Create a UserProfile object for the user upon signup.
@@ -26,15 +24,25 @@ def create_user_profile(sender, request, user, **kwargs):
     UserProfile.objects.create(user=user)
 
 
-@receiver(user_logged_in)
+@receiver(user_logged_in)  # Signal is sent when a user logs in
 def check_suspicious_activity(sender, request, user, **kwargs):
+    """
+    Grabs the user's ip-address, geolocates it, and checks if the user's last known country is different from the current
+    country. If it is, an email is sent to the user notifying them of the suspicious activity.
+    :param sender:
+    :param request:
+    :param user:
+    :param kwargs:
+    :return:
+    """
     profile, created = UserProfile.objects.get_or_create(user=user)
 
-    current_ip = get_client_ip(request)
+    current_ip = get_client_ip(request)  # Get ip from request
 
-    location_data = get_geoip_data(current_ip)
+    location_data = get_geoip_data(current_ip)  # Get location data from ip
     current_country = location_data['country']
 
+    # Set the context for the email
     context = {
         'user': user,
         'ip_address': current_ip,
@@ -42,6 +50,7 @@ def check_suspicious_activity(sender, request, user, **kwargs):
         'country': current_country,
     }
 
+    # If the user has a last known country, and it is different from the current country, send an email
     if profile.last_known_country and profile.last_known_country != current_country:
         message = render_to_string('emails/suspicious_activity.html', context)
         send_mail(
@@ -52,6 +61,7 @@ def check_suspicious_activity(sender, request, user, **kwargs):
             fail_silently=False,
         )
 
+        # Update the user's last known country
         profile.last_known_country = current_country
         profile.save()
 
