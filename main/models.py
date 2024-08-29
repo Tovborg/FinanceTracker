@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Account(models.Model):
     ACCOUNT_TYPES = (
         ('savings', 'Savings'),

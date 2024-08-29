@@ -149,13 +149,9 @@ def account_view(request, account_name):
     :param account_name:
     :return:
     """
-    # Handle exceptional cases where multiple accounts with the same name exist.
-    # User should not have multiple accounts with the same name
-    try:
-        account = get_object_or_404(Account, name=account_name, user=request.user)
-    except MultipleObjectsReturned:
-        account = Account.objects.filter(name=account_name, user=request.user).first()
-    transactions_list = account.transaction_set.all().order_by('-date')  # Get all transactions for the account and order by date
+    account = get_object_or_404(Account, name=account_name, user=request.user)
+    transactions_list = account.transaction_set.all().order_by('-date')  # Get all transactions for the account and
+    # order by date
 
     # Paginate the transactions with 5 transactions per page
     paginator = Paginator(transactions_list, 5)
@@ -252,6 +248,7 @@ def update_favorite(request):
     :return:
     """
     account_name = request.POST.get('account_name')  # Get the account name from the POST request
+    print(account_name)
     account = Account.objects.get(name=account_name, user=request.user)  # Get the account
     account.isFavorite = not account.isFavorite  # Toggle the favorite status
     account.save()  # Save the account

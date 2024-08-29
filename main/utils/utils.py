@@ -175,7 +175,9 @@ def translate_payday_info(weekday):
         'torsdag': 'Thursday',
         'fredag': 'Friday',
         'lørdag': 'Saturday',
-        'søndag': 'Sunday'
+        'søndag': 'Sunday',
+        'morgen': 'Tomorrow',
+        'dag': 'Today',
     }
     return weekdays[weekday]
 
