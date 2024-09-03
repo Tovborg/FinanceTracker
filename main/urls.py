@@ -1,5 +1,4 @@
-#main/urls.py
-
+# main/urls.py
 from django.urls import include, path
 from main.views import *
 from django.contrib.auth import views as auth_views
@@ -10,12 +9,11 @@ urlpatterns = [
     # User URLs
     path('delete_user/', delete_user, name='delete_user'),
     path('accounts/2fa/', CustomSecurityIndexView.as_view(), name='mfa_index'),
-    path('accounts/', accounts_view, name='account'),
     path('terminate_all_sessions/', TerminateAllSessionsView.as_view(), name='terminate_all_sessions'),
-    path('accounts/2fa/', CustomSecurityIndexView.as_view(), name='mfa_index'),
     path('user_info/', UserInfoView.as_view(), name='user_info'),
     path('terminate_session/<str:session_key>/', terminate_session, name='terminate_session'),
     # Bank Account URLs
+    path('accounts/', accounts_view, name='account'),
     path('account/add_account/', AddAccountView.as_view(), name='add_account'),
     path('account/update_favorite/', csrf_exempt(update_favorite), name='update_favorite'),
     path('account/<str:account_name>/', account_view, name='account_details'),

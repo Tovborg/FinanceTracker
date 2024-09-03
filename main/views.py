@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.views import View
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
 from django.utils import timezone
@@ -222,6 +222,10 @@ def edit_account(request, account_name, field):
                 pk=account.pk).exists():
             messages.error(request, 'An account with this name already exists.')
             return redirect('account_info', account_name=account_name)
+        # check if the account_type is valid
+        if field == 'account_type' and new_value not in ['savings', 'checking', 'Vacation', 'Retirement', 'Other']:
+            messages.error(request, 'Invalid account type.')
+            return redirect('account_info', account_name=account)
         # Update the field and save the account
         setattr(account, field, new_value)
         account.save()
@@ -247,8 +251,8 @@ def update_favorite(request):
     :param request:
     :return:
     """
+    print(request.POST)
     account_name = request.POST.get('account_name')  # Get the account name from the POST request
-    print(account_name)
     account = Account.objects.get(name=account_name, user=request.user)  # Get the account
     account.isFavorite = not account.isFavorite  # Toggle the favorite status
     account.save()  # Save the account
@@ -268,7 +272,6 @@ def new_transaction(request, account_name):
             date = form.cleaned_data['date']
             description = form.cleaned_data['description']
             transfer_to = form.cleaned_data['transfer_to']
-            print(f"Transfer to: {transfer_to.balance}")
             # Calculate balance after transaction
             if transaction_type == 'deposit':
                 balance_after = account.balance + amount
@@ -788,11 +791,14 @@ class TerminateAllSessionsView(LoginRequiredMixin, View):
                 terminated = True
 
         if terminated:
+            logout(request)  # Log out the user after terminating all sessions
             messages.success(request, 'All active sessions terminated.')
+            return redirect('account_login')  # Redirect to a safe page after logout
         else:
             messages.error(request, 'No active sessions to terminate.')
 
         return redirect('mfa_index')
+
 
 
 @require_POST

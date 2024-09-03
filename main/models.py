@@ -121,7 +121,6 @@ class Item(models.Model):
     quantity = models.IntegerField(default=1, blank=False, null=False)
 
 
-
 class Paychecks(models.Model):
     PAYCHECK_STATUS = (
         ('pending', 'Pending'),
