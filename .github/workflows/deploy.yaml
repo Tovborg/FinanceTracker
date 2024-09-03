@@ -33,7 +33,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AZURE_KEY: ${{ secrets.AZURE_KEY }}
           AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
-          DJANGO_DEBUG: ${{ secrets.DJANGO_DEBUG }}
+          DJANGO_DEBUG: False
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN: ${{ secrets.MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN }}
