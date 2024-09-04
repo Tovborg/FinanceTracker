@@ -154,7 +154,7 @@ class AddPaycheckForm(forms.Form):
         if start_pay_period and end_pay_period and start_pay_period > end_pay_period:
             raise ValidationError("End of pay period must be after start of pay period.")
 
-        if status == 'pending' and payout_date < datetime.date.today():
+        if status == 'pending' and payout_date <= datetime.date.today():
             raise ValidationError("Pay date must be in the future for pending paychecks.")
 
         if payout_date == 'paid' and payout_date > datetime.date.today():
