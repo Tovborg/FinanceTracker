@@ -8,6 +8,7 @@ from django.utils import timezone
 from allauth.account.models import EmailAddress
 import datetime
 
+
 def create_user(client):
     User = get_user_model()
     user = User.objects.create_user(
