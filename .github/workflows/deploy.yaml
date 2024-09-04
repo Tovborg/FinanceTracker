@@ -39,7 +39,6 @@ jobs:
           MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN: ${{ secrets.MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN }}
           HOST: ${{ secrets.HOST }}
           USER: ${{ secrets.USER }}
-
         run: |
           source venv/bin/activate
           pytest main/tests/views
