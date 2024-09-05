@@ -83,7 +83,8 @@ class Transaction(models.Model):
         ('payment', 'Payment'),
         ('transfer', 'Transfer'),
         ('purchase', 'Purchase'),
-        ('wage deposit', 'Wage Deposit')
+        ('wage deposit', 'Wage Deposit'),
+        ('recurring', 'Recurring')
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=12, choices=TRANSACTION_TYPES)
