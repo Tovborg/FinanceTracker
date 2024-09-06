@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
 
     <div class="flex justify-center mt-10 mobile-only:h-full mobile-only:mt-0">
@@ -102,10 +103,16 @@
                     </span>
                     </form>
                 </div>
-                <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Credit Card Type</span>
-                    <span class="font-dansketext">{{ account.creditcard_type }}</span>
-                </div>
+                {% if account.creditcard_type %}
+                    <div class="flex flex-row justify-between">
+                        <span class="font-semibold">Credit Card Type</span>
+                        {% if account.creditcard_type == 'dankort' %}
+                            <img src="{% static 'icons/DK_Logo_Sort_CMYK.png' %}" alt="icon"
+                                 class="w-7 h-4 mr-2">{% else %}
+                            <i class="fa !text-3xl r-2 fa-cc-{{ account.creditcard_type|translate_cardtype }}"
+                               style="font-size:24px"></i>{% endif %}
+                    </div>
+                {% endif %}
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Currency</span>
                     <span class="font-dansketext">DANSKE KRONER</span>

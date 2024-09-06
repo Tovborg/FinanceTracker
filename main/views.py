@@ -110,7 +110,9 @@ def accounts_view(request):
     :return:
     """
     user_accounts = Account.objects.filter(user=request.user)
-    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts})
+    creditcards = user_accounts.filter(account_type='credit card')
+    bank_accounts = user_accounts.exclude(account_type='credit card')
+    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts, "creditcards": creditcards, "bank_accounts": bank_accounts})
 
 
 @login_required

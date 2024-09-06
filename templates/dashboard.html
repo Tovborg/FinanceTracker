@@ -53,9 +53,14 @@
                     <div class="bg-account-cards mobile-only:mb-3 rounded-lg p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
-                                {{ account.name }}
-                                <a href="{% url 'account_details' account.name %}" class="flex items-center ml-2">
-                                    <ion-icon name="chevron-forward-outline" class="text-gray-500"></ion-icon>
+                                {% if account.creditcard_type == 'dankort' %}
+                                    <img src="{% static 'icons/DK_Logo_Sort_CMYK.png' %}" alt="icon"
+                                         class="w-7 h-4 mr-2">{% else %}
+                                    <i class="fa mr-2 fa-cc-{{ account.creditcard_type|translate_cardtype }}"
+                                       style="font-size:24px"></i>{% endif %}{{ account.name }}
+                                <a class="flex items-center"
+                                        {# href="{% url 'account_details' account.name %}">
+                                    <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
                                 </a>
                             </h2>
                             <span class="text-2xl text-white font-dansketext p-3">DKK {{ account.balance }}</span>
