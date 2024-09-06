@@ -179,13 +179,15 @@ class AddAccountView(LoginRequiredMixin, View):
         form = CreateAccountForm(request.POST, user=request.user)
         if form.is_valid():
             # Create a new account
+            print(form.cleaned_data['creditcard_type'])
             new_account = Account(
                 user=request.user,
                 name=form.cleaned_data['account_name'],
                 balance=form.cleaned_data['account_balance'],
                 account_type=form.cleaned_data['account_type'],
                 description=form.cleaned_data['description'],
-                account_number=form.cleaned_data['account_number']
+                account_number=form.cleaned_data['account_number'],
+                creditcard_type=form.cleaned_data['creditcard_type']
             )
             new_account.save()
             return redirect('account')

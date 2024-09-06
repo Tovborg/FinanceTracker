@@ -1,7 +1,7 @@
 <!-- templates/account/accounts.html -->
 {% extends '../base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block content %}
     <!-- Your regular content for accounts page -->
     <!-- Other account-related content -->
@@ -25,7 +25,8 @@
                                     <ion-icon id="star_{{ account.name }}" class="mr-2 cursor-pointer"
                                               name="star-outline"></ion-icon>
                                 {% endif %}
-                                {{ account.name }}<a class="flex items-center"
+
+                                <i class="fa mr-2 fa-cc-{{ account.creditcard_type|translate_cardtype }}" style="font-size:24px"></i>{{ account.name }}<a class="flex items-center"
                                                      href="{% url 'account_details' account.name %}">
                                 <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
                             </a></h2>

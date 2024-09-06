@@ -77,7 +77,33 @@
                                                 class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
                                             <option value="savings">Savings</option>
                                             <option value="checking">Checking</option>
-                                            <option value="Vacation">Vacation</option>
+                                            <option value="vacation">Vacation</option>
+                                            <option value="other">Other</option>
+                                            <option value="credit card">Credit Card</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="card_type" class="mt-7 hidden grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                            <div class="sm:col-span-4">
+                                {% if form.errors %}
+                                    <span class="font-dansketext text-warning">{{ form.errors.creditcard_type }}</span>
+                                {% endif %}
+                                <label for="id_creditcard_type"
+                                       class="block text-sm font-dansketext leading-6 text-gray-900">
+                                    Credit Card Type
+                                </label>
+                                <div class="mt-2">
+                                    <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-form_input focus-within:ring-2 focus-within:ring-inset focus-within:ring-form_outline sm:max-w-md">
+                                        <select name="creditcard_type" id="id_creditcard_type" required
+                                                class="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                            <option value="visa">Visa</option>
+                                            <option value="mastercard">Mastercard</option>
+                                            <option value="dankort">Dankort</option>
+                                            <option value="american express">American Express</option>
+                                            <option value="discover">Discover</option>
                                             <option value="other">Other</option>
                                         </select>
                                     </div>
@@ -147,11 +173,20 @@
         const account_type = document.getElementById('id_account_type')
         const account_number = document.getElementById('account_number')
         account_type.addEventListener('change', (e) => {
-            if (e.target.value === 'checking' || e.target.value === 'savings') {
+            if (e.target.value === 'checking' || e.target.value === 'savings' || e.target.value === 'credit card') {
                 console.log(e.target.value)
                 account_number.style.display = 'block'
             } else {
                 account_number.style.display = 'none'
+            }
+        })
+        const card_type = document.getElementById('card_type')
+        account_type.addEventListener('change', (e) => {
+            if (e.target.value === 'credit card') {
+                console.log(e.target.value)
+                card_type.style.display = 'grid'
+            } else {
+                card_type.style.display = 'none'
             }
         })
     </script>

@@ -24,12 +24,22 @@ class CreateAccountForm(forms.Form):
     ACCOUNT_TYPES = (
         ('savings', 'Savings'),
         ('checking', 'Checking'),
-        ('Vacation', 'Vacation'),
-        ('Retirement', 'Retirement'),
+        ('vacation', 'Vacation'),
+        ('retirement', 'Retirement'),
+        ('other', 'Other'),
+        ('credit card', 'Credit Card'),
+    )
+    CREDITCARD_TYPES = (
+        ('visa', 'Visa'),
+        ('mastercard', 'Mastercard'),
+        ('dankort', 'Dankort'),
+        ('american express', 'American Express'),
+        ('discover', 'Discover'),
         ('other', 'Other')
     )
     account_name = forms.CharField(max_length=20)
     account_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+    creditcard_type = forms.ChoiceField(choices=CREDITCARD_TYPES, required=False)
     account_type = forms.ChoiceField(choices=ACCOUNT_TYPES)
     account_number = forms.CharField(max_length=50, required=False)
     # field for uploading a file
@@ -47,6 +57,7 @@ class CreateAccountForm(forms.Form):
         if len(account_name) > 20:
             raise ValidationError("Account name must be 20 characters or less.")
         return account_name
+
 
 
 class NewTransactionForm(forms.Form):
