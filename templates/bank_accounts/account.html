@@ -68,38 +68,6 @@
                             </ul>
                         </div>
                     </div>
-                    <script>
-                        function toggleFavorite(accountName) {
-                            const formData = new FormData();
-                            formData.append('account_name', accountName);
-
-                            fetch('{% url "update_favorite" %}', {
-                                method: 'POST',
-                                body: formData,
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.status === 'ok') {
-                                        console.log('Favorite status updated successfully.');
-                                        // Update the UI as needed, e.g., change the star icon
-                                    } else {
-                                        console.error('Failed to update favorite status.');
-                                    }
-                                })
-                                .catch(error => console.error('Error:', error));
-                        }
-
-                        document.getElementById('star_{{ account.name }}').addEventListener('click', function () {
-                            toggleFavorite('{{ account.name }}');
-                            const starIcon = document.getElementById('star_{{ account.name }}');
-                            if (starIcon.name === 'star-outline') {
-                                starIcon.name = 'star';
-                            } else {
-                                starIcon.name = 'star-outline';
-                            }
-                        });
-                    </script>
-
                 {% endfor %}
             </div>
             {% if creditcards %}
@@ -127,7 +95,7 @@
                                         <i class="fa mr-2 fa-cc-{{ card.creditcard_type|translate_cardtype }}"
                                            style="font-size:24px"></i>{% endif %}{{ card.name }}
                                     <a class="flex items-center"
-                                            {# href="{% url 'account_details' card.name %}">
+                                            href="{% url 'account_details' card.name %}">
                                         <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
                                     </a></h2>
 
@@ -176,4 +144,50 @@
         <!-- Render no accounts error -->
         {% include "bank_accounts/no_accounts_error.html" %}
     {% endif %}
+    <!-- Toggle Favorite script -->
+    <script>
+        function toggleFavorite(accountName) {
+            const formData = new FormData();
+            formData.append('account_name', accountName);
+
+            fetch('{% url "update_favorite" %}', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    console.log('Favorite status updated successfully.');
+                } else {
+                    console.error('Failed to update favorite status.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to attach event listeners to all favorite icons
+        function attachEventListenersForFavorites() {
+            const bankStars = document.querySelectorAll('[id^="star_"]');
+
+            bankStars.forEach(starIcon => {
+                starIcon.addEventListener('click', function (event) {
+                    const clickedIcon = event.target; // Use event.target to get the clicked element
+                    const accountName = clickedIcon.id.replace('star_', '');  // Extract account name from ID
+
+                    toggleFavorite(accountName);
+
+                    // Toggle the star icon
+                    if (clickedIcon.name === 'star-outline') {
+                        clickedIcon.name = 'star';
+                    } else {
+                        clickedIcon.name = 'star-outline';
+                    }
+                });
+            });
+        }
+
+        // Run this after the DOM has fully loaded
+        document.addEventListener('DOMContentLoaded', attachEventListenersForFavorites);
+
+    </script>
 {% endblock content %}
