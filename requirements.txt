@@ -1,12 +1,12 @@
-Django==5.0.7
-django-environ==0.11.2
+Django
+django-environ
 gunicorn==22.0.0
 psycopg2-binary==2.9.9
 beautifulsoup4
 requests
 azure-ai-documentintelligence
 Pillow
-django-allauth==64.1.0
+django-allauth
 django-allauth[mfa]
 pyyaml
 ua-parser

@@ -39,8 +39,21 @@
                     <span class="font-dansketext">{{ account.user }}</span>
                 </div>
                 <div class="flex flex-row justify-between">
-                    <span class="font-semibold">Account Balance</span>
-                    <span>DKK {{ account.balance }}</span>
+                    <span class="font-semibold">Account Balance<a onclick="toggleEditForm('balance')"
+                                                                       class="cursor-pointer"><ion-icon
+                            id="balance_pencil" class="ml-2 font-bold"
+                            name="pencil-outline"></ion-icon></a></span>
+                    <form method="post" action="{% url 'edit_account' account.name 'balance' %}"
+                          id="balance_edit" class="hidden">
+                        {% csrf_token %}
+                        <span class="font-dansketext flex items-center">
+                            <input name="new_value" type="text" placeholder="{{ account.balance }}"
+                                   class="border rounded px-2 py-1 bg-transparent">
+                            <button type="submit"><ion-icon class="ml-2 text-2xl text-blue-500 cursor-pointer"
+                                                            name="checkmark-outline"></ion-icon></button>
+                        </span>
+                    </form>
+                    <span id="balance">DKK {{ account.balance }}</span>
                 </div>
                 <div class="flex flex-row justify-between">
                     <span class="font-semibold">Accumulated Interest<a onclick="toggleEditForm('accumulated_interest')"

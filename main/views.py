@@ -219,7 +219,7 @@ def edit_account(request, account_name, field):
         return redirect('account_info', account_name=account_name)
 
     # Check if the field is valid
-    valid_fields = ['name', 'account_number', 'account_type', 'accumulated_interest']
+    valid_fields = ['name', 'account_number', 'account_type', 'accumulated_interest', 'balance']
     if field in valid_fields:
         # Check if the new name already exists for another account
         if field == 'name' and Account.objects.filter(name=new_value, user=request.user).exclude(
@@ -230,6 +230,12 @@ def edit_account(request, account_name, field):
         if field == 'account_type' and new_value not in ['savings', 'checking', 'Vacation', 'Retirement', 'Other']:
             messages.error(request, 'Invalid account type.')
             return redirect('account_info', account_name=account)
+        if field == 'balance' and not new_value.isdigit() or int(new_value) < 0:
+            messages.error(request, 'Invalid balance.')
+            return redirect('account_info', account_name=account)
+        # make the balance an integer
+        if field == 'balance':
+            new_value = int(new_value)
         # Update the field and save the account
         setattr(account, field, new_value)
         account.save()

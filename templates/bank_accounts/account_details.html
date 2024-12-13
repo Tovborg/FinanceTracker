@@ -1,9 +1,10 @@
+
 {% extends '../base.html' %}
 {% load static %}
 {% block content %}
 
-    <div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-0 sm:mt-10">
-        <div class="bg-cards h-full sm:h-[600px] rounded-lg w-[100%] sm:w-[70%] shadow-lg p-6">
+    <div class="flex mobile-only:h-full mobile-only:bg-cards items-center justify-center mt-10 sm:mt-10">
+        <div class="bg-cards h-full sm:h-[600px] rounded-lg w-[70%] sm:w-[80%] shadow-lg p-6">
             <a id="backButton" href="">
                 <ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon>
             </a>
@@ -12,7 +13,7 @@
                 <div class="flex items-center text-3xl !space-x-3">
                     <span class="font-dansketext">{{ account.name }}</span>
                     <a href="{% url 'account_info' account.name %}" class="flex items-center">
-                        <ion-icon class="text-gray-500" name="information-circle-outline"></ion-icon>
+                        <ion-icon class="ml-2 text-gray-500" name="information-circle-outline"></ion-icon>
                     </a>
                 </div>
 
