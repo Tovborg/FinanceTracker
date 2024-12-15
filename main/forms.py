@@ -143,6 +143,9 @@ class AddPaycheckForm(forms.Form):
     employer = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea, required=False)
     status = forms.ChoiceField(choices=PAYCHECK_STATUS, required=True)
+    # fields for uploading a file
+    work_hour_report = forms.FileField(required=False)
+    paystub = forms.FileField(required=False)
 
     class Meta:
         model = Paychecks

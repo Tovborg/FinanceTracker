@@ -10,7 +10,7 @@
                 <h1 class="text-3xl font-dansketext text-center">Add New Paycheck</h1>
             </div>
             <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
-            <form method="post" action="#">
+            <form method="post" action="#" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% if form.errors %}
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -366,6 +366,82 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="sm:col-span-4">
+                                {% if form.errors %}
+                                    <span class="font-dansketext text-warning">{{ form.errors.status }}</span>
+                                {% endif %}
+                                <label for="id_status" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                    Work Hour Report
+                                </label>
+                                <div class="mt-4">
+                                    <input type="file" id="{{ form.work_hour_report.id_for_label }}" name="{{ form.work_hour_report.name }}" accept=".pdf" class="hidden">
+                                
+                                    <!-- Label styled as a button -->
+                                    <label for="{{ form.work_hour_report.id_for_label }}"
+                                           class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
+                                        Upload
+                                    </label>
+                                    <div id="work_hour_file_div" class="mt-5 items-center hidden">
+                                        <ion-icon id="work_hour_report_remove_btn" name="close-outline" class="text-red-500 cursor-pointer text-2xl mr-2"></ion-icon>
+                                        <p id="work_hour_file_text" class="font-dansketext" style="color: green;">Uploaded whr_3.pdf</p>
+                                    </div>
+                                    <script>
+                                        work_hour_document_input = document.getElementById('{{ form.work_hour_report.id_for_label }}');
+                                        work_hour_document_input.addEventListener('change', function () {
+                                            document.getElementById("work_hour_file_div").classList.remove('hidden');
+                                            document.getElementById("work_hour_file_div").classList.add('flex');
+                                            document.getElementById("work_hour_file_text").textContent = "Uploaded " + work_hour_document_input.files[0].name;
+                                        });
+                                        whr_remove_btn = document.getElementById('work_hour_report_remove_btn');
+                                        // remove the file from the input
+                                        whr_remove_btn.addEventListener('click', function () {
+                                            document.getElementById("work_hour_file_div").classList.remove('flex');
+                                            document.getElementById("work_hour_file_div").classList.add('hidden');
+                                            work_hour_document_input.value = '';
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="sm:col-span-4">
+                                {% if form.errors %}
+                                    <span class="font-dansketext text-warning">{{ form.errors.status }}</span>
+                                {% endif %}
+                                <label for="id_status" class="block text-sm font-dansketext leading-6 text-gray-900">
+                                    Paystub
+                                </label>
+                                <div class="mt-2">
+                                    <div class="mt-4">
+                                        <input type="file" id="{{ form.paystub.id_for_label }}" name="{{ form.paystub.name }}" accept=".pdf" class="hidden">
+                                    
+                                        <!-- Label styled as a button -->
+                                        <label for="{{ form.paystub.id_for_label }}"
+                                               class="select-none font-sans font-bold text-center uppercase transition-all text-xs py-3 px-6 bg-gradient-to-tr from-gray-900 to-gray-800 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] rounded-full cursor-pointer">
+                                            Upload
+                                        </label>
+                                        <div id="paystub_file_div" class="mt-3 items-center hidden">
+                                            <ion-icon id="paystub_remove_btn" name="close-outline" class="text-red-500 cursor-pointer text-2xl mr-2"></ion-icon>
+                                            <p id="paystub_file_text" class="font-dansketext mt-5" style="color: green;">Uploaded whr_3.pdf</p>
+                                        </div>
+                                        <script>
+                                            paystub_input = document.getElementById('{{ form.paystub.id_for_label }}');
+                                            paystub_input.addEventListener('change', function () {
+                                                document.getElementById("paystub_file_div").classList.remove('hidden');
+                                                document.getElementById("paystub_file_div").classList.add('flex');
+                                                document.getElementById("paystub_file_text").textContent = "Uploaded " + paystub_input.files[0].name;
+                                            });
+                                            paystub_remove_btn = document.getElementById('paystub_remove_btn');
+                                            // remove the file from the input
+                                            paystub_remove_btn.addEventListener('click', function () {
+                                                document.getElementById("paystub_file_div").classList.remove('flex');
+                                                document.getElementById("paystub_file_div").classList.add('hidden');
+                                                paystub_input.value = '';
+                                            });
+
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- End of Pay Date Section -->
                             <div class="sm:col-span-4">
