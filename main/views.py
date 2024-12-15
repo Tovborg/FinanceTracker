@@ -502,9 +502,6 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
         work_hour_report = form.cleaned_data.get('work_hour_report')
         paystub = form.cleaned_data.get('paystub')
 
-        print(f"work_hour_report name: {work_hour_report.name}")
-        print(f"paystub name: {paystub.name}")
-
         new_paycheck = Paychecks(
             user=self.request.user,
             amount=amount,
