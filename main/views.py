@@ -501,10 +501,9 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
         status = form.cleaned_data['status']
         
         
-        paystub = self.request.FILES.getlist('paystub')[0]
-        work_hour_report = self.request.FILES.getlist('work_hour_report')[0]
-        print(type(paystub))
-        print(type(work_hour_report))
+        paystub = self.request.FILES.getlist('paystub')
+        work_hour_report = self.request.FILES.getlist('work_hour_report')
+        
         new_paycheck = Paychecks(
             user=self.request.user,
             amount=amount,
@@ -516,10 +515,13 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
             payout_account=payout_account,
             status=status,
         )
-        new_paycheck.paystub = paystub
-        new_paycheck.paystub_original_name = paystub.name
-        new_paycheck.work_hour_report = work_hour_report
-        new_paycheck.work_hour_report_original_name = work_hour_report.name
+        if paystub:  # check if paystub is uploaded
+            new_paycheck.paystub = paystub[0]
+            new_paycheck.paystub_original_name = paystub[0].name
+        
+        if work_hour_report:  # check if work_hour_report is uploaded
+            new_paycheck.work_hour_report = work_hour_report[0]
+            new_paycheck.work_hour_report_original_name = work_hour_report[0].name
 
         
         new_paycheck.save()
