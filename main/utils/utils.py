@@ -262,3 +262,5 @@ def get_geoip_data(ip_address):
 
     return location_data
 
+def handle_uploaded_file(f):
+    pass

@@ -17,6 +17,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
+from django.core.files import File
 # Import app specific modules
 from main.forms import (CreateAccountForm,
                         NewTransactionForm,
@@ -499,9 +500,11 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
         description = form.cleaned_data['description']
         status = form.cleaned_data['status']
         
-        work_hour_report = form.cleaned_data.get('work_hour_report')
-        paystub = form.cleaned_data.get('paystub')
-
+        
+        paystub = self.request.FILES.getlist('paystub')[0]
+        work_hour_report = self.request.FILES.getlist('work_hour_report')[0]
+        print(type(paystub))
+        print(type(work_hour_report))
         new_paycheck = Paychecks(
             user=self.request.user,
             amount=amount,
@@ -511,8 +514,14 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
             employer=employer,
             description=description,
             payout_account=payout_account,
-            status=status
+            status=status,
         )
+        new_paycheck.paystub = paystub
+        new_paycheck.paystub_original_name = paystub.name
+        new_paycheck.work_hour_report = work_hour_report
+        new_paycheck.work_hour_report_original_name = work_hour_report.name
+
+        
         new_paycheck.save()
 
         if new_paycheck.status == 'paid':

@@ -149,7 +149,7 @@ class AddPaycheckForm(forms.Form):
 
     class Meta:
         model = Paychecks
-        fields = ['amount', 'payout_account', 'pay_date', 'start_pay_period', 'end_pay_period', 'employer', 'description', 'status']
+        fields = ['amount', 'payout_account', 'pay_date', 'start_pay_period', 'end_pay_period', 'employer', 'description', 'status', 'work_hour_report', 'paystub']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)

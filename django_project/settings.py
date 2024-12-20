@@ -194,6 +194,13 @@ USERSESSIONS_ADAPTER = 'main.adapters.CustomUserSessionsAdapter'
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static/"]
 
+MEDIA_URL = '/media/'
+if DEBUG:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
+    MEDIA_ROOT = '/var/www/media'
+
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

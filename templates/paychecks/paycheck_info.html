@@ -58,6 +58,32 @@
                               id="account_number">{{ paycheck.status|capfirst }} Payment</span>
                     {% endif %}
                 </div>
+                {% if paycheck.work_hour_report %}
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Work Hour Report</span>
+                    <a href="{{ paycheck.work_hour_report.url }}" 
+                    class="font-dansketext file-link" 
+                    download="{{ paycheck.work_hour_report_original_name }}">
+                        {{ paycheck.work_hour_report_original_name }}
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if paycheck.paystub %}
+                <div class="flex flex-row justify-between">
+                    <span class="font-semibold">Paystub</span>
+                    <a href="{{ paycheck.paystub.url }}" 
+                    class="font-dansketext hover:underline file-link" 
+                    download="{{ paycheck.paystub_original_name }}">
+                        {{ paycheck.paystub_original_name }}
+                    </a>
+                </div>
+                {% endif %}
+                <style>
+                    .file-link:hover {
+                        text-decoration: underline;
+                    }
+                </style>
             </div>
         </div>
     </div>

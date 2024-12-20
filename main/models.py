@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
-# Create your models here.
+from django.core.validators import FileExtensionValidator
+import uuid
 
 
 class UserProfile(models.Model):
@@ -38,6 +39,7 @@ class Account(models.Model):
     description = models.TextField(blank=True, null=True, max_length=255)
     isFavorite = models.BooleanField(default=False)
     accumulated_interest = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
 
     def __str__(self):
         return f"{self.name} ({self.account_type})"
@@ -132,6 +134,16 @@ class Item(models.Model):
     quantity = models.IntegerField(default=1, blank=False, null=False)
 
 
+def user_directory_path_paystub(instance, filename):
+    ext = filename.split('.')[-1]
+    new_filename = f"{uuid.uuid4()}.{ext}"
+    return f'paystubs/user_{instance.user.id}/{new_filename}'
+
+def user_directory_path_whr(instance, filename):
+    ext = filename.split('.')[-1]
+    new_filename = f"{uuid.uuid4()}.{ext}"
+    return f'work_hour_report/user_{instance.user.id}/{new_filename}'
+
 class Paychecks(models.Model):
     PAYCHECK_STATUS = (
         ('pending', 'Pending'),
@@ -147,6 +159,13 @@ class Paychecks(models.Model):
     employer = models.CharField(max_length=50)
     status = models.CharField(max_length=50, choices=PAYCHECK_STATUS, default='pending')
     description = models.TextField(blank=True, null=True)
+
+    paystub = models.FileField(upload_to=user_directory_path_paystub,blank=True, null=True) 
+    paystub_original_name = models.CharField(max_length=255, blank=True, null=True) # Original name of the uploaded file
+
+    work_hour_report = models.FileField(upload_to=user_directory_path_whr,blank=True, null=True)
+    work_hour_report_original_name = models.CharField(max_length=255, blank=True, null=True) # Original name of the uploaded file
+
 
     def __str__(self):
         return f"{self.employer} - {self.amount} kr. on {self.pay_date}"
