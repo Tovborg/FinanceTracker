@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 import datetime
 from django.core.validators import FileExtensionValidator
 import uuid
+import os
 
 
 class UserProfile(models.Model):
@@ -169,3 +170,12 @@ class Paychecks(models.Model):
 
     def __str__(self):
         return f"{self.employer} - {self.amount} kr. on {self.pay_date}"
+
+    def delete(self, *args, **kwargs):
+        if self.paystub:
+            if os.path.isfile(self.work_hour_report.path):
+                os.remove(self.paystub.path)
+        if self.work_hour_report:
+            if os.path.isfile(self.work_hour_report.path):
+                os.remove(self.work_hour_report.path)
+        super(Paychecks, self).delete(*args, **kwargs)

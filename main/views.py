@@ -589,6 +589,7 @@ def delete_paycheck(request, pk):
             paycheck.payout_account.balance -= wage_deposit.amount
             paycheck.payout_account.save()
             wage_deposit.delete()
+ 
     paycheck.delete()
     return redirect('paychecks')
 
