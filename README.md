@@ -7,6 +7,8 @@
 ---
 **Finance Tracker** is a web application designed to help users keep track of their finances. With features like bank account management, paycheck tracking, and transaction history, it simplifies personal finance management. It also includes integration with Azure for analyzing receipts and automatically extracting receipt information.
 
+you can find the hosted website on tovborg-finance.com/
+
 ## Features
 
 - **Authentication & MFA**: Secure login system with multi-factor authentication (MFA) for added security.
