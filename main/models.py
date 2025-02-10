@@ -172,6 +172,9 @@ class Paychecks(models.Model):
         return f"{self.employer} - {self.amount} kr. on {self.pay_date}"
 
     def delete(self, *args, **kwargs):
+        """
+        Custom delete method to also remove the paystub and work hour report files associated with the Paycheck object
+        """
         if self.paystub:
             if os.path.isfile(self.work_hour_report.path):
                 os.remove(self.paystub.path)

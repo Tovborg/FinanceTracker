@@ -1,0 +1,24 @@
+{% extends "base.html" %}🍾
+{% load static %}
+{% block content %}
+<div class="container mx-auto mt-10 h-screen">
+    <h2 class="text-3xl text-black font-dansketext text-center mb-7">How do you want to create your new account?</h2>
+    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+    
+    <div class="flex flex-col items-center space-y-5 mt-10">
+        <a href="{% url "add_account" %}">
+            <button type="button" style="background: #003f63 !important;"
+                    class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Create manual account
+            </button>
+        </a>
+        
+        <a href="{% url "choose_bank" %}" class="mt-10">
+            <button type="button" style="background: #003f63 !important;"
+                    class="text-white bg-primary text-center hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Import account from bank
+            </button>
+        </a>
+    </div>
+</div>
+{% endblock content %}

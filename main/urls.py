@@ -14,6 +14,7 @@ urlpatterns = [
     path('terminate_session/<str:session_key>/', terminate_session, name='terminate_session'),
     # Bank Account URLs
     path('accounts/', accounts_view, name='account'),
+    path('accounts/choose_import_option/', ChooseAccountCreationView.as_view(), name='choose_import_option'),
     path('account/add_account/', AddAccountView.as_view(), name='add_account'),
     path('account/update_favorite/', csrf_exempt(update_favorite), name='update_favorite'),
     path('account/<str:account_name>/', account_view, name='account_details'),
@@ -33,4 +34,9 @@ urlpatterns = [
     path('add_paycheck/', AddNewPaycheckView.as_view(), name='add_paycheck'),
     path('paycheck/<int:pk>/', paycheck_info, name='paycheck_info'),
     path('paycheck/delete/<int:pk>/', delete_paycheck, name='delete_paycheck'),
+    # Gocardless URLs
+    path('callback/', handle_openbanking_callback, name="openbanking_callback"),
+    path('banks/', get_banks, name='get_banks'),
+    path('choose_bank/<str:institution_id>/', connect_bank, name='connect_bank'),
+    path('choose_bank/', ChooseBankListView.as_view(), name='choose_bank'),
 ]

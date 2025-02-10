@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.sessions.models import Session
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.views import View
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -30,6 +30,8 @@ from main.models import Account, Transaction, Paychecks, Item, UserProfile
 # Azure modules
 from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
+# Nordigen modules
+from .services.nordigen_services import OpenBankingService
 # Import other modules
 from .utils.utils import (compress_image,
                           serialize_analysis_results,
@@ -169,6 +171,10 @@ def account_view(request, account_name):
         transactions = paginator.page(paginator.num_pages)
 
     return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
+
+class ChooseAccountCreationView(LoginRequiredMixin, TemplateView):
+    """Display the choice between creating a manual account or importing accounts with openbanking"""
+    template_name = "bank_accounts/choose_account_creation.html"
 
 
 class AddAccountView(LoginRequiredMixin, View):
@@ -839,3 +845,41 @@ def terminate_session(request, session_key):
     session.delete()
     messages.success(request, f'Session with session key {session_key} terminated.')
     return redirect('mfa_index')
+
+
+# GoCardless open banking integration
+def get_banks(request):
+    """fetch available banks"""
+    service = OpenBankingService()
+    banks = service.get_banks(country="DK")
+    return JsonResponse({"banks": banks})
+
+
+def connect_bank(request, institution_id):
+    """Initiate bank session for user"""
+    service = OpenBankingService()
+    redirect_uri = request.build_absolute_uri(reverse('openbanking_callback'))
+
+    link, requisition_id = service.create_bank_session(institution_id=institution_id, redirect_uri=redirect_uri)
+
+    return redirect(link)
+
+def handle_openbanking_callback(request):
+    """handle the redirect after bank authentication"""
+    requisition_id = request.GET.get('ref')
+    if requisition_id:
+        return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition_id})
+    return HttpResponse('No requisition id found', status=400)
+
+
+# GoCardless open banking template views
+class ChooseBankListView(LoginRequiredMixin, TemplateView):
+    template_name = "openbanking/choose_bank.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        service = OpenBankingService()
+        banks = service.get_banks()
+        context['banks'] = banks
+        return context
+        

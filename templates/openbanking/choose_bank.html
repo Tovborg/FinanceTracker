@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Nordigen Bank Selector UI</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{% static "nordigen-bank-ui/package/src/selector.min.css" %}" rel="stylesheet" />
+        <!--Local-->
+        
+    </head>
+    <body>
+        <div id="institution-content-wrapper"></div>
+    </body>
+
+    <!-- <script src="./node_modules/nordigen-bank-ui/package/src/selector.min.js"></script> -->
+
+    <!--Local-->
+    <script src="{% static "nordigen-bank-ui/package/src/selector.min.js" %}"></script>
+    <script>
+        // Get institutions list from ob.nordigen.com/api/v2/institutions/?country=GB
+        const institutionList = {{ banks | safe}};
+
+        const config = {
+            redirectUrl: '{% url "account" %}',
+            logoUrl: 'https://cdn-logos.gocardless.com/ais/Nordigen_Logo_Black.svg',
+            text: '',
+            countryFilter: true,
+            styles: {
+                // Primary
+                fontFamily: 'https://fonts.googleapis.com/css2?family=Roboto&display=swap',
+                fontSize: '13',
+                backgroundColor: '#fff',
+                textColor: '#1B2021',
+                headingColor: '#222',
+                linkColor: '#3F52E5',
+                // Modal
+                modalTextColor: '#1B2021',
+                modalBackgroundColor: '#fff',
+            }
+        };
+
+        institutionSelector(institutionList, 'institution-modal-content', config);
+
+    </script>
+</html>
