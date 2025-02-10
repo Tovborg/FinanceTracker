@@ -87,6 +87,9 @@ jobs:
             echo "AZURE_KEY=${{ secrets.AZURE_KEY }}" >> .env
             echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> .env
             echo "MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN=${{ secrets.MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN }}" >> .env
+            echo "GOCARDLESS_NAME=${{ secrets.GOCARDLESS_NAME }}" >> .env
+            echo "GOCARDLESS_SECRET_ID=${{ secrets.GOCARDLESS_SECRET_ID }}" >> .env
+            echo "GOCARDLESS_SECRET_KEY=${{ secrets.GOCARDLESS_SECRET_KEY }}" >> .env
           
             # Activate venv, run migrations and collect static files
             source venv/bin/activate
