@@ -182,3 +182,11 @@ class Paychecks(models.Model):
             if os.path.isfile(self.work_hour_report.path):
                 os.remove(self.work_hour_report.path)
         super(Paychecks, self).delete(*args, **kwargs)
+
+class OpenBankingRequisition(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    requisition_id = models.CharField(max_length=255, unique=True)
+    institution_id = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50, default='PENDING')
+    reference_id = models.CharField(max_length=255, null=True, blank=True)

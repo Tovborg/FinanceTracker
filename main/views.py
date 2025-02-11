@@ -26,7 +26,7 @@ from main.forms import (CreateAccountForm,
                         ReceiptUploadForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
-from main.models import Account, Transaction, Paychecks, Item, UserProfile
+from main.models import Account, Transaction, Paychecks, Item, UserProfile, OpenBankingRequisition
 # Azure modules
 from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
@@ -848,29 +848,88 @@ def terminate_session(request, session_key):
 
 
 # GoCardless open banking integration
+@login_required
 def get_banks(request):
     """fetch available banks"""
-    service = OpenBankingService()
+    service = OpenBankingService(user=request.user)
     banks = service.get_banks(country="DK")
     return JsonResponse({"banks": banks})
 
 
+@login_required
 def connect_bank(request, institution_id):
     """Initiate bank session for user"""
-    service = OpenBankingService()
+    service = OpenBankingService(user=request.user)
     redirect_uri = request.build_absolute_uri(reverse('openbanking_callback'))
 
-    link, requisition_id = service.create_bank_session(institution_id=institution_id, redirect_uri=redirect_uri)
+    link, requisition_id, reference_id = service.create_bank_session(institution_id=institution_id, redirect_uri=redirect_uri)
 
     return redirect(link)
 
-def handle_openbanking_callback(request):
-    """handle the redirect after bank authentication"""
-    requisition_id = request.GET.get('ref')
-    if requisition_id:
-        return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition_id})
-    return HttpResponse('No requisition id found', status=400)
+def grab_account_metadata(account, user):
+    account_id = account['accounts'][0]
+    
+    # Initialize service again
+    service = OpenBankingService(user=user)
+    # create account instance (this should be made a loop in the future for multiple accounts)
+    account = service.client.account_api(id=account_id)
 
+    # Fetch account metadata
+    meta_data = account.get_metadata()
+    # fetch details
+    details = account.get_details()
+    # fetch balances
+    balances = account.get_balances()
+    # fetch transactions
+    transactions = account.get_transactions()
+    print("\n\n")
+    print("-----------------")
+    print(f"Details for {account_id}")
+    print("-----------------")
+    print(meta_data)
+    print(details)
+    print(balances)
+    print(transactions)
+    return meta_data, details, balances, transactions # later on this function should be used to add all this data to the database
+
+
+@login_required
+def handle_openbanking_callback(request):
+    """Handle the redirect after bank authentication"""
+    # Get the requisition_id from the database
+    reference_id = request.GET.get('ref') # get reference id from url
+    error = request.GET.get('error') # get error from url
+
+    if not reference_id:
+        return HttpResponse("Invalid request: Missing reference ID.", status=400)
+    
+    if error:
+        error_details = request.GET.get('error_details', 'No error details provided')
+        print(f"❌ ERROR: {error} - {error_details}")
+        return HttpResponse(f"Authentication failed: {error}. Details: {error_details}", status=400)
+    print(f"🔄 Callback received with reference_id: {reference_id}")
+
+    service = OpenBankingService(user=request.user)
+    
+    requisition = OpenBankingRequisition.objects.filter(user=request.user, status='PENDING', reference_id=reference_id).order_by('-created_at').first()
+
+    if not requisition:
+        print(f"❌ ERROR: No pending requisition found for user {request.user}")
+        return HttpResponse("No matching requisition found", status=404)
+    
+    accounts = service.get_requisition_by_reference(requisition.requisition_id, reference_id)
+    print(f"🔍 Found these accounts for user: {accounts}")
+
+    # Update the requisition status
+    requisition.status = 'COMPLETED'
+    requisition.save()
+
+    # Grab account metadata
+    grab_account_metadata(accounts, request.user)
+
+    print(f"✅ Requisition {requisition.requisition_id} status updated to COMPLETED and reference_id saved")
+    return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition.requisition_id})
+    
 
 # GoCardless open banking template views
 class ChooseBankListView(LoginRequiredMixin, TemplateView):
@@ -878,7 +937,7 @@ class ChooseBankListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        service = OpenBankingService()
+        service = OpenBankingService(user=self.request.user)
         banks = service.get_banks()
         context['banks'] = banks
         return context
