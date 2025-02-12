@@ -939,6 +939,9 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
         booked_transactions = account_transactions.get('transactions', {}).get('booked', [])
         for transaction in booked_transactions:
             transaction_id = transaction.get('transactionId')
+            if not transaction_id or OpenBankingTransaction.objects.filter(transaction_id=transaction_id).exists():
+                print("❌ Transaction ID not found or already exists")
+                continue
             entry_reference = transaction.get('entryReference', 'Unknown')
             amount = float(transaction.get('transactionAmount', {}).get('amount', '0.00'))
             currency = transaction.get('transactionAmount', {}).get('currency', 'DKK')
@@ -946,9 +949,9 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
             description = transaction.get('remittanceInformationUnstructuredArray', ['Unknown'])[0]
 
             openbanking_transaction, created = OpenBankingTransaction.objects.update_or_create(
-                account=openbanking_account,
                 transaction_id=transaction_id,
                 defaults={
+                    "account": openbanking_account,
                     "entry_reference": entry_reference,
                     "amount": amount,
                     "currency": currency,
@@ -1002,7 +1005,9 @@ def handle_openbanking_callback(request):
     accounts_scraped, accounts_skipped = update_or_create_openbanking_accounts(accounts, request.user, requisition)
 
     print(f"✅ Requisition {requisition.requisition_id} status updated to COMPLETED and reference_id saved")
-    
+    if len(accounts_scraped) == 0:
+        print("❌ No accounts scraped")
+        return render(request, 'openbanking/callback_fail.html')
     return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition.requisition_id, 'accounts_scraped': accounts_scraped, 'accounts_skipped': accounts_skipped})
     
 
