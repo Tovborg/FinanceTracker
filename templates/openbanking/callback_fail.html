@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center;">
+    <ion-icon name="close-circle" style="color: red; font-size: 80px; margin-bottom: 16px;"></ion-icon>
+    <h1 style="font-size: 24px;" class="font-dansketext">Bank connection failed</h1>
+    <p class="font-dansketext">There was an error with the connection. If the accounts didn't import return to the accounts page and try importing again.</p>
+    <a href="{% url "account" %}" style="display: inline-block; padding: 10px 20px; background-color: #003F63; color: white; font-family: dansketext, sans-serif; font-size: 16px; text-decoration: none; border-radius: 5px; text-align: center; margin-top: 20px;">
+        Go to accounts
+    </a>
+</div>
+{% endblock content %}

@@ -6,5 +6,10 @@
     <ion-icon name="checkmark-circle" style="color: green; font-size: 80px; margin-bottom: 16px;"></ion-icon>
     <h1 style="font-size: 24px;" class="font-dansketext">Bank connected successfully!</h1>
     <p class="font-dansketext">We've added your selected accounts and their transactions</p>
+    <p class="font-dansketext" style="color: green;">Added {{ accounts_scraped|length }}</p>
+    <p class="font-dansketext" style="color: red;">Skipped {{ accounts_skipped|length }}</p>
+    <a href="{% url "account" %}" style="display: inline-block; padding: 10px 20px; background-color: #003F63; color: white; font-family: dansketext, sans-serif; font-size: 16px; text-decoration: none; border-radius: 5px; text-align: center; margin-top: 20px;">
+        Go to Accounts
+    </a>
 </div>
 {% endblock content %}

@@ -69,6 +69,46 @@
                         </div>
                     </div>
                 {% endfor %}
+                {% for ob_account in open_banking_accounts %}
+                <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
+                                <ion-icon id="star_{{ ob_account.name }}" class="mr-2 cursor-pointer"
+                                          name="star"></ion-icon>
+                            {{ ob_account.name|slice:":15" }}{% if ob_account.name|length > 15 %}...{% endif %}
+                            <a class="flex items-center"
+                                    href="#">
+                                <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
+                            </a></h2>
+
+                        <span class="text-2xl text-white font-dansketext p-3">DKK {{ ob_account.balance }}</span>
+                    </div>
+
+                    <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
+                    <div class="overflow-y-auto max-h-[200px]">
+                        <ul class="text-white">
+                            {% for transaction in ob_account.get_three_recent_transactions %}
+                                <li class="p-2 flex justify-between items-start border-b border-neutral-500">
+                                    <div>
+                                        <a href=""><span class="block">{{ transaction.description|slice:":15" }}{% if transaction.description|length > 15 %}...{% endif %}
+                                        </span></a>
+                                        <span class="block text-sm">{{ transaction.date }}</span>
+                                    </div>
+                                    {% if transaction.amount > 0 %}
+                                        <div class="text-right">
+                                            <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-right">
+                                            <span class="block font-bold text-warning">DKK {{ transaction.amount }}</span>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
             {% if creditcards %}
                 <hr class="my-5 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>

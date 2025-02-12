@@ -26,7 +26,7 @@ from main.forms import (CreateAccountForm,
                         ReceiptUploadForm,
                         ReceiptAnalysisForm,
                         IncludeTransactionInStatisticsForm)
-from main.models import Account, Transaction, Paychecks, Item, UserProfile, OpenBankingRequisition
+from main.models import Account, Transaction, Paychecks, Item, UserProfile, OpenBankingRequisition, OpenBankingAccount, OpenBankingTransaction
 # Azure modules
 from azure.core.exceptions import HttpResponseError
 from .services.azure_service import AzureDocumentIntelligenceService
@@ -115,7 +115,8 @@ def accounts_view(request):
     user_accounts = Account.objects.filter(user=request.user)
     creditcards = user_accounts.filter(account_type='credit card')
     bank_accounts = user_accounts.exclude(account_type='credit card')
-    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts, "creditcards": creditcards, "bank_accounts": bank_accounts})
+    open_banking_accounts = OpenBankingAccount.objects.filter(user=request.user)
+    return render(request, "bank_accounts/account.html", context={"accounts": user_accounts, "creditcards": creditcards, "bank_accounts": bank_accounts, "open_banking_accounts": open_banking_accounts})
 
 
 @login_required
@@ -866,31 +867,102 @@ def connect_bank(request, institution_id):
 
     return redirect(link)
 
-def grab_account_metadata(account, user):
-    account_id = account['accounts'][0]
-    
-    # Initialize service again
+def update_or_create_openbanking_accounts(account, user, requisition_id):
     service = OpenBankingService(user=user)
-    # create account instance (this should be made a loop in the future for multiple accounts)
-    account = service.client.account_api(id=account_id)
+    institution_id = account['institution_id']
+    accounts_scraped = []  # List to store account IDs that have been scraped successfully
+    accounts_skipped = []  # List to store account IDs that have been skipped due to errors
+    for account_id in account['accounts']:  # Loop through all account IDs
+        account_api = service.client.account_api(id=account_id)
 
-    # Fetch account metadata
-    meta_data = account.get_metadata()
-    # fetch details
-    details = account.get_details()
-    # fetch balances
-    balances = account.get_balances()
-    # fetch transactions
-    transactions = account.get_transactions()
-    print("\n\n")
-    print("-----------------")
-    print(f"Details for {account_id}")
-    print("-----------------")
-    print(meta_data)
-    print(details)
-    print(balances)
-    print(transactions)
-    return meta_data, details, balances, transactions # later on this function should be used to add all this data to the database
+        # Fetch account data with error handling
+        try:
+            account_metadata = account_api.get_metadata()
+        except Exception as e:
+            print(f"❌ Failed to get metadata: {e}")
+            if e.response is not None and e.response.status_code == 429:
+                print("🔄 Rate limit has been reached")
+                accounts_skipped.append(account_id)
+                continue
+            account_metadata = {}
+
+        try:
+            account_details = account_api.get_details()
+        except Exception as e:
+            print(f"❌ Failed to get details: {e}")
+            if e.response is not None and e.response.status_code == 429:
+                print("🔄 Rate limit has been reached")
+                accounts_skipped.append(account_id)
+                continue
+            account_details = {}
+
+        try:
+            account_balances = account_api.get_balances()
+        except Exception as e:
+            print(f"❌ Failed to get balances: {e}")
+            if e.response is not None and e.response.status_code == 429:
+                print("🔄 Rate limit has been reached")
+                accounts_skipped.append(account_id)
+                continue  # Skip this account move on to the next one
+            account_balances = {}
+                
+
+        try:
+            account_transactions = account_api.get_transactions()
+        except Exception as e:
+            print(f"❌ Failed to get transactions: {e}")
+            account_transactions = {}
+
+        # Extract relevant data
+        institution_id = institution_id
+        name = account_details.get('account', {}).get('name', 'Unknown')
+        balance = account_balances.get('balances', [{}])[0].get('balanceAmount', {}).get('amount', '0.00')
+
+        # Create or update the OpenBankingAccount
+        openbanking_account, created = OpenBankingAccount.objects.update_or_create(
+            user=user,
+            account_id=account_id,
+            requisition=requisition_id,
+            defaults={
+                "institution_id": institution_id,
+                "name": name,
+                "balance": balance
+            }
+        )
+
+        if created:
+            print(f"✅ Created new OpenBankingAccount: {openbanking_account.name}")
+        else:
+            print(f"🔄 Updated OpenBankingAccount: {openbanking_account.name}")
+
+        # Process transactions
+        booked_transactions = account_transactions.get('transactions', {}).get('booked', [])
+        for transaction in booked_transactions:
+            transaction_id = transaction.get('transactionId')
+            entry_reference = transaction.get('entryReference', 'Unknown')
+            amount = float(transaction.get('transactionAmount', {}).get('amount', '0.00'))
+            currency = transaction.get('transactionAmount', {}).get('currency', 'DKK')
+            booking_date = transaction.get('bookingDate', '0000-00-00')
+            description = transaction.get('remittanceInformationUnstructuredArray', ['Unknown'])[0]
+
+            openbanking_transaction, created = OpenBankingTransaction.objects.update_or_create(
+                account=openbanking_account,
+                transaction_id=transaction_id,
+                defaults={
+                    "entry_reference": entry_reference,
+                    "amount": amount,
+                    "currency": currency,
+                    "date": booking_date,
+                    "description": description
+                }
+            )
+
+            if created:
+                print(f"✅ Created new OpenBankingTransaction: {openbanking_transaction.transaction_id}")
+            else:
+                print(f"🔄 Updated OpenBankingTransaction: {openbanking_transaction.transaction_id}")
+        accounts_scraped.append(account_id)
+    return accounts_scraped, accounts_skipped
 
 
 @login_required
@@ -915,7 +987,9 @@ def handle_openbanking_callback(request):
 
     if not requisition:
         print(f"❌ ERROR: No pending requisition found for user {request.user}")
-        return HttpResponse("No matching requisition found", status=404)
+        return render(request, 'openbanking/callback_fail.html')
+
+        # return HttpResponse("No matching requisition found", status=404)
     
     accounts = service.get_requisition_by_reference(requisition.requisition_id, reference_id)
     print(f"🔍 Found these accounts for user: {accounts}")
@@ -925,10 +999,11 @@ def handle_openbanking_callback(request):
     requisition.save()
 
     # Grab account metadata
-    grab_account_metadata(accounts, request.user)
+    accounts_scraped, accounts_skipped = update_or_create_openbanking_accounts(accounts, request.user, requisition)
 
     print(f"✅ Requisition {requisition.requisition_id} status updated to COMPLETED and reference_id saved")
-    return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition.requisition_id})
+    
+    return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition.requisition_id, 'accounts_scraped': accounts_scraped, 'accounts_skipped': accounts_skipped})
     
 
 # GoCardless open banking template views

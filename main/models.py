@@ -190,3 +190,32 @@ class OpenBankingRequisition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, default='PENDING')
     reference_id = models.CharField(max_length=255, null=True, blank=True)
+
+# Open Banking models
+class OpenBankingAccount(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    institution_id = models.CharField(max_length=255)
+    requisition = models.ForeignKey(OpenBankingRequisition, on_delete=models.CASCADE)
+    account_id = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.name or self.account_id} - {self.balance} kr."
+    
+    def get_three_recent_transactions(self):
+        return self.openbankingtransaction_set.all().order_by('-date')[:3]
+    
+
+class OpenBankingTransaction(models.Model):
+    account = models.ForeignKey(OpenBankingAccount, on_delete=models.CASCADE)
+    transaction_id = models.CharField(max_length=255, unique=True)
+    entry_reference = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default="DKK")
+    description = models.TextField(blank=True, null=True)
+    date = models.DateField()
+
+    def __str__(self):
+        return f"{self.account.name} - {self.amount} {self.currency} on {self.date}"
