@@ -7,7 +7,7 @@
     <!-- Other account-related content -->
 
     <!-- Example condition to show no accounts error -->
-    {% if accounts %}
+    {% if accounts or open_banking_accounts %}
         <!-- templates/account/accounts.html -->
         <div class="container mx-auto mt-10">
             <h1 class="text-5xl text-black font-dansketext text-center mb-7">Bank Accounts</h1>
