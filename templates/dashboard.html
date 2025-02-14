@@ -57,7 +57,7 @@
                                     <img src="{% static 'icons/DK_Logo_Sort_CMYK.png' %}" alt="icon"
                                          class="w-7 h-4 mr-2">{% else %}
                                     <i class="fa mr-2 fa-cc-{{ account.creditcard_type|translate_cardtype }}"
-                                       style="font-size:24px"></i>{% endif %}{{ account.name }}
+                                       style="font-size:24px"></i>{% endif %}{{ account.name|slice:":15" }}{% if account.name|length > 15 %}...{% endif %}
                                 <a class="flex items-center"
                                         {# href="{% url 'account_details' account.name %}">
                                     <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
@@ -75,10 +75,21 @@
                                         <div>
                                             <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{% if transaction.transaction_type == 'purchase' %}
                                                 {{ transaction.merchant_name }}{% else %}
-                                                {{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
+                                                {{ transaction.transaction_type|capfirst }}{% endif %}{% if transaction.transaction_id %}{{ transaction.description|slice:":15" }}{% if transaction.description|length > 15 %}...{% endif %}{% endif %}</span></a>
                                             <span class="block text-sm">{{ transaction.date }}</span>
                                         </div>
-                                        {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
+                                        {% if transaction.transaction_id %}
+                                         {% if transaction.amount > 0 %}
+                                            <div class="text-right">
+                                                <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                            </div>
+                                         {% else %}
+                                         <div class="text-right">
+                                            <span class="block font-bold text-warning">DKK {{ transaction.amount }}</span>
+                                        </div>
+                                         {% endif %}
+                                         {% else %}
+                                         {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
                                             <div class="text-right">
                                                 <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
                                                 <span class="text-gray-400">{{ transaction.balance_after }}</span>
@@ -88,6 +99,7 @@
                                                 <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
                                                 <span class="text-gray-400">{{ transaction.balance_after }}</span>
                                             </div>
+                                        {% endif %}
                                         {% endif %}
                                     </li>
                                 {% endfor %}

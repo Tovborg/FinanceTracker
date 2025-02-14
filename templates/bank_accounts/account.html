@@ -34,7 +34,7 @@
                                     <i class="fa mr-2 fa-cc-{{ account.creditcard_type|translate_cardtype }}"
                                        style="font-size:24px"></i>{% endif %}{{ account.name }}
                                 <a class="flex items-center"
-                                        {# href="{% url 'account_details' account.name %}">
+                                        href="{% url 'account_details' account.name %}">
                                     <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
                                 </a></h2>
 
@@ -73,11 +73,16 @@
                 <div class="bg-account-cards p-4 shadow md:min-h-[300px] lg:min-h-[400px] flex flex-col">
                     <div class="flex flex-col md:flex-row justify-between items-center">
                         <h2 class="text-2xl text-white font-dansketext p-3 flex items-center">
+                                {% if ob_account.isFavorite %}
                                 <ion-icon id="star_{{ ob_account.name }}" class="mr-2 cursor-pointer"
                                           name="star"></ion-icon>
+                                {% else %}
+                                <ion-icon id="star_{{ ob_account.name }}" class="mr-2 cursor-pointer"
+                                          name="star-outline"></ion-icon>
+                                {% endif %}
                             {{ ob_account.name|slice:":15" }}{% if ob_account.name|length > 15 %}...{% endif %}
                             <a class="flex items-center"
-                                    href="#">
+                                    href="{% url 'account_details' ob_account.name %}">
                                 <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
                             </a></h2>
 

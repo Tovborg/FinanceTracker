@@ -40,20 +40,32 @@
                                 <a href="{% url 'transaction_detail' transaction.id %}"><span
                                         class="block font-semibold text-gray-900">{% if transaction.transaction_type == 'purchase' %}
                                     {{ transaction.merchant_name }}{% else %}
-                                    {{ transaction.transaction_type|capfirst }}{% endif %}</span></a>
+                                    {{ transaction.transaction_type|capfirst }}{% endif %}{% if transaction.transaction_id %}{{ transaction.description|slice:":15" }}{% if transaction.description|length > 15 %}...{% endif %}{% endif %}</span></a>
                                 <span class="block text-sm text-gray-500">{{ transaction.date }}</span>
                             </div>
-                            {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
-                                <div class="text-right">
-                                    <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
-                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
+                            {% if transaction.transaction_id %}
+                                    {% if transaction.amount > 0 %}
+                                    <div class="text-right">
+                                        <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-right">
+                                    <span class="block font-bold text-warning">DKK {{ transaction.amount }}</span>
                                 </div>
-                            {% else %}
-                                <div class="text-right">
-                                    <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
-                                    <span class="text-gray-400">{{ transaction.balance_after }}</span>
-                                </div>
-                            {% endif %}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'wage deposit' %}
+                                    <div class="text-right">
+                                        <span class="block font-bold text-accent">DKK {{ transaction.amount }}</span>
+                                        <span class="text-gray-400">{{ transaction.balance_after }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="text-right">
+                                        <span class="block font-bold text-warning">DKK -{{ transaction.amount }}</span>
+                                        <span class="text-gray-400">{{ transaction.balance_after }}</span>
+                                    </div>
+                                {% endif %}
+                                {% endif %}
                         </li>
                     {% endfor %}
 

@@ -17,6 +17,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
+from django.http import Http404
 from django.core.files import File
 # Import app specific modules
 from main.forms import (CreateAccountForm,
@@ -49,11 +50,12 @@ import os
 def index(request):
     """
     Display the dashboard with the user's accounts, total balance, payday, total expenses, and total income.
-    :param request:
-    :return:
     """
     accounts = Account.objects.filter(user=request.user)
-    favorites = Account.objects.filter(user=request.user, isFavorite=True)
+    ob_accounts = OpenBankingAccount.objects.filter(user=request.user)
+
+    favorites = accounts.filter(isFavorite=True)
+    ob_favorites = ob_accounts.filter(isFavorite=True)
 
     # Get payday info
     payday = get_payday_info()
@@ -61,35 +63,30 @@ def index(request):
         payday = int(payday)
     except ValueError:
         pass
-    if type(payday) is str:
-        payday = translate_payday_info(str(payday))
+    if isinstance(payday, str):
+        payday = translate_payday_info(payday)
 
     # Get total expenses and income
-    total_expenses = 0
-    total_income = 0
-    for account in accounts:
-        total_expenses += account.get_monthly_expenses()
-    for account in accounts:
-        total_income += account.get_monthly_income()
+    total_expenses = sum(account.get_monthly_expenses() for account in accounts)
+    total_income = sum(account.get_monthly_income() for account in accounts)
 
-    # Get total balance
-    total_balance = sum([account.balance for account in accounts])
+    # Get total balance (sum both manual and OpenBanking accounts)
+    total_balance = sum(account.balance for account in accounts) + sum(account.balance for account in ob_accounts)
 
-    # Determine the number of favorites and accounts
-    no_favorites = len(favorites)
-    no_accounts = len(accounts)
+    # Determine the number of accounts and favorites
+    no_favorites = len(favorites) + len(ob_favorites)
+    no_accounts = len(accounts) + len(ob_accounts)
 
-    # Logic to select accounts for display
-    if no_favorites >= 3:
-        # If there are 3 or more favorites, take the first 3 favorites
-        displayed_accounts = favorites[:3]
-    else:
-        # If there are fewer than 3 favorites, get all favorites and fill with non-favorites
-        additional_needed = 3 - no_favorites
+    # Select displayed accounts (prioritizing favorites)
+    displayed_accounts = list(favorites[:3]) + list(ob_favorites[:3])
+    if len(displayed_accounts) < 3:
+        additional_needed = 3 - len(displayed_accounts)
         non_favorites = accounts.filter(isFavorite=False)[:additional_needed]
-        displayed_accounts = list(favorites) + list(non_favorites)
+        ob_non_favorites = ob_accounts.filter(isFavorite=False)[:additional_needed - len(non_favorites)]
+        displayed_accounts.extend(non_favorites)
+        displayed_accounts.extend(ob_non_favorites)
 
-    # Update the context with the accounts to display and other relevant data
+    # Update context
     context = {
         "accounts": displayed_accounts,
         "total_balance": total_balance,
@@ -101,7 +98,6 @@ def index(request):
         'payday': payday,
     }
 
-    # Render the dashboard with the updated context
     return render(request, "dashboard.html", context=context)
 
 
@@ -151,19 +147,24 @@ def delete_account(request, account_name):
 def account_view(request, account_name):
     """
     Display the details and transactions for a specific account. Paginate the transactions with 5 transactions per page.
-    :param request:
-    :param account_name:
-    :return:
     """
-    account = get_object_or_404(Account, name=account_name, user=request.user)
-    transactions_list = account.transaction_set.all().order_by('-date')  # Get all transactions for the account and
-    # order by date
+    # Try to get a manual account first; if not found, check OpenBankingAccount
+    account = Account.objects.filter(name=account_name, user=request.user).first() or \
+              OpenBankingAccount.objects.filter(name=account_name, user=request.user).first()
 
-    # Paginate the transactions with 5 transactions per page
+    if not account:
+        # Raise a 404 error if the account is not found
+        raise Http404("Account not found")
+
+    # Determine the correct transaction set based on the account type
+    if isinstance(account, Account):
+        transactions_list = account.transaction_set.all().order_by('-date')
+    else:  # OpenBankingAccount
+        transactions_list = account.openbankingtransaction_set.all().order_by('-date')
+
+    # Paginate transactions (5 per page)
     paginator = Paginator(transactions_list, 5)
-    # Get the page number from the request
     page_number = request.GET.get('page')
-    # Get the transactions for the current page
     try:
         transactions = paginator.page(page_number)
     except PageNotAnInteger:
@@ -172,6 +173,7 @@ def account_view(request, account_name):
         transactions = paginator.page(paginator.num_pages)
 
     return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
+
 
 class ChooseAccountCreationView(LoginRequiredMixin, TemplateView):
     """Display the choice between creating a manual account or importing accounts with openbanking"""
@@ -229,9 +231,9 @@ def edit_account(request, account_name, field):
     # Check if the field is valid
     valid_fields = ['name', 'account_number', 'account_type', 'accumulated_interest', 'balance']
     if field in valid_fields:
-        # Check if the new name already exists for another account
-        if field == 'name' and Account.objects.filter(name=new_value, user=request.user).exclude(
-                pk=account.pk).exists():
+        # Check if the new name already exists for another account both manual and OpenBanking
+        if field == 'name' and (Account.objects.filter(name=new_value, user=request.user).exclude(
+                pk=account.pk).exists() or OpenBankingAccount.objects.filter(name=new_value, user=request.user).exists()):
             messages.error(request, 'An account with this name already exists.')
             return redirect('account_info', account_name=account_name)
         # check if the account_type is valid
@@ -271,7 +273,11 @@ def update_favorite(request):
     """
     print(request.POST)
     account_name = request.POST.get('account_name')  # Get the account name from the POST request
-    account = Account.objects.get(name=account_name, user=request.user)  # Get the account
+    try:
+        account = Account.objects.get(name=account_name, user=request.user)  # Get the account
+    except Account.DoesNotExist:
+        account = OpenBankingAccount.objects.get(name=account_name, user=request.user) # Get the account from OpenBanking if not found in manual accounts
+
     account.isFavorite = not account.isFavorite  # Toggle the favorite status
     account.save()  # Save the account
     return JsonResponse({'status': 'ok'})  # Return a JSON response
@@ -330,15 +336,25 @@ class TransactionDetailView(View, LoginRequiredMixin):
     template_name = "transactions/transaction_detail.html"
 
     def get(self, request, pk):
-        transaction = get_object_or_404(Transaction, pk=pk)  # Get the transaction
-        if transaction.transaction_type == 'purchase':
-            items = transaction.item_set.all()
-            return render(request, "transactions/transaction_detail.html",
-                          context={"transaction": transaction, "items": items})
-        return render(request, self.template_name, context={"transaction": transaction})
+        try:
+            transaction = Transaction.objects.get(pk=pk, account__user=request.user)
+        except Transaction.DoesNotExist:
+            transaction = OpenBankingTransaction.objects.get(pk=pk, account__user=request.user)
+        if isinstance(transaction, Transaction):
+            if transaction.transaction_type == 'purchase':
+                items = transaction.item_set.all()
+                return render(request, "transactions/transaction_detail.html",
+                            context={"transaction": transaction, "items": items})
+            return render(request, self.template_name, context={"transaction": transaction})
+        else:  # Seperate openbankingtransactions to set the context specific to openbankingtransactions
+            return render(request, self.template_name, context={"transaction": transaction, "openbanking": True})
+    
 
     def post(self, request, pk):
-        transaction = get_object_or_404(Transaction, pk=pk)  # Get the transaction
+        try:
+            transaction = Transaction.objects.get(pk=pk, account__user=request.user)
+        except Transaction.DoesNotExist:
+            transaction = OpenBankingTransaction.objects.get(pk=pk, account__user=request.user)
         form = IncludeTransactionInStatisticsForm(request.POST)  # Get the form
         if form.is_valid():
             include_in_statistics = form.cleaned_data['include_in_statistics']  # Get the value of the form
@@ -921,12 +937,12 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
         # Create or update the OpenBankingAccount
         openbanking_account, created = OpenBankingAccount.objects.update_or_create(
             user=user,
-            account_id=account_id,
-            requisition=requisition_id,
+            account_id=account_id,  # The account should be unique by user + account_id
             defaults={
                 "institution_id": institution_id,
                 "name": name,
-                "balance": balance
+                "balance": balance,
+                "requisition": requisition_id  # Only updated, not used to match
             }
         )
 
@@ -939,7 +955,7 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
         booked_transactions = account_transactions.get('transactions', {}).get('booked', [])
         for transaction in booked_transactions:
             transaction_id = transaction.get('transactionId')
-            if not transaction_id or OpenBankingTransaction.objects.filter(transaction_id=transaction_id).exists():
+            if not transaction_id or OpenBankingTransaction.objects.filter(transaction_id=transaction_id, account=openbanking_account).exists():
                 print("❌ Transaction ID not found or already exists")
                 continue
             entry_reference = transaction.get('entryReference', 'Unknown')
@@ -1007,6 +1023,7 @@ def handle_openbanking_callback(request):
     print(f"✅ Requisition {requisition.requisition_id} status updated to COMPLETED and reference_id saved")
     if len(accounts_scraped) == 0:
         print("❌ No accounts scraped")
+        # TODO: Create rate limit specific page instead of callback_fail
         return render(request, 'openbanking/callback_fail.html')
     return render(request, 'openbanking/callback_success.html', {'requisition_id': requisition.requisition_id, 'accounts_scraped': accounts_scraped, 'accounts_skipped': accounts_skipped})
     

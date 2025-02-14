@@ -9,18 +9,36 @@
                     <ion-icon class="text-3xl text-gray-500" name="arrow-back-outline"></ion-icon>
                 </a>
             </div>
+            {% if not openbanking %}
             <div class="flex justify-end">
                 <button id="delete_acc_btn">
                     <ion-icon class="text-3xl text-warning" name="trash"></ion-icon>
                 </button>
             </div>
+            {% endif %}
         </div>
         <hr class="mt-6 border-gray-500"/>
         <div id="transaction_info" class="mt-6 space-y-6">
             <div class="flex flex-row justify-between">
                 <span class="font-semibold">Transaction Type</span>
+                {% if not openbanking %}
                 <span class="font-dansketext">{{ transaction.transaction_type|upper }}</span>
+                {% else %}
+                <span class="font-dansketext">Openbanking Transaction</span>
+                {% endif %}
+                
             </div>
+            {% if openbanking %}
+            <div class="flex flex-row justify-between">
+                <span class="font-semibold">Account</span>
+                <span class="font-dansketext">{{ transaction.account.name }}</span>
+            </div>
+            <div class="flex flex-row justify-between">
+                <span class="font-semibold">Transaction Id</span>
+                <span class="font-dansketext">{{ transaction.transaction_id|slice:"10" }}...</span>
+            </div>
+            
+            {% endif %} 
             <div class="flex flex-row justify-between">
                 <span class="font-semibold">Transaction Amount</span>
                 <span class="font-dansketext">DKK {{ transaction.amount }}</span>
@@ -78,11 +96,13 @@
                     <span class="font-dansketext">{{ transaction.transfer_to|upper }}</span>
                 </div>
             {% endif %}
-
+            {% if not openbanking %}
             <div class="flex flex-row justify-between">
+                
                 <span class="font-semibold">Account Balance After</span>
                 <span class="font-dansketext">{{ transaction.balance_after }}</span>
             </div>
+            {% endif %}
             <div class="flex flex-row justify-between">
                 <span class="font-semibold">Description</span>
                 {% if transaction.description %}
@@ -122,12 +142,14 @@
 
         </div>
     </div>
+    {% if not openbanking %}
     <div id="modal"
          class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-gray-800 p-4 rounded shadow-lg mobile-only:w-[95%] sm:w-[75%] md:w-[60%] lg:w-[50%] xl:w-[35%]">
             <div class="flex justify-end">
                 <ion-icon name="close-outline" class="text-3xl text-gray-300"></ion-icon>
             </div>
+            
             <div class="flex justify-center">
                 <ion-icon name="alert-circle-outline" class="text-5xl text-gray-200"></ion-icon>
             </div>
@@ -147,8 +169,10 @@
                     No, cancel
                 </button>
             </div>
+            
         </div>
     </div>
+    {% endif %}
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const backButton = document.getElementById('backButton');
@@ -164,6 +188,7 @@
         });
 
     </script>
+    {% if not openbanking %}
     <script>
         const delete_acc_btn = document.getElementById('delete_acc_btn');
         const modal = document.getElementById('modal');
@@ -187,4 +212,5 @@
             modal.classList.add('hidden');
         });
     </script>
+    {% endif %}
 {% endblock %}
