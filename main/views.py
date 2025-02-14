@@ -1048,3 +1048,24 @@ class ChooseBankListView(LoginRequiredMixin, TemplateView):
         context['banks'] = banks
         return context
         
+
+# OpenBanking Account managements views
+@login_required
+@require_POST
+def terminate_openbanking_connection(request, account_id):
+    """
+    Delete an OpenBanking account and all transactions associated with it.
+    Uses connection based approach to delete the connection and all associated accounts.
+    
+    """
+    account = get_object_or_404(OpenBankingAccount, account_id=account_id, user=request.user)
+    # Get associated requisition
+    requisition = account.requisition
+    if requisition:
+        # TODO: Revoke requisition at bank level
+        # Delete all accounts associated with the requisition
+        OpenBankingAccount.objects.filter(requisition=requisition, user=request.user).delete()
+        # Delete the requisition
+        requisition.delete()
+    print(f"✅ Deleted OpenBankingAccount: {account.name}")
+    return redirect('account')

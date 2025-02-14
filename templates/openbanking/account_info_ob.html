@@ -88,8 +88,7 @@
                 want to terminate the connection for this account? You can always reconnect it later.
             </div>
             <div class="flex flex-row justify-center mt-7">
-                {% comment %} Remember to add terminate_bank_connection view in views.py {% endcomment %}
-                <form action="" method="post">
+                <form action="{% url "terminate_connection" account.account_id %}" method="post">
                     {% csrf_token %}
                     <button type="submit"
                             class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
