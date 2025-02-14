@@ -2,6 +2,7 @@ from uuid import uuid4
 from django.http import Http404, HttpResponse
 from nordigen import NordigenClient
 from django.conf import settings
+from django.utils.dateparse import parse_datetime
 from main.models import OpenBankingRequisition
 
 class OpenBankingService:
@@ -43,6 +44,7 @@ class OpenBankingService:
             reference_id=reference_id
         )
         print(f"Session created: {session}")
+        
         # Store requisition in DB
         requisition, created = OpenBankingRequisition.objects.update_or_create(
             user=self.user,

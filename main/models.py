@@ -190,6 +190,7 @@ class OpenBankingRequisition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, default='PENDING')
     reference_id = models.CharField(max_length=255, null=True, blank=True)
+    
 
 # Open Banking models
 class OpenBankingAccount(models.Model):

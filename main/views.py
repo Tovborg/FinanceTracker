@@ -123,8 +123,17 @@ def account_info(request, account_name):
     :param account_name:
     :return:
     """
-    account = get_object_or_404(Account, name=account_name, user=request.user)
-    return render(request, "bank_accounts/account_info.html", context={"account": account})
+    try:
+        account = Account.objects.get(name=account_name, user=request.user)
+    except Account.DoesNotExist:
+        account = get_object_or_404(OpenBankingAccount, name=account_name, user=request.user)
+        requisition_created = account.requisition.created_at
+        days_till_expiry = (requisition_created + timezone.timedelta(days=90) - timezone.now()).days
+    if isinstance(account, Account):
+        return render(request, "bank_accounts/account_info.html", context={"account": account})
+    elif isinstance(account, OpenBankingAccount):
+        return render(request, "openbanking/account_info_ob.html", context={"account": account, "days_till_expiry": days_till_expiry})
+    
 
 
 @require_POST  # Only allow POST requests
