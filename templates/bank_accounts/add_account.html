@@ -170,24 +170,38 @@
         </div>
     </div>
     <script>
-        const account_type = document.getElementById('id_account_type')
-        const account_number = document.getElementById('account_number')
-        account_type.addEventListener('change', (e) => {
-            if (e.target.value === 'checking' || e.target.value === 'savings' || e.target.value === 'credit card') {
-                console.log(e.target.value)
-                account_number.style.display = 'block'
-            } else {
-                account_number.style.display = 'none'
+        document.addEventListener("DOMContentLoaded", function () {
+            const account_type = document.getElementById('id_account_type');
+            const account_number = document.getElementById('account_number');
+            const card_type = document.getElementById('card_type');
+            const creditcard_type = document.getElementById('id_creditcard_type');
+    
+            function updateFields() {
+                const selectedType = account_type.value;
+    
+                // Show account number for certain types
+                if (selectedType === 'checking' || selectedType === 'savings' || selectedType === 'credit card') {
+                    account_number.style.display = 'block';
+                } else {
+                    account_number.style.display = 'none';
+                }
+    
+                // Show and require credit card type only if "credit card" is selected
+                if (selectedType === 'credit card') {
+                    card_type.style.display = 'grid';
+                    creditcard_type.setAttribute('required', 'true');
+                } else {
+                    card_type.style.display = 'none';
+                    creditcard_type.removeAttribute('required');
+                    creditcard_type.value = "";  // Clear value if not needed
+                }
             }
-        })
-        const card_type = document.getElementById('card_type')
-        account_type.addEventListener('change', (e) => {
-            if (e.target.value === 'credit card') {
-                console.log(e.target.value)
-                card_type.style.display = 'grid'
-            } else {
-                card_type.style.display = 'none'
-            }
-        })
+    
+            // Run function on page load in case of pre-filled forms
+            updateFields();
+    
+            // Run function whenever account type changes
+            account_type.addEventListener('change', updateFields);
+        });
     </script>
 {% endblock %}

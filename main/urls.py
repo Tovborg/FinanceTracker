@@ -40,4 +40,5 @@ urlpatterns = [
     path('choose_bank/<str:institution_id>/', connect_bank, name='connect_bank'),
     path('choose_bank/', ChooseBankListView.as_view(), name='choose_bank'),
     path('terminate_connection/<str:account_id>/', terminate_openbanking_connection, name='terminate_connection'),
+    path('renew_connection/<str:account_id>/', renew_openbanking_connection, name='renew_connection'),
 ]

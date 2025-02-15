@@ -181,7 +181,10 @@ def account_view(request, account_name):
     except EmptyPage:
         transactions = paginator.page(paginator.num_pages)
 
-    return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
+    if isinstance(account, OpenBankingAccount):
+        return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions, "openbanking": True})
+    else:
+        return render(request, "bank_accounts/account_details.html", context={"account": account, "transactions": transactions})
 
 
 class ChooseAccountCreationView(LoginRequiredMixin, TemplateView):
@@ -388,7 +391,8 @@ def delete_transaction(request, pk):
     # Revert back transaction
     account = transaction.account
     # Match transaction type and revert back the balance
-    match transaction.transaction_type:
+    transaction_type = transaction.transaction_type.lower()
+    match transaction_type:
         case 'deposit':
             account.balance -= transaction.amount
         case 'payment':
@@ -409,6 +413,8 @@ def delete_transaction(request, pk):
                 transaction.transfer_to.save()
                 corresponding_transaction.delete()
         case 'purchase':
+            account.balance += transaction.amount
+        case 'withdrawal':
             account.balance += transaction.amount
         case _:
             pass
@@ -967,11 +973,17 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
             if not transaction_id or OpenBankingTransaction.objects.filter(transaction_id=transaction_id, account=openbanking_account).exists():
                 print("❌ Transaction ID not found or already exists")
                 continue
+            print(f"🔄 Processing transaction: {transaction}")
             entry_reference = transaction.get('entryReference', 'Unknown')
             amount = float(transaction.get('transactionAmount', {}).get('amount', '0.00'))
             currency = transaction.get('transactionAmount', {}).get('currency', 'DKK')
             booking_date = transaction.get('bookingDate', '0000-00-00')
             description = transaction.get('remittanceInformationUnstructuredArray', ['Unknown'])[0]
+            # if not description then it should try without the array
+            if description == 'Unknown':
+                description = transaction.get('remittanceInformationUnstructured', 'Unknown')
+                if description != 'Unknown':
+                    description = description.split('\n')[0] # Take the first line if multiple lines
 
             openbanking_transaction, created = OpenBankingTransaction.objects.update_or_create(
                 transaction_id=transaction_id,
@@ -1069,3 +1081,17 @@ def terminate_openbanking_connection(request, account_id):
         requisition.delete()
     print(f"✅ Deleted OpenBankingAccount: {account.name}")
     return redirect('account')
+
+
+@require_POST
+@login_required
+def renew_openbanking_connection(request, account_id):
+    """
+    Renew the connection to the bank for the OpenBanking account.
+    Gives the user 89 new days to access the account.
+    """
+    account = get_object_or_404(OpenBankingAccount, account_id=account_id, user=request.user)
+    requisition = account.requisition
+    # Go to the choose bank page with the institution_id from the requisition
+    renew_url = reverse('connect_bank', kwargs={'institution_id': requisition.institution_id})
+    return redirect(renew_url)

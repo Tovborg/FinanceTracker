@@ -15,6 +15,9 @@
                     <button id="refresh_connection_btn">
                         <ion-icon name="refresh-outline" class="text-3xl mr-2 text-gray-400"></ion-icon>
                     </button>
+                    <form id="renew_connection_form" action="{% url "renew_connection" account.account_id %}" method="post">
+                        {% csrf_token %}
+                    </form>
                     <script>
                         document.getElementById("refresh_connection_btn").addEventListener("click", function() {
                             let icon = this.querySelector("ion-icon");
@@ -24,6 +27,8 @@
                             setTimeout(() => {
                                 icon.classList.remove("rotate-animation");
                             }, 500);
+                            // submit the refresh connection form
+                            document.getElementById("renew_connection_form").submit();
                         });
                     </script>
                     <style>

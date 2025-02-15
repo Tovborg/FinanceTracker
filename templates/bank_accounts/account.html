@@ -80,7 +80,7 @@
                                 <ion-icon id="star_{{ ob_account.name }}" class="mr-2 cursor-pointer"
                                           name="star-outline"></ion-icon>
                                 {% endif %}
-                            {{ ob_account.name|slice:":15" }}{% if ob_account.name|length > 15 %}...{% endif %}
+                            {{ ob_account.name|slice:":10" }}{% if ob_account.name|length > 10 %}...{% endif %}
                             <a class="flex items-center"
                                     href="{% url 'account_details' ob_account.name %}">
                                 <ion-icon name="chevron-forward-outline" class="ml-2 text-gray-500"></ion-icon>
@@ -95,7 +95,7 @@
                             {% for transaction in ob_account.get_three_recent_transactions %}
                                 <li class="p-2 flex justify-between items-start border-b border-neutral-500">
                                     <div>
-                                        <a href=""><span class="block">{{ transaction.description|slice:":15" }}{% if transaction.description|length > 15 %}...{% endif %}
+                                        <a href="{% url 'transaction_detail' transaction.id %}"><span class="block">{{ transaction.description|slice:":15" }}{% if transaction.description|length > 15 %}...{% endif %}
                                         </span></a>
                                         <span class="block text-sm">{{ transaction.date }}</span>
                                     </div>
