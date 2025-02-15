@@ -4,6 +4,7 @@ import datetime
 from django.core.validators import FileExtensionValidator
 import uuid
 import os
+from django.db.models import Sum
 
 
 class UserProfile(models.Model):
@@ -209,6 +210,40 @@ class OpenBankingAccount(models.Model):
     def get_three_recent_transactions(self):
         return self.openbankingtransaction_set.all().order_by('-date')[:3]
     
+    def get_monthly_expenses(self):
+        """
+        Calculates the total expenses for the current month by summing all negative transactions.
+        """
+        today = datetime.date.today()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = (today.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+
+        total_expenses = self.openbankingtransaction_set.filter(
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month,
+            amount__lt=0,  # Assuming expenses are negative amounts
+            include_in_statistics=True
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        return abs(total_expenses)  # Return as a positive value
+    
+    def get_monthly_income(self):
+        """
+        Calculates the total income for the current month by summing all positive transactions.
+        """
+        today = datetime.date.today()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = (today.replace(day=28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+
+        total_income = self.openbankingtransaction_set.filter(
+            date__gte=first_day_of_month,
+            date__lte=last_day_of_month,
+            amount__gt=0,  # Assuming income transactions are positive amounts
+            include_in_statistics=True
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        return total_income  # Returns as a positive value
+    
 
 class OpenBankingTransaction(models.Model):
     account = models.ForeignKey(OpenBankingAccount, on_delete=models.CASCADE)
@@ -222,3 +257,4 @@ class OpenBankingTransaction(models.Model):
 
     def __str__(self):
         return f"{self.account.name} - {self.amount} {self.currency} on {self.date}"
+    

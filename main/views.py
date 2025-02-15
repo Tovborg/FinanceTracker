@@ -66,9 +66,8 @@ def index(request):
     if isinstance(payday, str):
         payday = translate_payday_info(payday)
 
-    # Get total expenses and income
-    total_expenses = sum(account.get_monthly_expenses() for account in accounts)
-    total_income = sum(account.get_monthly_income() for account in accounts)
+    total_expenses = sum(account.get_monthly_expenses() for account in accounts) + sum(account.get_monthly_expenses() for account in ob_accounts)
+    total_income = sum(account.get_monthly_income() for account in accounts) + sum(account.get_monthly_income() for account in ob_accounts)
 
     # Get total balance (sum both manual and OpenBanking accounts)
     total_balance = sum(account.balance for account in accounts) + sum(account.balance for account in ob_accounts)
