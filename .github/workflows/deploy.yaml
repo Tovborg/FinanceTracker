@@ -90,6 +90,7 @@ jobs:
             echo "GOCARDLESS_NAME=${{ secrets.GOCARDLESS_NAME }}" >> .env
             echo "GOCARDLESS_SECRET_ID=${{ secrets.GOCARDLESS_SECRET_ID }}" >> .env
             echo "GOCARDLESS_SECRET_KEY=${{ secrets.GOCARDLESS_SECRET_KEY }}" >> .env
+            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
           
             # Activate venv, run migrations and collect static files
             source venv/bin/activate
@@ -100,6 +101,10 @@ jobs:
             sudo chown -R emil:www-data /home/django/FinanceTracker/logs
             sudo chmod -R 775 /home/django/FinanceTracker/logs
             
+            # Restart celery
+            sudo systemctl restart celery
+            sudo systemctl restart celery-beat
+
             # Restart gunicorn and nginx
             sudo systemctl restart gunicorn
             sudo nginx -t && sudo systemctl restart nginx

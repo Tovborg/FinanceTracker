@@ -17,3 +17,6 @@ geoip2
 pytest
 pytest-django
 django-browser-reload
+celery
+django-celery-beat
+redis

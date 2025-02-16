@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.mfa',  # Enable Allauth MFA
+    'django_celery_beat',
 ]
 
 if DEBUG:
@@ -222,3 +223,9 @@ GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
 GOCARDLESS_NAME = env('GOCARDLESS_NAME')
 GOCARDLESS_SECRET_ID = env('GOCARDLESS_SECRET_ID')
 GOCARDLESS_SECRET_KEY = env('GOCARDLESS_SECRET_KEY')
+
+# Celery settings
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Copenhagen"
