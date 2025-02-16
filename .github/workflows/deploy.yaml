@@ -42,6 +42,7 @@ jobs:
           GOCARDLESS_NAME: ${{ secrets.GOCARDLESS_NAME }}
           GOCARDLESS_SECRET_ID: ${{ secrets.GOCARDLESS_SECRET_ID }}
           GOCARDLESS_SECRET_KEY: ${{ secrets.GOCARDLESS_SECRET_KEY }}
+          CELERY_BROKER_URL: ${{ secrets.CELERY_BROKER_URL }}
         run: |
           source venv/bin/activate
           pytest main/tests/views
