@@ -247,13 +247,18 @@ class OpenBankingAccount(models.Model):
 
 class OpenBankingTransaction(models.Model):
     account = models.ForeignKey(OpenBankingAccount, on_delete=models.CASCADE)
-    transaction_id = models.CharField(max_length=255, unique=True)
+    transaction_id = models.CharField(max_length=255)
     entry_reference = models.CharField(max_length=255, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default="DKK")
     description = models.TextField(blank=True, null=True)
     date = models.DateField()
     include_in_statistics = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['transaction_id', 'account'], name='unique_transaction_id_per_account')
+        ]
 
     def __str__(self):
         return f"{self.account.name} - {self.amount} {self.currency} on {self.date}"

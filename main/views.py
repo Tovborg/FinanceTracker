@@ -66,8 +66,8 @@ def index(request):
     if isinstance(payday, str):
         payday = translate_payday_info(payday)
 
-    total_expenses = sum(account.get_monthly_expenses() for account in accounts) + sum(account.get_monthly_expenses() for account in ob_accounts)
-    total_income = sum(account.get_monthly_income() for account in accounts) + sum(account.get_monthly_income() for account in ob_accounts)
+    total_expenses = int(sum(account.get_monthly_expenses() for account in accounts) + sum(account.get_monthly_expenses() for account in ob_accounts))
+    total_income = int(sum(account.get_monthly_income() for account in accounts) + sum(account.get_monthly_income() for account in ob_accounts))
 
     # Get total balance (sum both manual and OpenBanking accounts)
     total_balance = sum(account.balance for account in accounts) + sum(account.balance for account in ob_accounts)
@@ -903,8 +903,14 @@ def update_or_create_openbanking_accounts(account, user, requisition_id):
     accounts_scraped = []  # List to store account IDs that have been scraped successfully
     accounts_skipped = []  # List to store account IDs that have been skipped due to errors
     for account_id in account['accounts']:  # Loop through all account IDs
+        existing_account = OpenBankingAccount.objects.filter(user=user, account_id=account_id).first()
+        # Skip the account if it already exists for another user
+        if existing_account and existing_account.user != user:
+            print(f"❌ Account {account_id} already exists for another user")
+            accounts_skipped.append(account_id)
+            continue
         account_api = service.client.account_api(id=account_id)
-
+        
         # Fetch account data with error handling
         try:
             account_metadata = account_api.get_metadata()
