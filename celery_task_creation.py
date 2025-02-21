@@ -23,8 +23,8 @@ schedule, created = CrontabSchedule.objects.get_or_create(
 task, created = PeriodicTask.objects.get_or_create(
     crontab=schedule,
     name="Update OpenBanking Accounts",
-    task="update_openbanking_accounts",  # Skift dette til din faktiske Celery-task
-    defaults={"args": json.dumps([])},  # Tilføj eventuelle argumenter her
+    task="main.tasks.update_openbanking_accounts",  
+    defaults={"args": json.dumps([])},  
 )
 
 print("Celery Beat opgave oprettet eller opdateret!")
