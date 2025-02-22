@@ -7,6 +7,7 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 from allauth.account.models import EmailAddress
 import datetime
+from django.contrib.contenttypes.models import ContentType
 
 def create_user(client):
     User = get_user_model()
@@ -29,10 +30,12 @@ def set_session_info(client):
 
 
 def create_paycheck(client, user, status, account, ):
+    payout_account_type = ContentType.objects.get_for_model(account)
     paycheck = Paychecks.objects.create(
         user=user,
         amount=1000,
-        payout_account=account,
+        payout_account_type=payout_account_type,
+        payout_account_id=account.id,
         pay_date='2024-02-01',
         pay_period_start='2024-01-01',
         pay_period_end='2024-01-15',
@@ -123,13 +126,16 @@ def test_add_paycheck_post_valid(client):
         balance=1000
     )
 
+    content_type = ContentType.objects.get_for_model(account)
+
     url = reverse('add_paycheck')
     data = {
         'amount': 1000,
         'pay_date': '2024-02-01',
         'start_pay_period': '2024-01-01',
         'end_pay_period': '2024-01-15',
-        'payout_account': account.id,
+        'register_payout': True,
+        'payout_account': f"account-{account.id}",
         'employer': 'Test Employer',
         'status': 'paid',
         'description': 'Test Description'
@@ -165,11 +171,13 @@ def test_add_paycheck_post_invalid(client):
     )
 
     url = reverse('add_paycheck')
+    payout_account_type = ContentType.objects.get_for_model(Account)
     data = {
         'pay_date': '2024-02-01',
         'start_pay_period': '2024-01-01',
         'end_pay_period': '2024-01-15',
-        'payout_account': account.id,
+        'register_payout': True,
+        'payout_account': f"account-{account.id}",
         'employer': 'Test Employer',
         'status': 'paid',
         'description': 'Test Description'
@@ -189,7 +197,8 @@ def test_add_paycheck_post_invalid(client):
         'pay_date': '2024-02-01',
         'start_pay_period': '2024-01-16',
         'end_pay_period': '2024-01-15',
-        'payout_account': account.id,
+        'register_payout': True,
+        'payout_account': f"account-{account.id}",
         'employer': 'Test Employer',
         'status': 'paid',
         'description': 'Test Description'
@@ -209,7 +218,8 @@ def test_add_paycheck_post_invalid(client):
         'pay_date': datetime.date.today(),
         'start_pay_period': '2024-01-01',
         'end_pay_period': '2024-01-15',
-        'payout_account': account.id,
+        'register_payout': True,
+        'payout_account': f"account-{account.id}",
         'employer': 'Test Employer',
         'status': 'pending',
         'description': 'Test Description'
