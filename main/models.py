@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
-from django.core.validators import FileExtensionValidator
 import uuid
 import os
 from django.db.models import Sum
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 class UserProfile(models.Model):
@@ -154,7 +155,11 @@ class Paychecks(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payout_account = models.ForeignKey(Account, on_delete=models.CASCADE, default=1)
+    # Payout account either a bank account or a open banking account
+    payout_account_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    payout_account_id = models.PositiveIntegerField(default=0)
+    register_payout_transaction = models.BooleanField(default=False)
+    payout_account = GenericForeignKey('payout_account_type', 'payout_account_id')
     pay_date = models.DateField(default=datetime.date.today)
     pay_period_start = models.DateField(default=datetime.date.today)
     pay_period_end = models.DateField(default=datetime.date.today)

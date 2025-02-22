@@ -2,10 +2,11 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
-from main.models import Account, Paychecks
+from main.models import Account, Paychecks, OpenBankingAccount
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email, FileExtensionValidator
 import datetime
+
 
 
 class CustomSignupForm(SignupForm):
@@ -136,7 +137,8 @@ class AddPaycheckForm(forms.Form):
         ('paid', 'Paid'),
     )
     amount = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
-    payout_account = forms.ModelChoiceField(queryset=Account.objects.none(), required=True)
+    register_payout = forms.BooleanField(required=True)
+    payout_account = forms.ChoiceField(choices=[], required=True)
     pay_date = forms.DateField(widget=forms.SelectDateWidget, required=True)
     start_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
     end_pay_period = forms.DateField(widget=forms.SelectDateWidget, required=True)
@@ -149,13 +151,21 @@ class AddPaycheckForm(forms.Form):
 
     class Meta:
         model = Paychecks
-        fields = ['amount', 'payout_account', 'pay_date', 'start_pay_period', 'end_pay_period', 'employer', 'description', 'status', 'work_hour_report', 'paystub']
+        fields = ['amount', 'register_payout','payout_account', 'pay_date', 'start_pay_period', 'end_pay_period', 'employer', 'description', 'status', 'work_hour_report', 'paystub']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
-            self.fields['payout_account'].queryset = Account.objects.filter(user=user)
+            # Payout account queryset should be Accounts that belong to the user and openbanking accounts
+            accounts = Account.objects.filter(user=user)
+            openbanking_accounts = OpenBankingAccount.objects.filter(user=user)
+
+            choices = [("account-{}".format(a.id), f"Account: {a.name}") for a in accounts]
+            choices += [("openbanking-{}".format(a.id), f"Account: {a.name}") for a in openbanking_accounts]
+            self.fields['payout_account'].choices = choices
+            print(self.fields['payout_account'].choices)
+            
 
     def clean(self):
         cleaned_data = super().clean()

@@ -19,6 +19,7 @@ from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.http import Http404
 from django.core.files import File
+from django.contrib.contenttypes.models import ContentType
 # Import app specific modules
 from main.forms import (CreateAccountForm,
                         NewTransactionForm,
@@ -525,30 +526,48 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+    
+
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         amount = form.cleaned_data['amount']
         pay_date = form.cleaned_data['pay_date']
         start_pay_period = form.cleaned_data['start_pay_period']
+        register_payout = form.cleaned_data['register_payout']
         payout_account = form.cleaned_data['payout_account']
         end_pay_period = form.cleaned_data['end_pay_period']
         employer = form.cleaned_data['employer']
         description = form.cleaned_data['description']
         status = form.cleaned_data['status']
-        
-        
         paystub = self.request.FILES.getlist('paystub')
         work_hour_report = self.request.FILES.getlist('work_hour_report')
         
+        payout_account_str = payout_account
+        account_type, account_id = payout_account_str.split('-')
+
+        # Determine the correct model
+        if account_type == 'account':
+            payout_account_model = Account
+        elif account_type == 'openbanking':
+            payout_account_model = OpenBankingAccount
+        else:
+            raise ValueError("Invalid account type")
+        
+        # Get the content type object for the model
+        payout_account_type = ContentType.objects.get_for_model(payout_account_model)
+        payout_account = payout_account_model.objects.get(id=int(account_id), user=self.request.user)
         new_paycheck = Paychecks(
             user=self.request.user,
             amount=amount,
             pay_date=pay_date,
             pay_period_start=start_pay_period,
             pay_period_end=end_pay_period,
+            register_payout_transaction=bool(register_payout),
             employer=employer,
             description=description,
+            payout_account_type=payout_account_type, # Store ContentType for the payout account
+            payout_account_id=int(account_id),  # Store the ID of the payout account
             payout_account=payout_account,
             status=status,
         )
@@ -562,10 +581,11 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
 
         
         new_paycheck.save()
-
-        if new_paycheck.status == 'paid':
-            self.create_wage_deposit(new_paycheck)
-
+        #IMPORTANT! DON'T REGISTER PAYOUT IF IT'S OPENBANKING ACCOUNT
+        if register_payout and payout_account_model == Account:
+            if new_paycheck.status == 'paid':
+                self.create_wage_deposit(new_paycheck)
+        
         return super().form_valid(form)
 
     def create_wage_deposit(self, paycheck):
@@ -585,7 +605,25 @@ class AddNewPaycheckView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         """Add accounts to the context."""
         context = super().get_context_data(**kwargs)
-        context['accounts'] = Account.objects.filter(user=self.request.user)
+        accounts = Account.objects.filter(user=self.request.user)
+        open_banking_accounts = OpenBankingAccount.objects.filter(user=self.request.user)
+        account_choices = [
+        {
+            "id": f"account-{a.id}",  
+            "name": f"Account: {a.name}",
+            "content_type_id": ContentType.objects.get_for_model(Account).id,
+        }
+        for a in accounts
+        ]
+        account_choices += [
+            {
+                "id": f"openbanking-{a.id}",  
+                "name": f"Name: {a.name}",
+                "content_type_id": ContentType.objects.get_for_model(OpenBankingAccount).id,
+            }
+            for a in open_banking_accounts
+        ]
+        context['accounts'] = account_choices
         return context
 
 
@@ -612,7 +650,7 @@ def delete_paycheck(request, pk):
     """
     paycheck = get_object_or_404(Paychecks, pk=pk)  # Get the paycheck
     # Revert transaction if paycheck was paid
-    if paycheck.status == 'paid':
+    if paycheck.status == 'paid' and paycheck.register_payout_transaction and paycheck.payout_account_type == ContentType.objects.get_for_model(Account):
         # revert transaction
         wage_deposit = Transaction.objects.filter(
             account=paycheck.payout_account,
@@ -626,7 +664,7 @@ def delete_paycheck(request, pk):
             paycheck.payout_account.balance -= wage_deposit.amount
             paycheck.payout_account.save()
             wage_deposit.delete()
- 
+
     paycheck.delete()
     return redirect('paychecks')
 

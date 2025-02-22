@@ -98,7 +98,6 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic --noinput
             # Run celery-beat migrations
-            python celery_task_creation.py # This script creates the periodic tasks in the postgres database
             python manage.py migrate django_celery_beat
 
           
